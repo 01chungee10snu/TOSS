@@ -10,7 +10,7 @@ __pycache__/
 .pytest_cache/
 
 # data/cache
-data/
+/data/
 .cache/
 
 # notebooks
