@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import argparse
+import json
 import os
 import sys
 from typing import Any, Dict, Optional
 
-import requests
 from dotenv import load_dotenv
+from toss_alpha.connectors.toss_readonly import TossReadOnlyClient
 
 BASE = "https://openapi.tossinvest.com"
 
@@ -25,46 +26,43 @@ def load_config():
     return client_id, client_secret, account_seq
 
 
+def make_client() -> TossReadOnlyClient:
+    client_id, client_secret, account_seq = load_config()
+    return TossReadOnlyClient(client_id=client_id, client_secret=client_secret, account_seq=account_seq)
+
+
 def token() -> str:
-    client_id, client_secret, _ = load_config()
-    r = requests.post(
-        f"{BASE}/oauth2/token",
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-        data={
-            "grant_type": "client_credentials",
-            "client_id": client_id,
-            "client_secret": client_secret,
-        },
-        timeout=20,
-    )
-    if not r.ok:
-        die(f"token failed: HTTP {r.status_code} {r.text[:500]}")
-    data = r.json()
-    access_token = data.get("access_token")
-    if not access_token:
-        die(f"token response has no access_token: {data}")
-    return access_token
+    try:
+        return make_client().token()
+    except Exception as exc:
+        die(str(exc))
 
 
 def request(method: str, path: str, *, params: Optional[Dict[str, Any]] = None, account: bool = False):
-    _, _, account_seq = load_config()
-    headers = {"Authorization": f"Bearer {token()}"}
-    if account:
-        if not account_seq:
-            die("This endpoint requires TOSSINVEST_ACCOUNT_SEQ in .env")
-        headers["X-Tossinvest-Account"] = account_seq
-    r = requests.request(method, f"{BASE}{path}", headers=headers, params=params, timeout=20)
-    print(f"HTTP {r.status_code}")
-    for h in ["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset", "Retry-After", "X-Request-Id"]:
-        if h in r.headers:
-            print(f"{h}: {r.headers[h]}")
+    client = make_client()
     try:
-        import json
-        print(json.dumps(r.json(), ensure_ascii=False, indent=2))
-    except Exception:
-        print(r.text)
-    if not r.ok:
-        raise SystemExit(1)
+        if path == "/api/v1/stocks":
+            result = client.stocks(params["symbols"] if params else "")
+        elif path == "/api/v1/prices":
+            result = client.prices(params["symbols"] if params else "")
+        elif path == "/api/v1/candles":
+            result = client.candles(params["symbol"], params.get("interval", "1D"))
+        elif path == "/api/v1/accounts":
+            result = client.accounts()
+        elif path == "/api/v1/holdings":
+            result = client.holdings()
+        else:
+            die(f"unsupported read-only path: {path}")
+    except Exception as exc:
+        die(str(exc))
+
+    print(f"HTTP {result['status_code']}")
+    for name, value in result["headers"].items():
+        print(f"{name}: {value}")
+    if result["json"] is not None:
+        print(json.dumps(result["json"], ensure_ascii=False, indent=2))
+    else:
+        print(result["text"])
 
 
 def main():
