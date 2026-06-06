@@ -1,0 +1,17 @@
+# secrets
+.env
+*.key
+*.secret
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# data/cache
+data/
+.cache/
+
+# notebooks
+.ipynb_checkpoints/

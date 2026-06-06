@@ -1,0 +1,11 @@
+# 초기 관심종목. 실제 매매 후보가 아니라 리서치/시세 조회 기본값입니다.
+kr:
+  - symbol: "005930"
+    name: "삼성전자"
+  - symbol: "000660"
+    name: "SK하이닉스"
+us:
+  - symbol: "AAPL"
+    name: "Apple"
+  - symbol: "MSFT"
+    name: "Microsoft"

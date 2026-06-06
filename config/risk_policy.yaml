@@ -1,0 +1,9 @@
+# Live order guardrails. 기본값은 실거래 금지입니다.
+live_trading_enabled: false
+max_position_pct: 0.05        # 단일 종목 최대 5%
+max_daily_loss_pct: 0.01      # 일 손실 1% 도달 시 중지
+max_order_krw: 100000         # 주문 1건 기본 상한
+require_manual_confirmation: true
+allow_short_selling: false
+allow_leverage: false
+allow_options: false
