@@ -1,0 +1,7 @@
+situation,momentum_col,vol_col,mode,return_col,top_n,min_dollar_volume,min_abs_momentum,objective,train_days,train_active_days,train_total_trades,train_final_value_krw,train_total_return_pct,train_cagr_pct,train_max_drawdown_pct,train_sharpe,train_win_rate_pct,train_profit_factor,test_days,test_active_days,test_total_trades,test_final_value_krw,test_total_return_pct,test_cagr_pct,test_max_drawdown_pct,test_sharpe,test_win_rate_pct,test_profit_factor
+down_low_vol,mom_20d,vol_20d,reversal,oo_ret,3,1000000000,0.0,1.7322,55,55,165,1172033.6,17.2,9.95,-10.53,1.738,45.45,1.406,18,18,54,880925.97,-11.91,-19.38,-14.69,-6.121,27.78,0.369
+up_high_vol,mom_1d,vol_20d,reversal,oo_ret,3,100000000,0.03,0.6816,82,82,246,1093853.21,9.39,3.25,-14.09,0.79,48.78,1.181,53,53,159,675646.7,-32.44,-33.81,-40.57,-3.299,35.85,0.545
+flat_high_vol,mom_20d,vol_20d,reversal,cc_next_ret,3,100000000,0.0,0.4554,74,73,217,1057393.41,5.74,1.95,-20.21,0.638,46.58,1.118,17,17,51,1030002.43,3.0,3.19,-11.45,1.312,47.06,1.245
+flat_low_vol,mom_20d,vol_20d,momentum,cc_next_ret,3,1000000000,0.03,0.0593,182,162,486,1049370.73,4.94,1.71,-35.08,0.393,45.06,1.077,52,52,156,858288.15,-14.17,-20.37,-26.11,-1.104,48.08,0.835
+down_high_vol,mom_20d,vol_20d,reversal,oo_ret,3,100000000,0.0,-0.4022,200,200,600,917399.08,-8.26,-2.94,-39.28,0.02,47.0,1.003,6,6,18,955409.74,-4.46,-6.9,-4.37,-4.543,50.0,0.459
+up_low_vol,mom_20d,vol_20d,momentum,cc_next_ret,3,1000000000,0.0,-1.2045,140,140,420,772173.51,-22.78,-9.66,-36.49,-0.743,42.14,0.884,95,94,282,580027.94,-42.0,-43.54,-49.04,-2.22,41.49,0.674
