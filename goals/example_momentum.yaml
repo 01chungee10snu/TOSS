@@ -1,0 +1,19 @@
+goal_id: kr_momentum_disclosure_001
+mode: backtest_only
+universe:
+  symbols:
+    - "005930"
+    - "000660"
+period:
+  start: "2022-01-01"
+  end: "2025-12-31"
+strategy:
+  name: momentum_volatility_event
+  params:
+    short_window: 20
+    long_window: 60
+    volatility_window: 20
+risk_profile: conservative
+outputs:
+  report: true
+  order_draft: false
