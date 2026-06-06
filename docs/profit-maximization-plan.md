@@ -47,11 +47,42 @@
   - 기존 보유종목을 Toss 계좌 API로 읽고 과다집중/손실확대 감지.
   - 장점: 신규 매매보다 위험이 낮고 즉시 실용적.
 
+## 이전 챗봇 레포 반영 방향
+
+- `Vibe-Trading`
+  - 현재 계획에 가장 직접적으로 반영한다.
+  - 참고 대상: research-goal runtime, alpha/backtest 명령 구조, MCP server/tool 설계, connector read-only 점검 방식.
+  - 금지: Vibe-Trading의 broker/live connector를 바로 실거래에 쓰지 않는다. Toss adapter와 자체 risk gate를 우선한다.
+
+- `AutoHedge`
+  - 참고 대상: 다중 에이전트 파이프라인 구조.
+  - Toss 하네스 적용형:
+    1. thesis agent: 후보/가설 생성
+    2. quant check: 가격·거래대금·변동성 검증
+    3. event check: OpenDart 공시/재무 이벤트 검증
+    4. risk gate: 주문금액/포지션/일손실 한도 검증
+    5. execution draft: 실주문이 아니라 수동 승인용 주문 초안 생성
+  - 금지: wallet private key, autonomous execution, live order loop.
+
+- `NotebookLM skill`
+  - Toss OpenAPI docs, OpenDart docs, AutoHedge/Vibe-Trading/Fincept README를 업로드해 문서 기반 QA에 사용한다.
+  - 목적: API 파라미터·제약·rate limit·주문 위험 문구를 출처 기반으로 재확인.
+
+- `FinceptTerminal`
+  - 당장 구현 대상은 아니다.
+  - 나중에 대시보드/워크스테이션 UX, 포트폴리오/리스크 시각화, node-editor workflow를 참고한다.
+
+- `camofox-browser`
+  - 허가된 브라우저 QA와 문서 탐색 보조용.
+  - 증권 웹사이트 우회/스크래핑을 핵심 데이터 파이프라인으로 삼지 않는다.
+
 ## 바로 다음 구현 태스크
 
 1. Toss 키 발급 후 `.env` 구성.
 2. `tossinvest_client.py token/prices/accounts` 실호출 검증.
 3. 캔들 응답 스키마에 맞춰 `data/market/*.parquet` 캐시 구현.
 4. OpenDart API 키를 `.env`에 추가하고 공시 조회 adapter 검증.
-5. 첫 백테스트: 삼성전자/SK하이닉스 대상 모멘텀+변동성 필터.
-6. Telegram 알림: “매수/매도”가 아니라 “검토 후보 + 근거 + 리스크” 형식.
+5. Vibe-Trading을 참고해 `research goal` 형태의 CLI 명령을 추가: “종목/기간/전략/리스크 기준 → 검토 리포트”.
+6. 첫 백테스트: 삼성전자/SK하이닉스 대상 모멘텀+변동성 필터.
+7. AutoHedge를 참고해 `thesis → quant → event → risk → execution draft` 보고서 포맷을 추가.
+8. Telegram 알림: “매수/매도”가 아니라 “검토 후보 + 근거 + 리스크 + 수동 승인 필요 여부” 형식.
