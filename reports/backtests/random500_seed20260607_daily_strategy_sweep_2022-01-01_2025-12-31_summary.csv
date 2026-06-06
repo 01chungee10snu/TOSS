@@ -1,0 +1,9 @@
+name,score_col,ascending,return_col,active_days,total_trades,final_value_krw,total_return_pct,cagr_pct,max_drawdown_pct,sharpe,win_rate_pct,profit_factor
+open_to_next_open_bottom_5d_reversal,mom_5d_prev,True,open_open_ret,967,9660,36233.62,-96.38,-56.49,-96.71,-2.019,44.05,0.721
+close_to_next_close_bottom_5d_reversal,mom_5d_prev,True,close_next_close_ret,967,9660,19664.68,-98.03,-62.68,-98.2,-2.7,41.47,0.641
+intraday_bottom_5d_reversal,mom_5d_prev,True,open_close_ret,968,9670,12862.78,-98.71,-66.45,-98.72,-3.262,41.12,0.584
+intraday_bottom_1d_reversal,ret_1d_prev,True,open_close_ret,972,9710,4409.73,-99.56,-74.35,-99.57,-3.937,38.37,0.524
+close_to_next_close_top_5d_momentum,mom_5d_prev,False,close_next_close_ret,967,9650,2978.2,-99.7,-76.76,-99.76,-3.533,39.4,0.561
+open_to_next_open_top_5d_momentum,mom_5d_prev,False,open_open_ret,967,9650,209.25,-99.98,-88.06,-99.98,-4.761,35.57,0.465
+intraday_top_5d_momentum,mom_5d_prev,False,open_close_ret,968,9660,57.37,-99.99,-91.37,-99.99,-6.584,33.47,0.341
+intraday_top_1d_momentum,ret_1d_prev,False,open_close_ret,971,9693,45.14,-100.0,-91.87,-100.0,-6.787,32.54,0.336

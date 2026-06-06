@@ -1,0 +1,219 @@
+{
+  "generated_at_utc": "2026-06-06T22:24:08.903229+00:00",
+  "sample_csv": "/mnt/c/Github/TOSS/reports/backtests/random500_seed20260607_ma20_60_2022-01-01_2025-12-31_sample.csv",
+  "period": {
+    "start": "2022-01-01",
+    "end": "2025-12-31"
+  },
+  "sample_n": 500,
+  "data_status_counts": {
+    "PASS": 496,
+    "NO_DATA": 3,
+    "INSUFFICIENT_DATA": 1
+  },
+  "costs": {
+    "fee_bps_each_side": 1.5,
+    "slippage_bps_each_side": 5.0,
+    "sell_tax_bps_on_sells": 18.0
+  },
+  "summary": {
+    "strategy_name": "daily_open_to_close_rotation_top10_by_prev_5d_momentum_vol_adjusted",
+    "no_lookahead": "rank uses prior close-derived features only; buy today open and sell today close",
+    "top_n": 10,
+    "lookback_days": 5,
+    "vol_window": 20,
+    "min_prev_dollar_volume_krw": 100000000,
+    "round_trip_cost_bps": 31.0,
+    "trading_days": 974,
+    "active_days": 953,
+    "total_trades": 9517,
+    "avg_picks_per_active_day": 9.99,
+    "final_value_krw": 1004.29,
+    "total_return_pct": -99.9,
+    "cagr_pct": -82.3,
+    "max_drawdown_pct": -99.9,
+    "sharpe": -5.941,
+    "win_days": 302,
+    "loss_days": 651,
+    "win_rate_pct": 31.69,
+    "profit_factor": 0.371,
+    "daily_return_distribution_pct": {
+      "mean": -0.6891,
+      "median": -0.6622,
+      "p05": -3.7116,
+      "p25": -1.7905,
+      "p75": 0.3745,
+      "p95": 2.2374
+    }
+  },
+  "top10_symbols_by_cumulative_trade_return": [
+    {
+      "code": "008600",
+      "name": "윌비스",
+      "trades": 20,
+      "avg_trade_return_pct": 5.3762,
+      "total_trade_return_pct": 107.5236,
+      "win_rate_pct": 60.0
+    },
+    {
+      "code": "066430",
+      "name": "아이로보틱스",
+      "trades": 34,
+      "avg_trade_return_pct": 2.3028,
+      "total_trade_return_pct": 78.2955,
+      "win_rate_pct": 52.94
+    },
+    {
+      "code": "039830",
+      "name": "오로라",
+      "trades": 19,
+      "avg_trade_return_pct": 3.7808,
+      "total_trade_return_pct": 71.8346,
+      "win_rate_pct": 63.16
+    },
+    {
+      "code": "094170",
+      "name": "동운아나텍",
+      "trades": 46,
+      "avg_trade_return_pct": 1.5392,
+      "total_trade_return_pct": 70.801,
+      "win_rate_pct": 47.83
+    },
+    {
+      "code": "006110",
+      "name": "삼아알미늄",
+      "trades": 49,
+      "avg_trade_return_pct": 1.1682,
+      "total_trade_return_pct": 57.2397,
+      "win_rate_pct": 42.86
+    },
+    {
+      "code": "092870",
+      "name": "엑시콘",
+      "trades": 36,
+      "avg_trade_return_pct": 1.525,
+      "total_trade_return_pct": 54.8985,
+      "win_rate_pct": 52.78
+    },
+    {
+      "code": "058970",
+      "name": "엠로",
+      "trades": 30,
+      "avg_trade_return_pct": 1.7613,
+      "total_trade_return_pct": 52.8376,
+      "win_rate_pct": 60.0
+    },
+    {
+      "code": "307870",
+      "name": "비투엔",
+      "trades": 44,
+      "avg_trade_return_pct": 1.1853,
+      "total_trade_return_pct": 52.1527,
+      "win_rate_pct": 52.27
+    },
+    {
+      "code": "000880",
+      "name": "한화",
+      "trades": 29,
+      "avg_trade_return_pct": 1.5426,
+      "total_trade_return_pct": 44.7355,
+      "win_rate_pct": 48.28
+    },
+    {
+      "code": "376900",
+      "name": "로킷헬스케어",
+      "trades": 15,
+      "avg_trade_return_pct": 2.8876,
+      "total_trade_return_pct": 43.3145,
+      "win_rate_pct": 60.0
+    }
+  ],
+  "bottom10_symbols_by_cumulative_trade_return": [
+    {
+      "code": "000230",
+      "name": "일동홀딩스",
+      "trades": 30,
+      "avg_trade_return_pct": -3.6825,
+      "total_trade_return_pct": -110.4739,
+      "win_rate_pct": 26.67
+    },
+    {
+      "code": "113810",
+      "name": "디젠스",
+      "trades": 32,
+      "avg_trade_return_pct": -3.4019,
+      "total_trade_return_pct": -108.8604,
+      "win_rate_pct": 25.0
+    },
+    {
+      "code": "204840",
+      "name": "지엘팜텍",
+      "trades": 22,
+      "avg_trade_return_pct": -4.4696,
+      "total_trade_return_pct": -98.3304,
+      "win_rate_pct": 27.27
+    },
+    {
+      "code": "229000",
+      "name": "젠큐릭스",
+      "trades": 28,
+      "avg_trade_return_pct": -3.0951,
+      "total_trade_return_pct": -86.6628,
+      "win_rate_pct": 25.0
+    },
+    {
+      "code": "119650",
+      "name": "KC코트렐",
+      "trades": 17,
+      "avg_trade_return_pct": -4.9599,
+      "total_trade_return_pct": -84.3188,
+      "win_rate_pct": 17.65
+    },
+    {
+      "code": "175140",
+      "name": "휴먼테크놀로지",
+      "trades": 16,
+      "avg_trade_return_pct": -4.8971,
+      "total_trade_return_pct": -78.3535,
+      "win_rate_pct": 25.0
+    },
+    {
+      "code": "090370",
+      "name": "메타랩스",
+      "trades": 19,
+      "avg_trade_return_pct": -3.9901,
+      "total_trade_return_pct": -75.8115,
+      "win_rate_pct": 26.32
+    },
+    {
+      "code": "187420",
+      "name": "HLB제넥스",
+      "trades": 33,
+      "avg_trade_return_pct": -2.115,
+      "total_trade_return_pct": -69.7962,
+      "win_rate_pct": 33.33
+    },
+    {
+      "code": "391710",
+      "name": "코닉오토메이션",
+      "trades": 21,
+      "avg_trade_return_pct": -3.1935,
+      "total_trade_return_pct": -67.0632,
+      "win_rate_pct": 14.29
+    },
+    {
+      "code": "060570",
+      "name": "드림어스컴퍼니",
+      "trades": 28,
+      "avg_trade_return_pct": -2.3614,
+      "total_trade_return_pct": -66.1183,
+      "win_rate_pct": 35.71
+    }
+  ],
+  "outputs": {
+    "daily_csv": "/mnt/c/Github/TOSS/reports/backtests/random500_seed20260607_daily_open_close_top10_mom5_2022-01-01_2025-12-31_daily_curve.csv",
+    "picks_csv": "/mnt/c/Github/TOSS/reports/backtests/random500_seed20260607_daily_open_close_top10_mom5_2022-01-01_2025-12-31_picks.csv",
+    "status_csv": "/mnt/c/Github/TOSS/reports/backtests/random500_seed20260607_daily_open_close_top10_mom5_2022-01-01_2025-12-31_data_status.csv"
+  },
+  "disclaimer": "Research-only daily buy/sell backtest; not investment advice; live orders not submitted."
+}

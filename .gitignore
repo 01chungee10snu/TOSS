@@ -12,6 +12,7 @@ __pycache__/
 # data/cache
 /data/
 .cache/
+reports/backtests/*_ohlcv_panel.csv
 
 # notebooks
 .ipynb_checkpoints/
