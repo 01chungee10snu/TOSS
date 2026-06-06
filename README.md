@@ -47,5 +47,18 @@ python tossinvest_client.py holdings
 ## 안전 원칙
 
 - 수익 보장 없음. 모든 전략은 손실 가능.
-- 기본값은 조회/알림/백테스트.
+- 이 프로젝트의 산출물은 투자 조언 아님.
+- 기본값은 조회/알림/백테스트/수동 검토 초안.
 - 실주문은 별도 승인, 한도, 수동확인 없이는 구현/실행하지 않음.
+- 현재 CLI는 `research run`, `backtest run`, `draft-order`만 제공하며 `live`, `place-order`, `buy`, `sell` 명령은 제공하지 않음.
+
+## Research harness CLI
+
+```bash
+PYTHONPATH=src python3 -m toss_alpha.cli --help
+PYTHONPATH=src python3 -m toss_alpha.cli research run goals/example_momentum.yaml
+PYTHONPATH=src python3 -m toss_alpha.cli backtest run goals/example_momentum.yaml
+PYTHONPATH=src python3 -m toss_alpha.cli draft-order goals/example_momentum.yaml
+```
+
+현재 CLI는 안전한 스켈레톤입니다. 실주문 실행 기능은 없습니다.
