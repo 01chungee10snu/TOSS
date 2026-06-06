@@ -38,7 +38,9 @@ python tossinvest_client.py holdings
 ## 프로젝트 문서
 
 - `docs/repo-integration-audit.md` — 기존 금융 관련 레포 접목 결과
-- `docs/profit-maximization-plan.md` — 단계별 이익극대화 시스템 계획
+- `docs/profit-maximization-plan.md` — 단계별 리서치/백테스트/리스크 관리 계획
+- `docs/ttak-recursive-harness-design.md` — Ttak recursive self-QA 기반 하네스 설계
+- `docs/plans/2026-06-06-ttak-harness-implementation-plan.md` — 구현 계획
 - `config/risk_policy.yaml` — 실거래 전 필수 리스크 한도
 - `config/watchlist.yaml` — 초기 관심종목
 
