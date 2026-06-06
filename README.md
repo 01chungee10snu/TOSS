@@ -49,8 +49,8 @@ python tossinvest_client.py holdings
 - 수익 보장 없음. 모든 전략은 손실 가능.
 - 이 프로젝트의 산출물은 투자 조언 아님.
 - 기본값은 조회/알림/백테스트/수동 검토 초안.
-- 실주문은 별도 승인, 한도, 수동확인 없이는 구현/실행하지 않음.
-- 현재 CLI는 `research run`, `backtest run`, `draft-order`만 제공하며 `live`, `place-order`, `buy`, `sell` 명령은 제공하지 않음.
+- 실주문은 기본 차단이며, API 발급 후에도 이중 opt-in과 정확한 확인 문구 없이는 제출하지 않음.
+- 바로가기성 `buy`, `sell`, `place-order`, `auto-trade` 명령은 제공하지 않음.
 
 ## Research harness CLI
 
@@ -59,6 +59,23 @@ PYTHONPATH=src python3 -m toss_alpha.cli --help
 PYTHONPATH=src python3 -m toss_alpha.cli research run goals/example_momentum.yaml
 PYTHONPATH=src python3 -m toss_alpha.cli backtest run goals/example_momentum.yaml
 PYTHONPATH=src python3 -m toss_alpha.cli draft-order goals/example_momentum.yaml
+PYTHONPATH=src python3 -m toss_alpha.cli live-readiness
 ```
 
-현재 CLI는 안전한 스켈레톤입니다. 실주문 실행 기능은 없습니다.
+현재 CLI는 안전한 스켈레톤입니다. `live-readiness`는 실전매매 준비 상태만 점검하며 주문을 제출하지 않습니다.
+
+## API 발급 후 실전매매 준비 절차
+
+1. `.env.example`을 `.env`로 복사하고 `TOSSINVEST_CLIENT_ID`, `TOSSINVEST_CLIENT_SECRET`, `TOSSINVEST_ACCOUNT_SEQ`를 로컬에만 입력합니다.
+2. 토큰/조회 확인:
+   ```bash
+   python tossinvest_client.py token
+   python tossinvest_client.py accounts
+   python tossinvest_client.py holdings
+   ```
+3. 공식 주문 endpoint가 확인되면 `.env`의 `TOSSINVEST_LIVE_ORDER_ENDPOINT`에 입력합니다.
+4. `PYTHONPATH=src python3 -m toss_alpha.cli live-readiness`로 누락 조건을 점검합니다.
+5. 실전 제출을 허용하려면 아래 두 값을 모두 켜야 합니다.
+   - `config/risk_policy.yaml`: `live_trading_enabled: true`
+   - `.env`: `TOSSINVEST_LIVE_TRADING_ENABLED=true`
+6. 실제 제출 함수는 `GuardedLiveExecutor.submit_manual_draft(..., dry_run=False)`이며, 수동 초안·통과된 `RiskDecision`·정확한 확인 문구가 모두 필요합니다.

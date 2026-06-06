@@ -23,13 +23,22 @@ def test_safe_commands_exist():
     assert "research" in help_text
     assert "backtest" in help_text
     assert "draft-order" in help_text
+    assert "live-readiness" in help_text
     assert run_cli("research", "run", "--help").returncode == 0
     assert run_cli("backtest", "run", "--help").returncode == 0
     assert run_cli("draft-order", "--help").returncode == 0
+    assert run_cli("live-readiness", "--help").returncode == 0
 
 
-def test_forbidden_commands_do_not_exist():
+def test_live_readiness_reports_not_ready_by_default():
+    result = run_cli("live-readiness")
+    assert result.returncode == 0
+    assert "ready: False" in result.stdout
+    assert "BLOCK_UNLESS_DOUBLE_OPT_IN" in result.stdout
+
+
+def test_forbidden_shortcut_commands_do_not_exist():
     help_text = run_cli("--help").stdout
-    for forbidden in ["live", "place-order", "buy", "sell"]:
+    for forbidden in ["place-order", "buy", "sell", "auto-trade"]:
         assert forbidden not in help_text
         assert run_cli(forbidden).returncode != 0

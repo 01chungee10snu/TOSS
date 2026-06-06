@@ -7,3 +7,16 @@ require_manual_confirmation: true
 allow_short_selling: false
 allow_leverage: false
 allow_options: false
+
+# 실전매매 준비용 guarded execution 설정.
+# 실제 주문은 아래 조건을 모두 만족해야만 가능하게 설계한다:
+# 1) 이 파일에서 live_trading_enabled=true
+# 2) .env에서 TOSSINVEST_LIVE_TRADING_ENABLED=true
+# 3) 정확한 확인 문구 입력
+# 4) 주문 endpoint/API 스펙 확정
+live_execution:
+  confirmation_phrase: "I UNDERSTAND THIS IS A REAL ORDER"
+  require_env_double_opt_in: true
+  require_manual_draft: true
+  default_dry_run: true
+  order_endpoint_path: null
