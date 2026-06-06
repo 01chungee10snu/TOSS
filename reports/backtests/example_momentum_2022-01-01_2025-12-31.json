@@ -1,0 +1,71 @@
+{
+  "generated_at_utc": "2026-06-06T21:39:50.445217+00:00",
+  "goal_path": "/mnt/c/Github/TOSS/goals/example_momentum.yaml",
+  "period": {
+    "start": "2022-01-01",
+    "end": "2025-12-31"
+  },
+  "strategy": {
+    "name": "long_when_MA20_above_MA60_else_cash",
+    "no_lookahead": "signal at close, position applied next trading day",
+    "short_window": 20,
+    "long_window": 60
+  },
+  "costs": {
+    "fee_bps_each_side": 1.5,
+    "slippage_bps_each_side": 5.0,
+    "sell_tax_bps_on_sells": 18.0
+  },
+  "starting_cash_krw_per_symbol": 1000000.0,
+  "symbols": {
+    "005930": {
+      "rows": 974,
+      "first_date": "2022-01-04",
+      "last_date": "2025-12-30",
+      "final_value_krw": 1471382.18,
+      "total_return_pct": 47.14,
+      "cagr_pct": 10.17,
+      "max_drawdown_pct": -32.9,
+      "sharpe": 0.57,
+      "trades": 21,
+      "win_days": 255,
+      "loss_days": 247,
+      "profit_factor": 1.142,
+      "buyhold_final_krw": 1663216.36,
+      "buyhold_return_pct": 66.32,
+      "invested_days_pct": 52.67,
+      "name": "삼성전자",
+      "yfinance_symbol": "005930.KS"
+    },
+    "000660": {
+      "rows": 974,
+      "first_date": "2022-01-04",
+      "last_date": "2025-12-30",
+      "final_value_krw": 3272240.14,
+      "total_return_pct": 227.22,
+      "cagr_pct": 34.63,
+      "max_drawdown_pct": -45.51,
+      "sharpe": 1.055,
+      "trades": 13,
+      "win_days": 267,
+      "loss_days": 277,
+      "profit_factor": 1.271,
+      "buyhold_final_krw": 5267831.63,
+      "buyhold_return_pct": 426.78,
+      "invested_days_pct": 57.29,
+      "name": "SK하이닉스",
+      "yfinance_symbol": "000660.KS"
+    }
+  },
+  "portfolio_equal_weight": {
+    "construction": "equal-weight average of per-symbol 1,000,000 KRW strategy equity curves",
+    "first_date": "2022-01-04",
+    "last_date": "2025-12-30",
+    "final_value_krw": 2371811.16,
+    "total_return_pct": 137.18,
+    "cagr_pct": 24.19,
+    "max_drawdown_pct": -38.45,
+    "sharpe": 0.965
+  },
+  "disclaimer": "Research-only backtest; not investment advice; live orders not submitted."
+}
