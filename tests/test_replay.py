@@ -254,6 +254,32 @@ def test_replay_engine_prediction_overlay_penalty_combines_scores():
     assert result["trades"][0]["symbol"] == boosted
 
 
+def test_replay_engine_prediction_overlay_hybrid_combines_quant_and_sentiment_ranks():
+    """Hybrid mode combines quant rank and sentiment rank instead of sentiment-only rerank."""
+    panel = _make_panel(days=30, n_symbols=3)
+    symbols = sorted(panel["code"].unique().tolist())
+    date_str = pd.Timestamp(panel["Date"].max()).date().isoformat()
+    candidates = [
+        {"symbol": symbols[0], "final_score": 100.0},  # best quant, worst sentiment
+        {"symbol": symbols[1], "final_score": 80.0},
+        {"symbol": symbols[2], "final_score": 60.0},  # worst quant, best sentiment
+    ]
+    prediction_map = {date_str: {symbols[0]: -1.0, symbols[1]: 0.0, symbols[2]: 1.0}}
+
+    engine = ReplayEngine(
+        panel=panel,
+        symbols=symbols,
+        prediction_map=prediction_map,
+        prediction_overlay_mode="hybrid",
+        prediction_alpha=0.5,
+    )
+    ranked = engine._apply_prediction_ranking(candidates, date_str)
+
+    assert ranked[0]["symbol"] == symbols[0]
+    assert ranked[0]["hybrid_score"] > ranked[-1]["hybrid_score"]
+    assert all("quant_rank_pct" in row and "sentiment_rank_pct" in row for row in ranked)
+
+
 def test_run_replay_writes_artifacts(tmp_path: Path):
     panel = _make_panel(days=120, n_symbols=5)
     panel.to_csv(tmp_path / "panel.csv", index=False)

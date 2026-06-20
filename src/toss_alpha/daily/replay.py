@@ -258,6 +258,43 @@ class ReplayEngine:
             adjusted.sort(key=lambda c: c["final_score"], reverse=True)
             return adjusted
 
+        if mode == "hybrid":
+            # Overlay: combine quant rank and sentiment rank on a common 0..1 scale.
+            # This avoids raw-score scale mismatch and keeps sentiment from fully
+            # replacing the proven quantitative base ranking.
+            enriched = []
+            n = max(1, len(candidates))
+            quant_order = sorted(
+                [str(c["symbol"]).zfill(6) for c in candidates],
+                key=lambda s: next(float(c["final_score"]) for c in candidates if str(c["symbol"]).zfill(6) == s),
+                reverse=True,
+            )
+            sentiment_order = sorted(
+                [str(c["symbol"]).zfill(6) for c in candidates],
+                key=lambda s: (float(scores.get(s, 0.0)), next(float(c["final_score"]) for c in candidates if str(c["symbol"]).zfill(6) == s)),
+                reverse=True,
+            )
+            denom = max(1, n - 1)
+            quant_rank_pct = {symbol: 1.0 - idx / denom for idx, symbol in enumerate(quant_order)}
+            sentiment_rank_pct = {symbol: 1.0 - idx / denom for idx, symbol in enumerate(sentiment_order)}
+            for candidate in candidates:
+                symbol = str(candidate["symbol"]).zfill(6)
+                prediction = float(scores.get(symbol, 0.0))
+                q = quant_rank_pct[symbol]
+                s = sentiment_rank_pct[symbol]
+                hybrid_score = q + self.prediction_alpha * s
+                row = dict(candidate)
+                row["symbol"] = symbol
+                row["ml_prediction"] = prediction
+                row["quant_rank_pct"] = q
+                row["sentiment_rank_pct"] = s
+                row["hybrid_score"] = hybrid_score
+                # Keep final_score as the original quantitative score so the
+                # existing entry threshold remains a base-quality gate.
+                enriched.append(row)
+            enriched.sort(key=lambda c: (c["hybrid_score"], c["final_score"]), reverse=True)
+            return enriched
+
         raise ValueError(f"unsupported prediction_overlay_mode: {mode}")
 
     def _latest_close_prices(self, sub: pd.DataFrame, date_str: str) -> dict[str, float]:

@@ -35,6 +35,7 @@ DEFAULT_ARTICLES_PER_SYMBOL = 8
 DEFAULT_WHEN = "7d"
 SENTIMENT_LOOKBACK_DAYS = 7
 PENALTY_ALPHA = 10.0
+HYBRID_ALPHA = 0.5
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
 
@@ -162,7 +163,7 @@ def build_latest_sentiment_by_code(sentiment_df: pd.DataFrame) -> dict[str, floa
     return {code: float(score) for code, score in grouped.items() if not math.isnan(float(score))}
 
 
-def latest_candidates(sentiment_by_code: dict[str, float]) -> tuple[pd.Timestamp, dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+def latest_candidates(sentiment_by_code: dict[str, float]) -> tuple[pd.Timestamp, dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     panel = pd.read_csv(PANEL_CSV, dtype={"code": str}, parse_dates=["Date"])
     panel["code"] = panel["code"].astype(str).str.zfill(6)
     latest_date = pd.Timestamp(panel["Date"].max())
@@ -183,14 +184,34 @@ def latest_candidates(sentiment_by_code: dict[str, float]) -> tuple[pd.Timestamp
 
     rerank = sorted(enriched, key=lambda c: (c["sentiment_score"], c["final_score"]), reverse=True)
     penalty = sorted(enriched, key=lambda c: c["adjusted_score"], reverse=True)
-    return latest_date, regime, base, rerank, penalty
+
+    n = max(1, len(enriched))
+    denom = max(1, n - 1)
+    quant_order = sorted(enriched, key=lambda c: c["final_score"], reverse=True)
+    sentiment_order = sorted(enriched, key=lambda c: (c["sentiment_score"], c["final_score"]), reverse=True)
+    quant_rank_pct = {row["symbol"]: 1.0 - idx / denom for idx, row in enumerate(quant_order)}
+    sentiment_rank_pct = {row["symbol"]: 1.0 - idx / denom for idx, row in enumerate(sentiment_order)}
+    hybrid = []
+    for row in enriched:
+        h = dict(row)
+        h["quant_rank_pct"] = quant_rank_pct[h["symbol"]]
+        h["sentiment_rank_pct"] = sentiment_rank_pct[h["symbol"]]
+        h["hybrid_score"] = h["quant_rank_pct"] + HYBRID_ALPHA * h["sentiment_rank_pct"]
+        hybrid.append(h)
+    hybrid = sorted(hybrid, key=lambda c: (c["hybrid_score"], c["final_score"]), reverse=True)
+    return latest_date, regime, base, rerank, penalty, hybrid
 
 
-def format_candidate(row: dict[str, Any], names: dict[str, str], rank: int, include_adjusted: bool = False) -> str:
+def format_candidate(row: dict[str, Any], names: dict[str, str], rank: int, include_adjusted: bool = False, include_hybrid: bool = False) -> str:
     code = str(row["symbol"]).zfill(6)
     name = names.get(code, "")
     base_score = float(row.get("final_score", 0.0))
     sent = float(row.get("sentiment_score", 0.0))
+    if include_hybrid:
+        hybrid = float(row.get("hybrid_score", 0.0))
+        q = float(row.get("quant_rank_pct", 0.0))
+        s = float(row.get("sentiment_rank_pct", 0.0))
+        return f"{rank}. {code} {name} — hybrid {hybrid:.3f}, qrank {q:.2f}, srank {s:.2f}, base {base_score:.2f}, sent {sent:+.2f}"
     if include_adjusted:
         adj = float(row.get("adjusted_score", base_score))
         return f"{rank}. {code} {name} — adj {adj:.2f}, base {base_score:.2f}, sent {sent:+.2f}"
@@ -216,7 +237,7 @@ def run(limit_symbols: int, articles_per_symbol: int, when: str, sleep_seconds: 
     # To keep cron runs short, collect sentiment only for the current base candidate pool.
     # This is sufficient for forward tracking because sentiment is only used to re-rank
     # base-approved candidates, not the full 496-symbol universe.
-    latest_date0, regime0, base0, _, _ = latest_candidates({})
+    latest_date0, regime0, base0, _, _, _ = latest_candidates({})
     pool_codes = [str(row["symbol"]).zfill(6) for row in base0[:candidate_pool]]
     target_universe = names_df[names_df["Code"].astype(str).str.zfill(6).isin(pool_codes)].copy()
     # Preserve candidate order, not code sort order.
@@ -232,7 +253,7 @@ def run(limit_symbols: int, articles_per_symbol: int, when: str, sleep_seconds: 
         target_universe=target_universe,
     )
     sentiment_by_code = build_latest_sentiment_by_code(sentiment_df)
-    latest_date, regime, base, rerank, penalty = latest_candidates(sentiment_by_code)
+    latest_date, regime, base, rerank, penalty, hybrid = latest_candidates(sentiment_by_code)
 
     coverage_symbols = sentiment_df["code"].nunique() if not sentiment_df.empty else 0
     coverage_articles = len(sentiment_df)
@@ -252,6 +273,8 @@ def run(limit_symbols: int, articles_per_symbol: int, when: str, sleep_seconds: 
         "### Base 후보 Top 10",
     ]
     lines += [format_candidate(row, names, i + 1) for i, row in enumerate(base[:10])]
+    lines += ["", f"### Quant+Sentiment hybrid Top 10 (alpha={HYBRID_ALPHA:.2f})"]
+    lines += [format_candidate(row, names, i + 1, include_hybrid=True) for i, row in enumerate(hybrid[:10])]
     lines += ["", "### Sentiment rerank Top 10"]
     lines += [format_candidate(row, names, i + 1) for i, row in enumerate(rerank[:10])]
     lines += ["", f"### Sentiment penalty Top 10 (alpha={PENALTY_ALPHA:.0f})"]
@@ -266,6 +289,7 @@ def run(limit_symbols: int, articles_per_symbol: int, when: str, sleep_seconds: 
         "avg_sentiment": avg_score,
         "regime": regime,
         "base_top10": base[:10],
+        "sentiment_hybrid_top10": hybrid[:10],
         "sentiment_rerank_top10": rerank[:10],
         "sentiment_penalty_top10": penalty[:10],
     }

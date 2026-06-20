@@ -168,7 +168,18 @@ def main() -> None:
             rows.append(summary)
             print(f"    return={summary['total_return_pct']:.2f}% trades={summary['total_trades']}")
 
-        # 3. Sentiment rerank
+        # 3. Hybrid rank blend: quant rank + alpha * sentiment rank.
+        # final_score remains the original quant score for base-quality gating.
+        for alpha in [0.25, 0.5, 1.0, 2.0]:
+            label = str(alpha).replace(".", "p")
+            print(f"  Running sentiment_hybrid alpha={alpha}...")
+            result = run_engine(panel, sentiment_map=yr_sent_map, overlay_mode="hybrid", alpha=alpha, cost_bps=30.0, year=year)
+            summary = dict(result["summary"])
+            summary.update({"candidate": f"sentiment_hybrid_a{label}", "year": year, "overlay": "hybrid"})
+            rows.append(summary)
+            print(f"    return={summary['total_return_pct']:.2f}% trades={summary['total_trades']}")
+
+        # 4. Sentiment rerank
         print(f"  Running sentiment_rerank...")
         result = run_engine(panel, sentiment_map=yr_sent_map, overlay_mode="rerank", cost_bps=30.0, year=year)
         summary = dict(result["summary"])
