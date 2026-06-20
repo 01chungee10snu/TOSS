@@ -171,6 +171,89 @@ def test_replay_engine_can_rank_entries_with_prediction_map():
     assert any("ml_prediction" in trade for trade in result["trades"])
 
 
+def test_replay_engine_prediction_overlay_rerank_keeps_base_candidates():
+    """In rerank mode, base-approved candidates are all kept; ML only re-orders them."""
+    panel = _make_panel(days=140, n_symbols=5)
+    symbols = sorted(panel["code"].unique().tolist())
+    preferred = symbols[-1]
+    prediction_map = {}
+    for ts in sorted(panel["Date"].unique()):
+        date_str = pd.Timestamp(ts).date().isoformat()
+        prediction_map[date_str] = {symbol: 0.01 for symbol in symbols}
+        prediction_map[date_str][preferred] = 0.50
+
+    engine = ReplayEngine(
+        panel=panel,
+        symbols=symbols,
+        initial_cash_krw=1_000_000,
+        max_notional_krw=100_000,
+        score_threshold=0.0,
+        max_positions=1,
+        prediction_map=prediction_map,
+        prediction_overlay_mode="rerank",
+    )
+    result = engine.run(step=5)
+
+    assert result["trades"]
+    assert result["trades"][0]["symbol"] == preferred
+
+
+def test_replay_engine_prediction_overlay_gate_requires_both_base_and_ml():
+    """In gate mode, a symbol needs BOTH base_score >= threshold AND ml_pred >= min."""
+    panel = _make_panel(days=140, n_symbols=5)
+    symbols = sorted(panel["code"].unique().tolist())
+    blocked = symbols[0]
+    prediction_map = {}
+    for ts in sorted(panel["Date"].unique()):
+        date_str = pd.Timestamp(ts).date().isoformat()
+        prediction_map[date_str] = {symbol: 0.50 for symbol in symbols}
+        prediction_map[date_str][blocked] = -0.50
+
+    engine = ReplayEngine(
+        panel=panel,
+        symbols=symbols,
+        initial_cash_krw=1_000_000,
+        max_notional_krw=100_000,
+        score_threshold=0.0,
+        max_positions=5,
+        prediction_map=prediction_map,
+        prediction_overlay_mode="gate",
+        prediction_min_score=0.0,
+    )
+    result = engine.run(step=5)
+
+    entered = {t["symbol"] for t in result["trades"]}
+    assert blocked not in entered
+
+
+def test_replay_engine_prediction_overlay_penalty_combines_scores():
+    """In penalty mode, adjusted_score = base_score + alpha * ml_pred."""
+    panel = _make_panel(days=140, n_symbols=5)
+    symbols = sorted(panel["code"].unique().tolist())
+    boosted = symbols[-1]
+    prediction_map = {}
+    for ts in sorted(panel["Date"].unique()):
+        date_str = pd.Timestamp(ts).date().isoformat()
+        prediction_map[date_str] = {symbol: 0.0 for symbol in symbols}
+        prediction_map[date_str][boosted] = 1.0
+
+    engine = ReplayEngine(
+        panel=panel,
+        symbols=symbols,
+        initial_cash_krw=1_000_000,
+        max_notional_krw=100_000,
+        score_threshold=0.0,
+        max_positions=1,
+        prediction_map=prediction_map,
+        prediction_overlay_mode="penalty",
+        prediction_alpha=50.0,
+    )
+    result = engine.run(step=5)
+
+    assert result["trades"]
+    assert result["trades"][0]["symbol"] == boosted
+
+
 def test_run_replay_writes_artifacts(tmp_path: Path):
     panel = _make_panel(days=120, n_symbols=5)
     panel.to_csv(tmp_path / "panel.csv", index=False)

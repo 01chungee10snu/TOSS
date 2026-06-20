@@ -75,6 +75,8 @@ class ReplayEngine:
         rebalance_mode: str = "hold_until_exit",
         prediction_map: dict[str, dict[str, float]] | None = None,
         prediction_min_score: float | None = None,
+        prediction_overlay_mode: str | None = None,
+        prediction_alpha: float = 10.0,
     ) -> None:
         self.panel = panel.copy()
         self.panel["code"] = self.panel["code"].astype(str).str.zfill(6)
@@ -93,6 +95,8 @@ class ReplayEngine:
         self.total_cost_krw = 0.0
         self.prediction_map = self._normalize_prediction_map(prediction_map)
         self.prediction_min_score = prediction_min_score
+        self.prediction_overlay_mode = prediction_overlay_mode
+        self.prediction_alpha = prediction_alpha
         if rebalance_mode not in {"hold_until_exit", "top_n_rotation", "full_liquidate_every_step"}:
             raise ValueError(f"unsupported rebalance_mode: {rebalance_mode}")
         self.rebalance_mode = rebalance_mode
@@ -187,20 +191,74 @@ class ReplayEngine:
         if not self.prediction_map:
             return candidates
         scores = self.prediction_map.get(date_str, {})
-        ranked: list[dict[str, Any]] = []
-        for candidate in candidates:
-            symbol = str(candidate["symbol"]).zfill(6)
-            prediction = scores.get(symbol)
-            if prediction is None:
-                continue
-            if self.prediction_min_score is not None and prediction < self.prediction_min_score:
-                continue
-            row = dict(candidate)
-            row["symbol"] = symbol
-            row["ml_prediction"] = float(prediction)
-            ranked.append(row)
-        ranked.sort(key=lambda c: (c["ml_prediction"], c["final_score"]), reverse=True)
-        return ranked
+
+        mode = self.prediction_overlay_mode
+
+        if mode is None:
+            # Replacement mode (original behavior): ML replaces base ranking entirely
+            ranked: list[dict[str, Any]] = []
+            for candidate in candidates:
+                symbol = str(candidate["symbol"]).zfill(6)
+                prediction = scores.get(symbol)
+                if prediction is None:
+                    continue
+                if self.prediction_min_score is not None and prediction < self.prediction_min_score:
+                    continue
+                row = dict(candidate)
+                row["symbol"] = symbol
+                row["ml_prediction"] = float(prediction)
+                ranked.append(row)
+            ranked.sort(key=lambda c: (c["ml_prediction"], c["final_score"]), reverse=True)
+            return ranked
+
+        if mode == "rerank":
+            # Overlay: keep ALL base candidates (even without predictions),
+            # but re-order by ml_pred first, base_score as tiebreaker.
+            enriched = []
+            for candidate in candidates:
+                symbol = str(candidate["symbol"]).zfill(6)
+                prediction = scores.get(symbol, 0.0)
+                row = dict(candidate)
+                row["symbol"] = symbol
+                row["ml_prediction"] = float(prediction)
+                enriched.append(row)
+            enriched.sort(key=lambda c: (c["ml_prediction"], c["final_score"]), reverse=True)
+            return enriched
+
+        if mode == "gate":
+            # Overlay: require BOTH base_score >= threshold AND ml_pred >= min.
+            # Ranking stays by base final_score.
+            gated = []
+            for candidate in candidates:
+                symbol = str(candidate["symbol"]).zfill(6)
+                prediction = scores.get(symbol)
+                if prediction is None:
+                    continue
+                if self.prediction_min_score is not None and prediction < self.prediction_min_score:
+                    continue
+                row = dict(candidate)
+                row["symbol"] = symbol
+                row["ml_prediction"] = float(prediction)
+                gated.append(row)
+            gated.sort(key=lambda c: c["final_score"], reverse=True)
+            return gated
+
+        if mode == "penalty":
+            # Overlay: adjusted_score = base_score + alpha * ml_pred.
+            # Candidates without predictions keep their base_score.
+            adjusted = []
+            for candidate in candidates:
+                symbol = str(candidate["symbol"]).zfill(6)
+                prediction = scores.get(symbol, 0.0)
+                row = dict(candidate)
+                row["symbol"] = symbol
+                row["ml_prediction"] = float(prediction)
+                row["final_score"] = row["final_score"] + self.prediction_alpha * float(prediction)
+                adjusted.append(row)
+            adjusted.sort(key=lambda c: c["final_score"], reverse=True)
+            return adjusted
+
+        raise ValueError(f"unsupported prediction_overlay_mode: {mode}")
 
     def _latest_close_prices(self, sub: pd.DataFrame, date_str: str) -> dict[str, float]:
         """Get the most recent close price for each symbol on or before date_str."""
@@ -340,7 +398,9 @@ class ReplayEngine:
             if symbol in self.open_positions:
                 continue
             if cand["final_score"] < self.score_threshold:
-                if self.prediction_map:
+                # In modes where candidates aren't sorted by final_score,
+                # skip rather than break
+                if self.prediction_map and self.prediction_overlay_mode in (None, "rerank"):
                     continue
                 break  # sorted by score desc
 
