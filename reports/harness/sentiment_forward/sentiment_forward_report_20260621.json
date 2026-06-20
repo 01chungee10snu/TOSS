@@ -1,0 +1,780 @@
+{
+  "run_date": "20260621",
+  "latest_panel_date": "2026-06-19",
+  "live_order_submitted": false,
+  "coverage_symbols": 44,
+  "coverage_articles": 173,
+  "avg_sentiment": 0.3562346936416185,
+  "regime": {
+    "status": "risk_off",
+    "breadth_positive_20d": 0.1169,
+    "average_20d_return": -0.105552,
+    "rationale": "20d breadth=11.69%, avg_ret20=-10.56%"
+  },
+  "base_top10": [
+    {
+      "symbol": "046070",
+      "last_close": 4328.4208984375,
+      "final_score": 78.75,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 50.0,
+        "volatility_score": 100.0,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.0,
+        "momentum_60d": 7.0,
+        "volume_surge": 1.0
+      },
+      "entry": {
+        "setup": "breakout",
+        "trigger_price": 4371.71,
+        "stop_price": 4112.0,
+        "take_profit_1": 4674.69,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=78.8; 20d=0.00%; 60d=700.00%; volume_surge=1.00; regime=risk_off"
+    },
+    {
+      "symbol": "080720",
+      "last_close": 8175.8173828125,
+      "final_score": 78.75,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 50.0,
+        "volatility_score": 100.0,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.0,
+        "momentum_60d": 2.0003,
+        "volume_surge": 1.0
+      },
+      "entry": {
+        "setup": "breakout",
+        "trigger_price": 8257.58,
+        "stop_price": 7767.03,
+        "take_profit_1": 8829.88,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=78.8; 20d=0.00%; 60d=200.03%; volume_surge=1.00; regime=risk_off"
+    },
+    {
+      "symbol": "033560",
+      "last_close": 3700.0,
+      "final_score": 75.76,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 65.24,
+        "volatility_score": 69.79,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.158059,
+        "momentum_60d": 0.159875,
+        "volume_surge": 1.6095
+      },
+      "entry": {
+        "setup": "breakout",
+        "trigger_price": 3737.0,
+        "stop_price": 3515.0,
+        "take_profit_1": 3996.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=75.8; 20d=15.81%; 60d=15.99%; volume_surge=1.61; regime=risk_off"
+    },
+    {
+      "symbol": "161390",
+      "last_close": 66700.0,
+      "final_score": 71.86,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 47.26,
+        "volatility_score": 68.29,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.124789,
+        "momentum_60d": 0.263299,
+        "volume_surge": 0.8905
+      },
+      "entry": {
+        "setup": "breakout",
+        "trigger_price": 67367.0,
+        "stop_price": 63365.0,
+        "take_profit_1": 72036.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=71.9; 20d=12.48%; 60d=26.33%; volume_surge=0.89; regime=risk_off"
+    },
+    {
+      "symbol": "092190",
+      "last_close": 8570.0,
+      "final_score": 69.76,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 46.42,
+        "volatility_score": 58.61,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": -0.427522,
+        "momentum_60d": 1.494905,
+        "volume_surge": 0.8566
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 8655.7,
+        "stop_price": 8141.5,
+        "take_profit_1": 9255.6,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=69.8; 20d=-42.75%; 60d=149.49%; volume_surge=0.86; regime=risk_off"
+    },
+    {
+      "symbol": "483650",
+      "last_close": 214000.0,
+      "final_score": 69.71,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 45.41,
+        "volatility_score": 59.41,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": -0.006961,
+        "momentum_60d": 0.444921,
+        "volume_surge": 0.8164
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 216140.0,
+        "stop_price": 203300.0,
+        "take_profit_1": 231120.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=69.7; 20d=-0.70%; 60d=44.49%; volume_surge=0.82; regime=risk_off"
+    },
+    {
+      "symbol": "080220",
+      "last_close": 114300.0,
+      "final_score": 69.56,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 77.27,
+        "volatility_score": 26.77,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.205696,
+        "momentum_60d": 1.781022,
+        "volume_surge": 2.0909
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 115443.0,
+        "stop_price": 108585.0,
+        "take_profit_1": 123444.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=69.6; 20d=20.57%; 60d=178.10%; volume_surge=2.09; regime=risk_off"
+    },
+    {
+      "symbol": "023530",
+      "last_close": 179900.0,
+      "final_score": 68.71,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 45.46,
+        "volatility_score": 54.32,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.175049,
+        "momentum_60d": 0.833137,
+        "volume_surge": 0.8184
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 181699.0,
+        "stop_price": 170905.0,
+        "take_profit_1": 194292.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.7; 20d=17.50%; 60d=83.31%; volume_surge=0.82; regime=risk_off"
+    },
+    {
+      "symbol": "039830",
+      "last_close": 17510.0,
+      "final_score": 68.58,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 44.94,
+        "volatility_score": 54.22,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.175957,
+        "momentum_60d": 0.810755,
+        "volume_surge": 0.7975
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 17685.1,
+        "stop_price": 16634.5,
+        "take_profit_1": 18910.8,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.6; 20d=17.60%; 60d=81.08%; volume_surge=0.80; regime=risk_off"
+    },
+    {
+      "symbol": "016360",
+      "last_close": 118900.0,
+      "final_score": 68.14,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 95.22,
+        "volume_score": 49.78,
+        "volatility_score": 57.95,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.055013,
+        "momentum_60d": 0.262208,
+        "volume_surge": 0.9913
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 120089.0,
+        "stop_price": 112955.0,
+        "take_profit_1": 128412.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.1; 20d=5.50%; 60d=26.22%; volume_surge=0.99; regime=risk_off"
+    }
+  ],
+  "sentiment_rerank_top10": [
+    {
+      "symbol": "014910",
+      "last_close": 2945.0,
+      "final_score": 67.62,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 77.52,
+        "volatility_score": 16.81,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": -0.0576,
+        "momentum_60d": 0.832607,
+        "volume_surge": 2.1008
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 2974.45,
+        "stop_price": 2797.75,
+        "take_profit_1": 3180.6,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=67.6; 20d=-5.76%; 60d=83.26%; volume_surge=2.10; regime=risk_off",
+      "sentiment_score": 0.9916786,
+      "adjusted_score": 77.536786
+    },
+    {
+      "symbol": "267260",
+      "last_close": 1078000.0,
+      "final_score": 58.81,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 74.64,
+        "volume_score": 50.91,
+        "volatility_score": 56.47,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.011257,
+        "momentum_60d": 0.181851,
+        "volume_surge": 1.0364
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 1088780.0,
+        "stop_price": 1024100.0,
+        "take_profit_1": 1164240.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=58.8; 20d=1.13%; 60d=18.19%; volume_surge=1.04; regime=risk_off",
+      "sentiment_score": 0.9902903999999999,
+      "adjusted_score": 68.71290400000001
+    },
+    {
+      "symbol": "270870",
+      "last_close": 4170.0,
+      "final_score": 56.4,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 72.19,
+        "volume_score": 43.78,
+        "volatility_score": 57.04,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.0425,
+        "momentum_60d": 0.096351,
+        "volume_surge": 0.7513
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 4211.7,
+        "stop_price": 3961.5,
+        "take_profit_1": 4503.6,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=56.4; 20d=4.25%; 60d=9.64%; volume_surge=0.75; regime=risk_off",
+      "sentiment_score": 0.9835186666666668,
+      "adjusted_score": 66.23518666666666
+    },
+    {
+      "symbol": "432980",
+      "last_close": 3025.0,
+      "final_score": 56.22,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 69.37,
+        "volume_score": 45.56,
+        "volatility_score": 60.68,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.126629,
+        "momentum_60d": -0.102374,
+        "volume_surge": 0.8225
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 3055.25,
+        "stop_price": 2873.75,
+        "take_profit_1": 3267.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=56.2; 20d=12.66%; 60d=-10.24%; volume_surge=0.82; regime=risk_off",
+      "sentiment_score": 0.9693246,
+      "adjusted_score": 65.913246
+    },
+    {
+      "symbol": "016360",
+      "last_close": 118900.0,
+      "final_score": 68.14,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 95.22,
+        "volume_score": 49.78,
+        "volatility_score": 57.95,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.055013,
+        "momentum_60d": 0.262208,
+        "volume_surge": 0.9913
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 120089.0,
+        "stop_price": 112955.0,
+        "take_profit_1": 128412.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.1; 20d=5.50%; 60d=26.22%; volume_surge=0.99; regime=risk_off",
+      "sentiment_score": 0.9556278,
+      "adjusted_score": 77.696278
+    },
+    {
+      "symbol": "162300",
+      "last_close": 1746.0,
+      "final_score": 62.64,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 86.0,
+        "volume_score": 38.37,
+        "volatility_score": 62.59,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.100189,
+        "momentum_60d": 0.09125,
+        "volume_surge": 0.5348
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 1763.46,
+        "stop_price": 1658.7,
+        "take_profit_1": 1885.68,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=62.6; 20d=10.02%; 60d=9.13%; volume_surge=0.53; regime=risk_off",
+      "sentiment_score": 0.7945376,
+      "adjusted_score": 70.585376
+    },
+    {
+      "symbol": "039830",
+      "last_close": 17510.0,
+      "final_score": 68.58,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 44.94,
+        "volatility_score": 54.22,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.175957,
+        "momentum_60d": 0.810755,
+        "volume_surge": 0.7975
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 17685.1,
+        "stop_price": 16634.5,
+        "take_profit_1": 18910.8,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.6; 20d=17.60%; 60d=81.08%; volume_surge=0.80; regime=risk_off",
+      "sentiment_score": 0.7943352,
+      "adjusted_score": 76.523352
+    },
+    {
+      "symbol": "080220",
+      "last_close": 114300.0,
+      "final_score": 69.56,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 77.27,
+        "volatility_score": 26.77,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.205696,
+        "momentum_60d": 1.781022,
+        "volume_surge": 2.0909
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 115443.0,
+        "stop_price": 108585.0,
+        "take_profit_1": 123444.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=69.6; 20d=20.57%; 60d=178.10%; volume_surge=2.09; regime=risk_off",
+      "sentiment_score": 0.794322,
+      "adjusted_score": 77.50322
+    },
+    {
+      "symbol": "023530",
+      "last_close": 179900.0,
+      "final_score": 68.71,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 45.46,
+        "volatility_score": 54.32,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.175049,
+        "momentum_60d": 0.833137,
+        "volume_surge": 0.8184
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 181699.0,
+        "stop_price": 170905.0,
+        "take_profit_1": 194292.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.7; 20d=17.50%; 60d=83.31%; volume_surge=0.82; regime=risk_off",
+      "sentiment_score": 0.7883614,
+      "adjusted_score": 76.59361399999999
+    },
+    {
+      "symbol": "104830",
+      "last_close": 45250.0,
+      "final_score": 60.01,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 72.48,
+        "volume_score": 70.13,
+        "volatility_score": 48.07,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.034286,
+        "momentum_60d": 0.115906,
+        "volume_surge": 1.8051
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 45702.5,
+        "stop_price": 42987.5,
+        "take_profit_1": 48870.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=60.0; 20d=3.43%; 60d=11.59%; volume_surge=1.81; regime=risk_off",
+      "sentiment_score": 0.7789588000000001,
+      "adjusted_score": 67.799588
+    }
+  ],
+  "sentiment_penalty_top10": [
+    {
+      "symbol": "046070",
+      "last_close": 4328.4208984375,
+      "final_score": 78.75,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 50.0,
+        "volatility_score": 100.0,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.0,
+        "momentum_60d": 7.0,
+        "volume_surge": 1.0
+      },
+      "entry": {
+        "setup": "breakout",
+        "trigger_price": 4371.71,
+        "stop_price": 4112.0,
+        "take_profit_1": 4674.69,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=78.8; 20d=0.00%; 60d=700.00%; volume_surge=1.00; regime=risk_off",
+      "sentiment_score": 0.0,
+      "adjusted_score": 78.75
+    },
+    {
+      "symbol": "016360",
+      "last_close": 118900.0,
+      "final_score": 68.14,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 95.22,
+        "volume_score": 49.78,
+        "volatility_score": 57.95,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.055013,
+        "momentum_60d": 0.262208,
+        "volume_surge": 0.9913
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 120089.0,
+        "stop_price": 112955.0,
+        "take_profit_1": 128412.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.1; 20d=5.50%; 60d=26.22%; volume_surge=0.99; regime=risk_off",
+      "sentiment_score": 0.9556278,
+      "adjusted_score": 77.696278
+    },
+    {
+      "symbol": "014910",
+      "last_close": 2945.0,
+      "final_score": 67.62,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 77.52,
+        "volatility_score": 16.81,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": -0.0576,
+        "momentum_60d": 0.832607,
+        "volume_surge": 2.1008
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 2974.45,
+        "stop_price": 2797.75,
+        "take_profit_1": 3180.6,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=67.6; 20d=-5.76%; 60d=83.26%; volume_surge=2.10; regime=risk_off",
+      "sentiment_score": 0.9916786,
+      "adjusted_score": 77.536786
+    },
+    {
+      "symbol": "080220",
+      "last_close": 114300.0,
+      "final_score": 69.56,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 77.27,
+        "volatility_score": 26.77,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.205696,
+        "momentum_60d": 1.781022,
+        "volume_surge": 2.0909
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 115443.0,
+        "stop_price": 108585.0,
+        "take_profit_1": 123444.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=69.6; 20d=20.57%; 60d=178.10%; volume_surge=2.09; regime=risk_off",
+      "sentiment_score": 0.794322,
+      "adjusted_score": 77.50322
+    },
+    {
+      "symbol": "023530",
+      "last_close": 179900.0,
+      "final_score": 68.71,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 45.46,
+        "volatility_score": 54.32,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.175049,
+        "momentum_60d": 0.833137,
+        "volume_surge": 0.8184
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 181699.0,
+        "stop_price": 170905.0,
+        "take_profit_1": 194292.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.7; 20d=17.50%; 60d=83.31%; volume_surge=0.82; regime=risk_off",
+      "sentiment_score": 0.7883614,
+      "adjusted_score": 76.59361399999999
+    },
+    {
+      "symbol": "039830",
+      "last_close": 17510.0,
+      "final_score": 68.58,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 44.94,
+        "volatility_score": 54.22,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.175957,
+        "momentum_60d": 0.810755,
+        "volume_surge": 0.7975
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 17685.1,
+        "stop_price": 16634.5,
+        "take_profit_1": 18910.8,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=68.6; 20d=17.60%; 60d=81.08%; volume_surge=0.80; regime=risk_off",
+      "sentiment_score": 0.7943352,
+      "adjusted_score": 76.523352
+    },
+    {
+      "symbol": "161390",
+      "last_close": 66700.0,
+      "final_score": 71.86,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 47.26,
+        "volatility_score": 68.29,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.124789,
+        "momentum_60d": 0.263299,
+        "volume_surge": 0.8905
+      },
+      "entry": {
+        "setup": "breakout",
+        "trigger_price": 67367.0,
+        "stop_price": 63365.0,
+        "take_profit_1": 72036.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=71.9; 20d=12.48%; 60d=26.33%; volume_surge=0.89; regime=risk_off",
+      "sentiment_score": 0.39742439999999996,
+      "adjusted_score": 75.834244
+    },
+    {
+      "symbol": "033560",
+      "last_close": 3700.0,
+      "final_score": 75.76,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 65.24,
+        "volatility_score": 69.79,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": 0.158059,
+        "momentum_60d": 0.159875,
+        "volume_surge": 1.6095
+      },
+      "entry": {
+        "setup": "breakout",
+        "trigger_price": 3737.0,
+        "stop_price": 3515.0,
+        "take_profit_1": 3996.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=75.8; 20d=15.81%; 60d=15.99%; volume_surge=1.61; regime=risk_off",
+      "sentiment_score": 0.0,
+      "adjusted_score": 75.76
+    },
+    {
+      "symbol": "092190",
+      "last_close": 8570.0,
+      "final_score": 69.76,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 46.42,
+        "volatility_score": 58.61,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": -0.427522,
+        "momentum_60d": 1.494905,
+        "volume_surge": 0.8566
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 8655.7,
+        "stop_price": 8141.5,
+        "take_profit_1": 9255.6,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=69.8; 20d=-42.75%; 60d=149.49%; volume_surge=0.86; regime=risk_off",
+      "sentiment_score": 0.3971922,
+      "adjusted_score": 73.73192200000001
+    },
+    {
+      "symbol": "483650",
+      "last_close": 214000.0,
+      "final_score": 69.71,
+      "opinion": "관망",
+      "components": {
+        "momentum_score": 100.0,
+        "volume_score": 45.41,
+        "volatility_score": 59.41,
+        "regime_score": 25.0,
+        "overextension_penalty": 0.0,
+        "momentum_20d": -0.006961,
+        "momentum_60d": 0.444921,
+        "volume_surge": 0.8164
+      },
+      "entry": {
+        "setup": "wait",
+        "trigger_price": 216140.0,
+        "stop_price": 203300.0,
+        "take_profit_1": 231120.0,
+        "invalidation": "close below 20d trend or risk_off regime"
+      },
+      "rationale": "score=69.7; 20d=-0.70%; 60d=44.49%; volume_surge=0.82; regime=risk_off",
+      "sentiment_score": 0.2009328,
+      "adjusted_score": 71.71932799999999
+    }
+  ]
+}
