@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:20.876446+00:00",
+  "as_of": "2024-02-01",
+  "status": "CANDIDATES",
+  "situation": "down_low_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "454910",
+      "name": "두산로보틱스",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 72400.0,
+      "score": 6.848066532986887,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "256940",
+      "name": "킵스파마",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 5610.0,
+      "score": 6.022115454343507,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "002070",
+      "name": "비비안",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 33403.61328125,
+      "score": 5.350601835408165,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

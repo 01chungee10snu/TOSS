@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:00:48.016618+00:00",
+  "as_of": "2025-03-31",
+  "status": "CANDIDATES",
+  "situation": "down_low_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "257370",
+      "name": "피엔티엠에스",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 2860.0,
+      "score": 7.28198064296261,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "294630",
+      "name": "서남",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 2675.0,
+      "score": 7.199525909946561,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "462520",
+      "name": "조선내화",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 12188.1630859375,
+      "score": 6.894490579859685,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

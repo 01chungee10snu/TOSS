@@ -1,0 +1,4351 @@
+{
+  "generated_at_utc": "2026-06-19T02:38:08.900126+00:00",
+  "inputs": {
+    "monfri_picks": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31_combined_picks.csv",
+    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_2022-01-01_2025-12-31_ohlcv_panel.csv",
+    "base_policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/contextual_mon_fri_policy_seed20260607.json",
+    "promoted_policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/contextual_mon_fri_policy_seed20260607_walkforward_promoted.json",
+    "gate_config": {
+      "min_oos_trades": 60,
+      "max_oos_drawdown_pct": -30.0,
+      "max_negative_years": 0,
+      "min_consistency_ratio": 0.67,
+      "min_oos_total_return_pct": 0.0
+    },
+    "stress_scenarios": [
+      {
+        "scenario_id": "base",
+        "extra_round_trip_bps": 0.0
+      },
+      {
+        "scenario_id": "stress_plus_10bps",
+        "extra_round_trip_bps": 10.0
+      },
+      {
+        "scenario_id": "stress_plus_20bps",
+        "extra_round_trip_bps": 20.0
+      },
+      {
+        "scenario_id": "stress_plus_30bps",
+        "extra_round_trip_bps": 30.0
+      }
+    ]
+  },
+  "variant_stress_leaderboard": [
+    {
+      "variant_id": "veto_higher_liquidity_looser_range",
+      "thresholds": {
+        "max_gap_pct": 0.08,
+        "max_intraday_range_pct": 0.22,
+        "min_dollar_volume_krw": 1000000000.0,
+        "max_prev_volatility_20d": 0.1
+      },
+      "scenarios": [
+        {
+          "variant_id": "veto_higher_liquidity_looser_range",
+          "thresholds": {
+            "max_gap_pct": 0.08,
+            "max_intraday_range_pct": 0.22,
+            "min_dollar_volume_krw": 1000000000.0,
+            "max_prev_volatility_20d": 0.1
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.25,
+                "max_drawdown_pct": -5.68,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.095
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 25,
+                "total_return_pct": 4.36,
+                "max_drawdown_pct": -9.43,
+                "win_rate_pct": 54.55,
+                "sharpe_proxy": 0.351
+              },
+              "test_kept_trades": 25,
+              "test_blocked_trades": 8,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 6,
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1,
+                "excessive_prev_volatility_20d": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 31,
+                "total_return_pct": 3.05,
+                "max_drawdown_pct": -9.43,
+                "win_rate_pct": 53.85,
+                "sharpe_proxy": 0.256
+              },
+              "test_performance": {
+                "periods": 14,
+                "total_trades": 30,
+                "total_return_pct": 14.63,
+                "max_drawdown_pct": -18.07,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.504
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 15,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 14,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 27,
+                "total_trades": 61,
+                "total_return_pct": 18.13,
+                "max_drawdown_pct": -21.21,
+                "win_rate_pct": 51.85,
+                "sharpe_proxy": 0.573
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 21,
+                "total_return_pct": 82.41,
+                "max_drawdown_pct": -4.5,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.572
+              },
+              "test_kept_trades": 21,
+              "test_blocked_trades": 9,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 8,
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 35,
+            "total_trades": 76,
+            "total_return_pct": 118.22,
+            "max_drawdown_pct": -21.21,
+            "win_rate_pct": 62.86,
+            "sharpe_proxy": 1.762
+          },
+          "negative_test_years": 0,
+          "positive_test_years": 3,
+          "consistency_ratio": 1.0,
+          "scenario_id": "base",
+          "extra_round_trip_bps": 0.0,
+          "gate": {
+            "approved": true,
+            "reasons": [],
+            "variant_id": "veto_higher_liquidity_looser_range"
+          },
+          "fixed_oos_score": 114.63
+        },
+        {
+          "variant_id": "veto_higher_liquidity_looser_range",
+          "thresholds": {
+            "max_gap_pct": 0.08,
+            "max_intraday_range_pct": 0.22,
+            "min_dollar_volume_krw": 1000000000.0,
+            "max_prev_volatility_20d": 0.1
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.45,
+                "max_drawdown_pct": -5.78,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.114
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 25,
+                "total_return_pct": 3.22,
+                "max_drawdown_pct": -9.8,
+                "win_rate_pct": 54.55,
+                "sharpe_proxy": 0.278
+              },
+              "test_kept_trades": 25,
+              "test_blocked_trades": 8,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 6,
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1,
+                "excessive_prev_volatility_20d": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 31,
+                "total_return_pct": 1.72,
+                "max_drawdown_pct": -9.8,
+                "win_rate_pct": 53.85,
+                "sharpe_proxy": 0.179
+              },
+              "test_performance": {
+                "periods": 14,
+                "total_trades": 30,
+                "total_return_pct": 13.05,
+                "max_drawdown_pct": -18.82,
+                "win_rate_pct": 35.71,
+                "sharpe_proxy": 0.471
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 15,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 14,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 27,
+                "total_trades": 61,
+                "total_return_pct": 14.99,
+                "max_drawdown_pct": -22.4,
+                "win_rate_pct": 44.44,
+                "sharpe_proxy": 0.511
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 21,
+                "total_return_pct": 80.7,
+                "max_drawdown_pct": -4.6,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.532
+              },
+              "test_kept_trades": 21,
+              "test_blocked_trades": 9,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 8,
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 35,
+            "total_trades": 76,
+            "total_return_pct": 110.85,
+            "max_drawdown_pct": -22.4,
+            "win_rate_pct": 57.14,
+            "sharpe_proxy": 1.694
+          },
+          "negative_test_years": 0,
+          "positive_test_years": 3,
+          "consistency_ratio": 1.0,
+          "scenario_id": "stress_plus_10bps",
+          "extra_round_trip_bps": 10.0,
+          "gate": {
+            "approved": true,
+            "reasons": [],
+            "variant_id": "veto_higher_liquidity_looser_range"
+          },
+          "fixed_oos_score": 105.39
+        },
+        {
+          "variant_id": "veto_higher_liquidity_looser_range",
+          "thresholds": {
+            "max_gap_pct": 0.08,
+            "max_intraday_range_pct": 0.22,
+            "min_dollar_volume_krw": 1000000000.0,
+            "max_prev_volatility_20d": 0.1
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.65,
+                "max_drawdown_pct": -5.88,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.134
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 25,
+                "total_return_pct": 2.09,
+                "max_drawdown_pct": -10.17,
+                "win_rate_pct": 54.55,
+                "sharpe_proxy": 0.205
+              },
+              "test_kept_trades": 25,
+              "test_blocked_trades": 8,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 6,
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1,
+                "excessive_prev_volatility_20d": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 31,
+                "total_return_pct": 0.41,
+                "max_drawdown_pct": -10.17,
+                "win_rate_pct": 53.85,
+                "sharpe_proxy": 0.102
+              },
+              "test_performance": {
+                "periods": 14,
+                "total_trades": 30,
+                "total_return_pct": 11.48,
+                "max_drawdown_pct": -19.56,
+                "win_rate_pct": 35.71,
+                "sharpe_proxy": 0.437
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 15,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 14,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 27,
+                "total_trades": 61,
+                "total_return_pct": 11.93,
+                "max_drawdown_pct": -23.58,
+                "win_rate_pct": 44.44,
+                "sharpe_proxy": 0.45
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 21,
+                "total_return_pct": 79.0,
+                "max_drawdown_pct": -4.7,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.492
+              },
+              "test_kept_trades": 21,
+              "test_blocked_trades": 9,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 8,
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 35,
+            "total_trades": 76,
+            "total_return_pct": 103.72,
+            "max_drawdown_pct": -23.58,
+            "win_rate_pct": 57.14,
+            "sharpe_proxy": 1.626
+          },
+          "negative_test_years": 0,
+          "positive_test_years": 3,
+          "consistency_ratio": 1.0,
+          "scenario_id": "stress_plus_20bps",
+          "extra_round_trip_bps": 20.0,
+          "gate": {
+            "approved": true,
+            "reasons": [],
+            "variant_id": "veto_higher_liquidity_looser_range"
+          },
+          "fixed_oos_score": 96.4
+        },
+        {
+          "variant_id": "veto_higher_liquidity_looser_range",
+          "thresholds": {
+            "max_gap_pct": 0.08,
+            "max_intraday_range_pct": 0.22,
+            "min_dollar_volume_krw": 1000000000.0,
+            "max_prev_volatility_20d": 0.1
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.85,
+                "max_drawdown_pct": -5.98,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.153
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 25,
+                "total_return_pct": 0.98,
+                "max_drawdown_pct": -10.54,
+                "win_rate_pct": 54.55,
+                "sharpe_proxy": 0.133
+              },
+              "test_kept_trades": 25,
+              "test_blocked_trades": 8,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 6,
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1,
+                "excessive_prev_volatility_20d": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 31,
+                "total_return_pct": -0.89,
+                "max_drawdown_pct": -10.54,
+                "win_rate_pct": 53.85,
+                "sharpe_proxy": 0.025
+              },
+              "test_performance": {
+                "periods": 14,
+                "total_trades": 30,
+                "total_return_pct": 9.94,
+                "max_drawdown_pct": -20.3,
+                "win_rate_pct": 35.71,
+                "sharpe_proxy": 0.403
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 15,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 14,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_higher_liquidity_looser_range",
+              "train_performance": {
+                "periods": 27,
+                "total_trades": 61,
+                "total_return_pct": 8.95,
+                "max_drawdown_pct": -24.74,
+                "win_rate_pct": 44.44,
+                "sharpe_proxy": 0.388
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 21,
+                "total_return_pct": 77.31,
+                "max_drawdown_pct": -4.8,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.452
+              },
+              "test_kept_trades": 21,
+              "test_blocked_trades": 9,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 8,
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 35,
+            "total_trades": 76,
+            "total_return_pct": 96.83,
+            "max_drawdown_pct": -24.74,
+            "win_rate_pct": 57.14,
+            "sharpe_proxy": 1.558
+          },
+          "negative_test_years": 0,
+          "positive_test_years": 3,
+          "consistency_ratio": 1.0,
+          "scenario_id": "stress_plus_30bps",
+          "extra_round_trip_bps": 30.0,
+          "gate": {
+            "approved": true,
+            "reasons": [],
+            "variant_id": "veto_higher_liquidity_looser_range"
+          },
+          "fixed_oos_score": 87.67
+        }
+      ],
+      "base_scenario": {
+        "variant_id": "veto_higher_liquidity_looser_range",
+        "thresholds": {
+          "max_gap_pct": 0.08,
+          "max_intraday_range_pct": 0.22,
+          "min_dollar_volume_krw": 1000000000.0,
+          "max_prev_volatility_20d": 0.1
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 6,
+              "total_return_pct": -1.25,
+              "max_drawdown_pct": -5.68,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": -0.095
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 25,
+              "total_return_pct": 4.36,
+              "max_drawdown_pct": -9.43,
+              "win_rate_pct": 54.55,
+              "sharpe_proxy": 0.351
+            },
+            "test_kept_trades": 25,
+            "test_blocked_trades": 8,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 6,
+              "excessive_gap": 2,
+              "excessive_intraday_range": 1,
+              "excessive_prev_volatility_20d": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 31,
+              "total_return_pct": 3.05,
+              "max_drawdown_pct": -9.43,
+              "win_rate_pct": 53.85,
+              "sharpe_proxy": 0.256
+            },
+            "test_performance": {
+              "periods": 14,
+              "total_trades": 30,
+              "total_return_pct": 14.63,
+              "max_drawdown_pct": -18.07,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": 0.504
+            },
+            "test_kept_trades": 30,
+            "test_blocked_trades": 15,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 14,
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 27,
+              "total_trades": 61,
+              "total_return_pct": 18.13,
+              "max_drawdown_pct": -21.21,
+              "win_rate_pct": 51.85,
+              "sharpe_proxy": 0.573
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 21,
+              "total_return_pct": 82.41,
+              "max_drawdown_pct": -4.5,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.572
+            },
+            "test_kept_trades": 21,
+            "test_blocked_trades": 9,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 8,
+              "excessive_intraday_range": 1
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 35,
+          "total_trades": 76,
+          "total_return_pct": 118.22,
+          "max_drawdown_pct": -21.21,
+          "win_rate_pct": 62.86,
+          "sharpe_proxy": 1.762
+        },
+        "negative_test_years": 0,
+        "positive_test_years": 3,
+        "consistency_ratio": 1.0,
+        "scenario_id": "base",
+        "extra_round_trip_bps": 0.0,
+        "gate": {
+          "approved": true,
+          "reasons": [],
+          "variant_id": "veto_higher_liquidity_looser_range"
+        },
+        "fixed_oos_score": 114.63
+      },
+      "base_gate_approved_count": 1,
+      "stress_pass_count": 4,
+      "all_scenarios_approved": true,
+      "robust_score": 107.67,
+      "worst_case_return_pct": 96.83,
+      "worst_case_drawdown_pct": -24.74
+    },
+    {
+      "variant_id": "veto_higher_liquidity",
+      "thresholds": {
+        "max_gap_pct": 0.1,
+        "max_intraday_range_pct": 0.2,
+        "min_dollar_volume_krw": 1000000000.0,
+        "max_prev_volatility_20d": 0.12
+      },
+      "scenarios": [
+        {
+          "variant_id": "veto_higher_liquidity",
+          "thresholds": {
+            "max_gap_pct": 0.1,
+            "max_intraday_range_pct": 0.2,
+            "min_dollar_volume_krw": 1000000000.0,
+            "max_prev_volatility_20d": 0.12
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 5,
+                "total_return_pct": 0.34,
+                "max_drawdown_pct": -5.68,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.058
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 25,
+                "total_return_pct": 4.36,
+                "max_drawdown_pct": -9.43,
+                "win_rate_pct": 54.55,
+                "sharpe_proxy": 0.351
+              },
+              "test_kept_trades": 25,
+              "test_blocked_trades": 8,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 6,
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 30,
+                "total_return_pct": 4.71,
+                "max_drawdown_pct": -9.43,
+                "win_rate_pct": 53.85,
+                "sharpe_proxy": 0.344
+              },
+              "test_performance": {
+                "periods": 14,
+                "total_trades": 30,
+                "total_return_pct": 14.63,
+                "max_drawdown_pct": -18.07,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.504
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 15,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 14,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 27,
+                "total_trades": 60,
+                "total_return_pct": 20.04,
+                "max_drawdown_pct": -21.21,
+                "win_rate_pct": 51.85,
+                "sharpe_proxy": 0.609
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 20,
+                "total_return_pct": 80.78,
+                "max_drawdown_pct": -4.5,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.515
+              },
+              "test_kept_trades": 20,
+              "test_blocked_trades": 10,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 8,
+                "excessive_intraday_range": 2
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 35,
+            "total_trades": 75,
+            "total_return_pct": 116.26,
+            "max_drawdown_pct": -21.21,
+            "win_rate_pct": 62.86,
+            "sharpe_proxy": 1.743
+          },
+          "negative_test_years": 0,
+          "positive_test_years": 3,
+          "consistency_ratio": 1.0,
+          "scenario_id": "base",
+          "extra_round_trip_bps": 0.0,
+          "gate": {
+            "approved": true,
+            "reasons": [],
+            "variant_id": "veto_higher_liquidity"
+          },
+          "fixed_oos_score": 112.48
+        },
+        {
+          "variant_id": "veto_higher_liquidity",
+          "thresholds": {
+            "max_gap_pct": 0.1,
+            "max_intraday_range_pct": 0.2,
+            "min_dollar_volume_krw": 1000000000.0,
+            "max_prev_volatility_20d": 0.12
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 5,
+                "total_return_pct": 0.14,
+                "max_drawdown_pct": -5.78,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.042
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 25,
+                "total_return_pct": 3.22,
+                "max_drawdown_pct": -9.8,
+                "win_rate_pct": 54.55,
+                "sharpe_proxy": 0.278
+              },
+              "test_kept_trades": 25,
+              "test_blocked_trades": 8,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 6,
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 30,
+                "total_return_pct": 3.37,
+                "max_drawdown_pct": -9.8,
+                "win_rate_pct": 53.85,
+                "sharpe_proxy": 0.27
+              },
+              "test_performance": {
+                "periods": 14,
+                "total_trades": 30,
+                "total_return_pct": 13.05,
+                "max_drawdown_pct": -18.82,
+                "win_rate_pct": 35.71,
+                "sharpe_proxy": 0.471
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 15,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 14,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 27,
+                "total_trades": 60,
+                "total_return_pct": 16.85,
+                "max_drawdown_pct": -22.4,
+                "win_rate_pct": 44.44,
+                "sharpe_proxy": 0.548
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 20,
+                "total_return_pct": 79.07,
+                "max_drawdown_pct": -4.6,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.476
+              },
+              "test_kept_trades": 20,
+              "test_blocked_trades": 10,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 8,
+                "excessive_intraday_range": 2
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 35,
+            "total_trades": 75,
+            "total_return_pct": 108.96,
+            "max_drawdown_pct": -22.4,
+            "win_rate_pct": 57.14,
+            "sharpe_proxy": 1.675
+          },
+          "negative_test_years": 0,
+          "positive_test_years": 3,
+          "consistency_ratio": 1.0,
+          "scenario_id": "stress_plus_10bps",
+          "extra_round_trip_bps": 10.0,
+          "gate": {
+            "approved": true,
+            "reasons": [],
+            "variant_id": "veto_higher_liquidity"
+          },
+          "fixed_oos_score": 103.31
+        },
+        {
+          "variant_id": "veto_higher_liquidity",
+          "thresholds": {
+            "max_gap_pct": 0.1,
+            "max_intraday_range_pct": 0.2,
+            "min_dollar_volume_krw": 1000000000.0,
+            "max_prev_volatility_20d": 0.12
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 5,
+                "total_return_pct": -0.06,
+                "max_drawdown_pct": -5.88,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.025
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 25,
+                "total_return_pct": 2.09,
+                "max_drawdown_pct": -10.17,
+                "win_rate_pct": 54.55,
+                "sharpe_proxy": 0.205
+              },
+              "test_kept_trades": 25,
+              "test_blocked_trades": 8,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 6,
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 30,
+                "total_return_pct": 2.03,
+                "max_drawdown_pct": -10.17,
+                "win_rate_pct": 53.85,
+                "sharpe_proxy": 0.195
+              },
+              "test_performance": {
+                "periods": 14,
+                "total_trades": 30,
+                "total_return_pct": 11.48,
+                "max_drawdown_pct": -19.56,
+                "win_rate_pct": 35.71,
+                "sharpe_proxy": 0.437
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 15,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 14,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 27,
+                "total_trades": 60,
+                "total_return_pct": 13.75,
+                "max_drawdown_pct": -23.58,
+                "win_rate_pct": 44.44,
+                "sharpe_proxy": 0.486
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 20,
+                "total_return_pct": 77.39,
+                "max_drawdown_pct": -4.7,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.436
+              },
+              "test_kept_trades": 20,
+              "test_blocked_trades": 10,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 8,
+                "excessive_intraday_range": 2
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 35,
+            "total_trades": 75,
+            "total_return_pct": 101.89,
+            "max_drawdown_pct": -23.58,
+            "win_rate_pct": 57.14,
+            "sharpe_proxy": 1.607
+          },
+          "negative_test_years": 0,
+          "positive_test_years": 3,
+          "consistency_ratio": 1.0,
+          "scenario_id": "stress_plus_20bps",
+          "extra_round_trip_bps": 20.0,
+          "gate": {
+            "approved": true,
+            "reasons": [],
+            "variant_id": "veto_higher_liquidity"
+          },
+          "fixed_oos_score": 94.38
+        },
+        {
+          "variant_id": "veto_higher_liquidity",
+          "thresholds": {
+            "max_gap_pct": 0.1,
+            "max_intraday_range_pct": 0.2,
+            "min_dollar_volume_krw": 1000000000.0,
+            "max_prev_volatility_20d": 0.12
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 5,
+                "total_return_pct": -0.26,
+                "max_drawdown_pct": -5.98,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.009
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 25,
+                "total_return_pct": 0.98,
+                "max_drawdown_pct": -10.54,
+                "win_rate_pct": 54.55,
+                "sharpe_proxy": 0.133
+              },
+              "test_kept_trades": 25,
+              "test_blocked_trades": 8,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 6,
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 30,
+                "total_return_pct": 0.71,
+                "max_drawdown_pct": -10.54,
+                "win_rate_pct": 53.85,
+                "sharpe_proxy": 0.121
+              },
+              "test_performance": {
+                "periods": 14,
+                "total_trades": 30,
+                "total_return_pct": 9.94,
+                "max_drawdown_pct": -20.3,
+                "win_rate_pct": 35.71,
+                "sharpe_proxy": 0.403
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 15,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 14,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_higher_liquidity",
+              "train_performance": {
+                "periods": 27,
+                "total_trades": 60,
+                "total_return_pct": 10.72,
+                "max_drawdown_pct": -24.74,
+                "win_rate_pct": 44.44,
+                "sharpe_proxy": 0.425
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 20,
+                "total_return_pct": 75.72,
+                "max_drawdown_pct": -4.8,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.397
+              },
+              "test_kept_trades": 20,
+              "test_blocked_trades": 10,
+              "test_blocked_counts_by_reason": {
+                "low_dollar_volume": 8,
+                "excessive_intraday_range": 2
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 35,
+            "total_trades": 75,
+            "total_return_pct": 95.06,
+            "max_drawdown_pct": -24.74,
+            "win_rate_pct": 57.14,
+            "sharpe_proxy": 1.539
+          },
+          "negative_test_years": 0,
+          "positive_test_years": 3,
+          "consistency_ratio": 1.0,
+          "scenario_id": "stress_plus_30bps",
+          "extra_round_trip_bps": 30.0,
+          "gate": {
+            "approved": true,
+            "reasons": [],
+            "variant_id": "veto_higher_liquidity"
+          },
+          "fixed_oos_score": 85.71
+        }
+      ],
+      "base_scenario": {
+        "variant_id": "veto_higher_liquidity",
+        "thresholds": {
+          "max_gap_pct": 0.1,
+          "max_intraday_range_pct": 0.2,
+          "min_dollar_volume_krw": 1000000000.0,
+          "max_prev_volatility_20d": 0.12
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_higher_liquidity",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 5,
+              "total_return_pct": 0.34,
+              "max_drawdown_pct": -5.68,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": 0.058
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 25,
+              "total_return_pct": 4.36,
+              "max_drawdown_pct": -9.43,
+              "win_rate_pct": 54.55,
+              "sharpe_proxy": 0.351
+            },
+            "test_kept_trades": 25,
+            "test_blocked_trades": 8,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 6,
+              "excessive_gap": 2,
+              "excessive_intraday_range": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_higher_liquidity",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 30,
+              "total_return_pct": 4.71,
+              "max_drawdown_pct": -9.43,
+              "win_rate_pct": 53.85,
+              "sharpe_proxy": 0.344
+            },
+            "test_performance": {
+              "periods": 14,
+              "total_trades": 30,
+              "total_return_pct": 14.63,
+              "max_drawdown_pct": -18.07,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": 0.504
+            },
+            "test_kept_trades": 30,
+            "test_blocked_trades": 15,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 14,
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_higher_liquidity",
+            "train_performance": {
+              "periods": 27,
+              "total_trades": 60,
+              "total_return_pct": 20.04,
+              "max_drawdown_pct": -21.21,
+              "win_rate_pct": 51.85,
+              "sharpe_proxy": 0.609
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 20,
+              "total_return_pct": 80.78,
+              "max_drawdown_pct": -4.5,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.515
+            },
+            "test_kept_trades": 20,
+            "test_blocked_trades": 10,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 8,
+              "excessive_intraday_range": 2
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 35,
+          "total_trades": 75,
+          "total_return_pct": 116.26,
+          "max_drawdown_pct": -21.21,
+          "win_rate_pct": 62.86,
+          "sharpe_proxy": 1.743
+        },
+        "negative_test_years": 0,
+        "positive_test_years": 3,
+        "consistency_ratio": 1.0,
+        "scenario_id": "base",
+        "extra_round_trip_bps": 0.0,
+        "gate": {
+          "approved": true,
+          "reasons": [],
+          "variant_id": "veto_higher_liquidity"
+        },
+        "fixed_oos_score": 112.48
+      },
+      "base_gate_approved_count": 1,
+      "stress_pass_count": 4,
+      "all_scenarios_approved": true,
+      "robust_score": 105.71,
+      "worst_case_return_pct": 95.06,
+      "worst_case_drawdown_pct": -24.74
+    },
+    {
+      "variant_id": "veto_looser_range",
+      "thresholds": {
+        "max_gap_pct": 0.1,
+        "max_intraday_range_pct": 0.22,
+        "min_dollar_volume_krw": 10000000.0,
+        "max_prev_volatility_20d": 0.12
+      },
+      "scenarios": [
+        {
+          "variant_id": "veto_looser_range",
+          "thresholds": {
+            "max_gap_pct": 0.1,
+            "max_intraday_range_pct": 0.22,
+            "min_dollar_volume_krw": 10000000.0,
+            "max_prev_volatility_20d": 0.12
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.25,
+                "max_drawdown_pct": -5.68,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.095
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 31,
+                "total_return_pct": -4.04,
+                "max_drawdown_pct": -14.58,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.169
+              },
+              "test_kept_trades": 31,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 37,
+                "total_return_pct": -5.24,
+                "max_drawdown_pct": -14.58,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.208
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 44,
+                "total_return_pct": 41.08,
+                "max_drawdown_pct": -8.84,
+                "win_rate_pct": 53.33,
+                "sharpe_proxy": 1.092
+              },
+              "test_kept_trades": 44,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 81,
+                "total_return_pct": 33.69,
+                "max_drawdown_pct": -18.92,
+                "win_rate_pct": 42.86,
+                "sharpe_proxy": 0.883
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 29,
+                "total_return_pct": 45.5,
+                "max_drawdown_pct": -3.15,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.827
+              },
+              "test_kept_trades": 29,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 104,
+            "total_return_pct": 96.99,
+            "max_drawdown_pct": -18.92,
+            "win_rate_pct": 55.56,
+            "sharpe_proxy": 1.777
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "base",
+          "extra_round_trip_bps": 0.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_looser_range"
+          },
+          "fixed_oos_score": 83.807
+        },
+        {
+          "variant_id": "veto_looser_range",
+          "thresholds": {
+            "max_gap_pct": 0.1,
+            "max_intraday_range_pct": 0.22,
+            "min_dollar_volume_krw": 10000000.0,
+            "max_prev_volatility_20d": 0.12
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.45,
+                "max_drawdown_pct": -5.78,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.114
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 31,
+                "total_return_pct": -5.09,
+                "max_drawdown_pct": -15.36,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.234
+              },
+              "test_kept_trades": 31,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 37,
+                "total_return_pct": -6.47,
+                "max_drawdown_pct": -15.36,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.279
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 44,
+                "total_return_pct": 39.02,
+                "max_drawdown_pct": -9.57,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 1.052
+              },
+              "test_kept_trades": 44,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 81,
+                "total_return_pct": 30.02,
+                "max_drawdown_pct": -20.46,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.815
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 29,
+                "total_return_pct": 44.11,
+                "max_drawdown_pct": -3.25,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.755
+              },
+              "test_kept_trades": 29,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 104,
+            "total_return_pct": 90.13,
+            "max_drawdown_pct": -20.46,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.694
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_10bps",
+          "extra_round_trip_bps": 10.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_looser_range"
+          },
+          "fixed_oos_score": 74.577
+        },
+        {
+          "variant_id": "veto_looser_range",
+          "thresholds": {
+            "max_gap_pct": 0.1,
+            "max_intraday_range_pct": 0.22,
+            "min_dollar_volume_krw": 10000000.0,
+            "max_prev_volatility_20d": 0.12
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.65,
+                "max_drawdown_pct": -5.88,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.134
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 31,
+                "total_return_pct": -6.14,
+                "max_drawdown_pct": -16.13,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.299
+              },
+              "test_kept_trades": 31,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 37,
+                "total_return_pct": -7.69,
+                "max_drawdown_pct": -16.13,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.349
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 44,
+                "total_return_pct": 36.99,
+                "max_drawdown_pct": -10.3,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 1.011
+              },
+              "test_kept_trades": 44,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 81,
+                "total_return_pct": 26.46,
+                "max_drawdown_pct": -21.98,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.748
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 29,
+                "total_return_pct": 42.72,
+                "max_drawdown_pct": -3.35,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.682
+              },
+              "test_kept_trades": 29,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 104,
+            "total_return_pct": 83.51,
+            "max_drawdown_pct": -21.98,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.61
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_20bps",
+          "extra_round_trip_bps": 20.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_looser_range"
+          },
+          "fixed_oos_score": 65.597
+        },
+        {
+          "variant_id": "veto_looser_range",
+          "thresholds": {
+            "max_gap_pct": 0.1,
+            "max_intraday_range_pct": 0.22,
+            "min_dollar_volume_krw": 10000000.0,
+            "max_prev_volatility_20d": 0.12
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.85,
+                "max_drawdown_pct": -5.98,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.153
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 31,
+                "total_return_pct": -7.17,
+                "max_drawdown_pct": -16.9,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.364
+              },
+              "test_kept_trades": 31,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 2,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 37,
+                "total_return_pct": -8.89,
+                "max_drawdown_pct": -16.9,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.42
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 44,
+                "total_return_pct": 34.98,
+                "max_drawdown_pct": -11.03,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 0.97
+              },
+              "test_kept_trades": 44,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_looser_range",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 81,
+                "total_return_pct": 22.98,
+                "max_drawdown_pct": -23.47,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.68
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 29,
+                "total_return_pct": 41.35,
+                "max_drawdown_pct": -3.45,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.61
+              },
+              "test_kept_trades": 29,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 104,
+            "total_return_pct": 77.11,
+            "max_drawdown_pct": -23.47,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.527
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_30bps",
+          "extra_round_trip_bps": 30.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_looser_range"
+          },
+          "fixed_oos_score": 56.877
+        }
+      ],
+      "base_scenario": {
+        "variant_id": "veto_looser_range",
+        "thresholds": {
+          "max_gap_pct": 0.1,
+          "max_intraday_range_pct": 0.22,
+          "min_dollar_volume_krw": 10000000.0,
+          "max_prev_volatility_20d": 0.12
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_looser_range",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 6,
+              "total_return_pct": -1.25,
+              "max_drawdown_pct": -5.68,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": -0.095
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 31,
+              "total_return_pct": -4.04,
+              "max_drawdown_pct": -14.58,
+              "win_rate_pct": 27.27,
+              "sharpe_proxy": -0.169
+            },
+            "test_kept_trades": 31,
+            "test_blocked_trades": 2,
+            "test_blocked_counts_by_reason": {
+              "excessive_gap": 2,
+              "excessive_intraday_range": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_looser_range",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 37,
+              "total_return_pct": -5.24,
+              "max_drawdown_pct": -14.58,
+              "win_rate_pct": 30.77,
+              "sharpe_proxy": -0.208
+            },
+            "test_performance": {
+              "periods": 15,
+              "total_trades": 44,
+              "total_return_pct": 41.08,
+              "max_drawdown_pct": -8.84,
+              "win_rate_pct": 53.33,
+              "sharpe_proxy": 1.092
+            },
+            "test_kept_trades": 44,
+            "test_blocked_trades": 1,
+            "test_blocked_counts_by_reason": {
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_looser_range",
+            "train_performance": {
+              "periods": 28,
+              "total_trades": 81,
+              "total_return_pct": 33.69,
+              "max_drawdown_pct": -18.92,
+              "win_rate_pct": 42.86,
+              "sharpe_proxy": 0.883
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 29,
+              "total_return_pct": 45.5,
+              "max_drawdown_pct": -3.15,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.827
+            },
+            "test_kept_trades": 29,
+            "test_blocked_trades": 1,
+            "test_blocked_counts_by_reason": {
+              "excessive_intraday_range": 1
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 36,
+          "total_trades": 104,
+          "total_return_pct": 96.99,
+          "max_drawdown_pct": -18.92,
+          "win_rate_pct": 55.56,
+          "sharpe_proxy": 1.777
+        },
+        "negative_test_years": 1,
+        "positive_test_years": 2,
+        "consistency_ratio": 0.6666666666666666,
+        "scenario_id": "base",
+        "extra_round_trip_bps": 0.0,
+        "gate": {
+          "approved": false,
+          "reasons": [
+            "negative_test_years_exceeded",
+            "consistency_ratio_too_low"
+          ],
+          "variant_id": "veto_looser_range"
+        },
+        "fixed_oos_score": 83.807
+      },
+      "base_gate_approved_count": 0,
+      "stress_pass_count": 0,
+      "all_scenarios_approved": false,
+      "robust_score": 68.91,
+      "worst_case_return_pct": 77.11,
+      "worst_case_drawdown_pct": -23.47
+    },
+    {
+      "variant_id": "veto_looser_all",
+      "thresholds": {
+        "max_gap_pct": 0.12,
+        "max_intraday_range_pct": 0.25,
+        "min_dollar_volume_krw": 0.0,
+        "max_prev_volatility_20d": 0.2
+      },
+      "scenarios": [
+        {
+          "variant_id": "veto_looser_all",
+          "thresholds": {
+            "max_gap_pct": 0.12,
+            "max_intraday_range_pct": 0.25,
+            "min_dollar_volume_krw": 0.0,
+            "max_prev_volatility_20d": 0.2
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.25,
+                "max_drawdown_pct": -5.68,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.095
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 31,
+                "total_return_pct": -4.04,
+                "max_drawdown_pct": -14.58,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.169
+              },
+              "test_kept_trades": 31,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 37,
+                "total_return_pct": -5.24,
+                "max_drawdown_pct": -14.58,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.208
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 44,
+                "total_return_pct": 41.08,
+                "max_drawdown_pct": -8.84,
+                "win_rate_pct": 53.33,
+                "sharpe_proxy": 1.092
+              },
+              "test_kept_trades": 44,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 81,
+                "total_return_pct": 33.69,
+                "max_drawdown_pct": -18.92,
+                "win_rate_pct": 42.86,
+                "sharpe_proxy": 0.883
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 29,
+                "total_return_pct": 45.5,
+                "max_drawdown_pct": -3.15,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.827
+              },
+              "test_kept_trades": 29,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 104,
+            "total_return_pct": 96.99,
+            "max_drawdown_pct": -18.92,
+            "win_rate_pct": 55.56,
+            "sharpe_proxy": 1.777
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "base",
+          "extra_round_trip_bps": 0.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_looser_all"
+          },
+          "fixed_oos_score": 83.807
+        },
+        {
+          "variant_id": "veto_looser_all",
+          "thresholds": {
+            "max_gap_pct": 0.12,
+            "max_intraday_range_pct": 0.25,
+            "min_dollar_volume_krw": 0.0,
+            "max_prev_volatility_20d": 0.2
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.45,
+                "max_drawdown_pct": -5.78,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.114
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 31,
+                "total_return_pct": -5.09,
+                "max_drawdown_pct": -15.36,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.234
+              },
+              "test_kept_trades": 31,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 37,
+                "total_return_pct": -6.47,
+                "max_drawdown_pct": -15.36,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.279
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 44,
+                "total_return_pct": 39.02,
+                "max_drawdown_pct": -9.57,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 1.052
+              },
+              "test_kept_trades": 44,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 81,
+                "total_return_pct": 30.02,
+                "max_drawdown_pct": -20.46,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.815
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 29,
+                "total_return_pct": 44.11,
+                "max_drawdown_pct": -3.25,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.755
+              },
+              "test_kept_trades": 29,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 104,
+            "total_return_pct": 90.13,
+            "max_drawdown_pct": -20.46,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.694
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_10bps",
+          "extra_round_trip_bps": 10.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_looser_all"
+          },
+          "fixed_oos_score": 74.577
+        },
+        {
+          "variant_id": "veto_looser_all",
+          "thresholds": {
+            "max_gap_pct": 0.12,
+            "max_intraday_range_pct": 0.25,
+            "min_dollar_volume_krw": 0.0,
+            "max_prev_volatility_20d": 0.2
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.65,
+                "max_drawdown_pct": -5.88,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.134
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 31,
+                "total_return_pct": -6.14,
+                "max_drawdown_pct": -16.13,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.299
+              },
+              "test_kept_trades": 31,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 37,
+                "total_return_pct": -7.69,
+                "max_drawdown_pct": -16.13,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.349
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 44,
+                "total_return_pct": 36.99,
+                "max_drawdown_pct": -10.3,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 1.011
+              },
+              "test_kept_trades": 44,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 81,
+                "total_return_pct": 26.46,
+                "max_drawdown_pct": -21.98,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.748
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 29,
+                "total_return_pct": 42.72,
+                "max_drawdown_pct": -3.35,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.682
+              },
+              "test_kept_trades": 29,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 104,
+            "total_return_pct": 83.51,
+            "max_drawdown_pct": -21.98,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.61
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_20bps",
+          "extra_round_trip_bps": 20.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_looser_all"
+          },
+          "fixed_oos_score": 65.597
+        },
+        {
+          "variant_id": "veto_looser_all",
+          "thresholds": {
+            "max_gap_pct": 0.12,
+            "max_intraday_range_pct": 0.25,
+            "min_dollar_volume_krw": 0.0,
+            "max_prev_volatility_20d": 0.2
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.85,
+                "max_drawdown_pct": -5.98,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.153
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 31,
+                "total_return_pct": -7.17,
+                "max_drawdown_pct": -16.9,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.364
+              },
+              "test_kept_trades": 31,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1,
+                "excessive_intraday_range": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 37,
+                "total_return_pct": -8.89,
+                "max_drawdown_pct": -16.9,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.42
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 44,
+                "total_return_pct": 34.98,
+                "max_drawdown_pct": -11.03,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 0.97
+              },
+              "test_kept_trades": 44,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_looser_all",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 81,
+                "total_return_pct": 22.98,
+                "max_drawdown_pct": -23.47,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.68
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 29,
+                "total_return_pct": 41.35,
+                "max_drawdown_pct": -3.45,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.61
+              },
+              "test_kept_trades": 29,
+              "test_blocked_trades": 1,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 104,
+            "total_return_pct": 77.11,
+            "max_drawdown_pct": -23.47,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.527
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_30bps",
+          "extra_round_trip_bps": 30.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_looser_all"
+          },
+          "fixed_oos_score": 56.877
+        }
+      ],
+      "base_scenario": {
+        "variant_id": "veto_looser_all",
+        "thresholds": {
+          "max_gap_pct": 0.12,
+          "max_intraday_range_pct": 0.25,
+          "min_dollar_volume_krw": 0.0,
+          "max_prev_volatility_20d": 0.2
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_looser_all",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 6,
+              "total_return_pct": -1.25,
+              "max_drawdown_pct": -5.68,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": -0.095
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 31,
+              "total_return_pct": -4.04,
+              "max_drawdown_pct": -14.58,
+              "win_rate_pct": 27.27,
+              "sharpe_proxy": -0.169
+            },
+            "test_kept_trades": 31,
+            "test_blocked_trades": 2,
+            "test_blocked_counts_by_reason": {
+              "excessive_gap": 1,
+              "excessive_intraday_range": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_looser_all",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 37,
+              "total_return_pct": -5.24,
+              "max_drawdown_pct": -14.58,
+              "win_rate_pct": 30.77,
+              "sharpe_proxy": -0.208
+            },
+            "test_performance": {
+              "periods": 15,
+              "total_trades": 44,
+              "total_return_pct": 41.08,
+              "max_drawdown_pct": -8.84,
+              "win_rate_pct": 53.33,
+              "sharpe_proxy": 1.092
+            },
+            "test_kept_trades": 44,
+            "test_blocked_trades": 1,
+            "test_blocked_counts_by_reason": {
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_looser_all",
+            "train_performance": {
+              "periods": 28,
+              "total_trades": 81,
+              "total_return_pct": 33.69,
+              "max_drawdown_pct": -18.92,
+              "win_rate_pct": 42.86,
+              "sharpe_proxy": 0.883
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 29,
+              "total_return_pct": 45.5,
+              "max_drawdown_pct": -3.15,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.827
+            },
+            "test_kept_trades": 29,
+            "test_blocked_trades": 1,
+            "test_blocked_counts_by_reason": {
+              "excessive_intraday_range": 1
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 36,
+          "total_trades": 104,
+          "total_return_pct": 96.99,
+          "max_drawdown_pct": -18.92,
+          "win_rate_pct": 55.56,
+          "sharpe_proxy": 1.777
+        },
+        "negative_test_years": 1,
+        "positive_test_years": 2,
+        "consistency_ratio": 0.6666666666666666,
+        "scenario_id": "base",
+        "extra_round_trip_bps": 0.0,
+        "gate": {
+          "approved": false,
+          "reasons": [
+            "negative_test_years_exceeded",
+            "consistency_ratio_too_low"
+          ],
+          "variant_id": "veto_looser_all"
+        },
+        "fixed_oos_score": 83.807
+      },
+      "base_gate_approved_count": 0,
+      "stress_pass_count": 0,
+      "all_scenarios_approved": false,
+      "robust_score": 68.91,
+      "worst_case_return_pct": 77.11,
+      "worst_case_drawdown_pct": -23.47
+    },
+    {
+      "variant_id": "baseline",
+      "thresholds": null,
+      "scenarios": [
+        {
+          "variant_id": "baseline",
+          "thresholds": null,
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.25,
+                "max_drawdown_pct": -5.68,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.095
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 33,
+                "total_return_pct": -8.67,
+                "max_drawdown_pct": -18.7,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.427
+              },
+              "test_kept_trades": 33,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 39,
+                "total_return_pct": -9.81,
+                "max_drawdown_pct": -18.7,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.447
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 45,
+                "total_return_pct": 42.43,
+                "max_drawdown_pct": -8.84,
+                "win_rate_pct": 53.33,
+                "sharpe_proxy": 1.121
+              },
+              "test_kept_trades": 45,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 84,
+                "total_return_pct": 28.46,
+                "max_drawdown_pct": -22.83,
+                "win_rate_pct": 42.86,
+                "sharpe_proxy": 0.781
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 30,
+                "total_return_pct": 39.68,
+                "max_drawdown_pct": -3.15,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 3.161
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 108,
+            "total_return_pct": 81.71,
+            "max_drawdown_pct": -22.83,
+            "win_rate_pct": 55.56,
+            "sharpe_proxy": 1.598
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "base",
+          "extra_round_trip_bps": 0.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "baseline"
+          },
+          "fixed_oos_score": 62.827
+        },
+        {
+          "variant_id": "baseline",
+          "thresholds": null,
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.45,
+                "max_drawdown_pct": -5.78,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.114
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 33,
+                "total_return_pct": -9.68,
+                "max_drawdown_pct": -19.45,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.489
+              },
+              "test_kept_trades": 33,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 39,
+                "total_return_pct": -10.99,
+                "max_drawdown_pct": -19.45,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.514
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 45,
+                "total_return_pct": 40.35,
+                "max_drawdown_pct": -9.57,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 1.08
+              },
+              "test_kept_trades": 45,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 84,
+                "total_return_pct": 24.93,
+                "max_drawdown_pct": -24.3,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.714
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 30,
+                "total_return_pct": 38.34,
+                "max_drawdown_pct": -3.25,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 3.07
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 108,
+            "total_return_pct": 75.37,
+            "max_drawdown_pct": -24.3,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.513
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_10bps",
+          "extra_round_trip_bps": 10.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "baseline"
+          },
+          "fixed_oos_score": 54.167
+        },
+        {
+          "variant_id": "baseline",
+          "thresholds": null,
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.65,
+                "max_drawdown_pct": -5.88,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.134
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 33,
+                "total_return_pct": -10.67,
+                "max_drawdown_pct": -20.19,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.551
+              },
+              "test_kept_trades": 33,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 39,
+                "total_return_pct": -12.15,
+                "max_drawdown_pct": -20.19,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.582
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 45,
+                "total_return_pct": 38.3,
+                "max_drawdown_pct": -10.3,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 1.039
+              },
+              "test_kept_trades": 45,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 84,
+                "total_return_pct": 21.5,
+                "max_drawdown_pct": -25.75,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.647
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 30,
+                "total_return_pct": 37.0,
+                "max_drawdown_pct": -3.35,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.978
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 108,
+            "total_return_pct": 69.25,
+            "max_drawdown_pct": -25.75,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.429
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_20bps",
+          "extra_round_trip_bps": 20.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "baseline"
+          },
+          "fixed_oos_score": 45.757
+        },
+        {
+          "variant_id": "baseline",
+          "thresholds": null,
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 6,
+                "total_return_pct": -1.85,
+                "max_drawdown_pct": -5.98,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": -0.153
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 33,
+                "total_return_pct": -11.66,
+                "max_drawdown_pct": -20.92,
+                "win_rate_pct": 27.27,
+                "sharpe_proxy": -0.613
+              },
+              "test_kept_trades": 33,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 39,
+                "total_return_pct": -13.3,
+                "max_drawdown_pct": -20.92,
+                "win_rate_pct": 30.77,
+                "sharpe_proxy": -0.649
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 45,
+                "total_return_pct": 36.28,
+                "max_drawdown_pct": -11.03,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 0.999
+              },
+              "test_kept_trades": 45,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "baseline",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 84,
+                "total_return_pct": 18.16,
+                "max_drawdown_pct": -27.17,
+                "win_rate_pct": 32.14,
+                "sharpe_proxy": 0.58
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 30,
+                "total_return_pct": 35.68,
+                "max_drawdown_pct": -3.45,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.887
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 0,
+              "test_blocked_counts_by_reason": {}
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 108,
+            "total_return_pct": 63.34,
+            "max_drawdown_pct": -27.17,
+            "win_rate_pct": 47.22,
+            "sharpe_proxy": 1.345
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_30bps",
+          "extra_round_trip_bps": 30.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "baseline"
+          },
+          "fixed_oos_score": 37.587
+        }
+      ],
+      "base_scenario": {
+        "variant_id": "baseline",
+        "thresholds": null,
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "baseline",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 6,
+              "total_return_pct": -1.25,
+              "max_drawdown_pct": -5.68,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": -0.095
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 33,
+              "total_return_pct": -8.67,
+              "max_drawdown_pct": -18.7,
+              "win_rate_pct": 27.27,
+              "sharpe_proxy": -0.427
+            },
+            "test_kept_trades": 33,
+            "test_blocked_trades": 0,
+            "test_blocked_counts_by_reason": {}
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "baseline",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 39,
+              "total_return_pct": -9.81,
+              "max_drawdown_pct": -18.7,
+              "win_rate_pct": 30.77,
+              "sharpe_proxy": -0.447
+            },
+            "test_performance": {
+              "periods": 15,
+              "total_trades": 45,
+              "total_return_pct": 42.43,
+              "max_drawdown_pct": -8.84,
+              "win_rate_pct": 53.33,
+              "sharpe_proxy": 1.121
+            },
+            "test_kept_trades": 45,
+            "test_blocked_trades": 0,
+            "test_blocked_counts_by_reason": {}
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "baseline",
+            "train_performance": {
+              "periods": 28,
+              "total_trades": 84,
+              "total_return_pct": 28.46,
+              "max_drawdown_pct": -22.83,
+              "win_rate_pct": 42.86,
+              "sharpe_proxy": 0.781
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 30,
+              "total_return_pct": 39.68,
+              "max_drawdown_pct": -3.15,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 3.161
+            },
+            "test_kept_trades": 30,
+            "test_blocked_trades": 0,
+            "test_blocked_counts_by_reason": {}
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 36,
+          "total_trades": 108,
+          "total_return_pct": 81.71,
+          "max_drawdown_pct": -22.83,
+          "win_rate_pct": 55.56,
+          "sharpe_proxy": 1.598
+        },
+        "negative_test_years": 1,
+        "positive_test_years": 2,
+        "consistency_ratio": 0.6666666666666666,
+        "scenario_id": "base",
+        "extra_round_trip_bps": 0.0,
+        "gate": {
+          "approved": false,
+          "reasons": [
+            "negative_test_years_exceeded",
+            "consistency_ratio_too_low"
+          ],
+          "variant_id": "baseline"
+        },
+        "fixed_oos_score": 62.827
+      },
+      "base_gate_approved_count": 0,
+      "stress_pass_count": 0,
+      "all_scenarios_approved": false,
+      "robust_score": 49.62,
+      "worst_case_return_pct": 63.34,
+      "worst_case_drawdown_pct": -27.17
+    },
+    {
+      "variant_id": "veto_base",
+      "thresholds": {
+        "max_gap_pct": 0.08,
+        "max_intraday_range_pct": 0.15,
+        "min_dollar_volume_krw": 10000000.0,
+        "max_prev_volatility_20d": 0.1
+      },
+      "scenarios": [
+        {
+          "variant_id": "veto_base",
+          "thresholds": {
+            "max_gap_pct": 0.08,
+            "max_intraday_range_pct": 0.15,
+            "min_dollar_volume_krw": 10000000.0,
+            "max_prev_volatility_20d": 0.1
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 5,
+                "total_return_pct": 0.34,
+                "max_drawdown_pct": -5.68,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.058
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 30,
+                "total_return_pct": -16.26,
+                "max_drawdown_pct": -25.46,
+                "win_rate_pct": 18.18,
+                "sharpe_proxy": -1.214
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 3,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 2,
+                "excessive_intraday_range": 3,
+                "excessive_prev_volatility_20d": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 35,
+                "total_return_pct": -15.98,
+                "max_drawdown_pct": -25.46,
+                "win_rate_pct": 23.08,
+                "sharpe_proxy": -0.972
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 43,
+                "total_return_pct": 40.18,
+                "max_drawdown_pct": -9.42,
+                "win_rate_pct": 53.33,
+                "sharpe_proxy": 1.073
+              },
+              "test_kept_trades": 43,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 78,
+                "total_return_pct": 17.78,
+                "max_drawdown_pct": -29.7,
+                "win_rate_pct": 39.29,
+                "sharpe_proxy": 0.575
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 27,
+                "total_return_pct": 45.31,
+                "max_drawdown_pct": -2.41,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.861
+              },
+              "test_kept_trades": 27,
+              "test_blocked_trades": 3,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 3
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 100,
+            "total_return_pct": 70.57,
+            "max_drawdown_pct": -29.7,
+            "win_rate_pct": 52.78,
+            "sharpe_proxy": 1.44
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "base",
+          "extra_round_trip_bps": 0.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_base"
+          },
+          "fixed_oos_score": 43.237
+        },
+        {
+          "variant_id": "veto_base",
+          "thresholds": {
+            "max_gap_pct": 0.08,
+            "max_intraday_range_pct": 0.15,
+            "min_dollar_volume_krw": 10000000.0,
+            "max_prev_volatility_20d": 0.1
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 5,
+                "total_return_pct": 0.14,
+                "max_drawdown_pct": -5.78,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.042
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 30,
+                "total_return_pct": -17.2,
+                "max_drawdown_pct": -26.15,
+                "win_rate_pct": 18.18,
+                "sharpe_proxy": -1.294
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 3,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 2,
+                "excessive_intraday_range": 3,
+                "excessive_prev_volatility_20d": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 35,
+                "total_return_pct": -17.08,
+                "max_drawdown_pct": -26.15,
+                "win_rate_pct": 23.08,
+                "sharpe_proxy": -1.051
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 43,
+                "total_return_pct": 38.13,
+                "max_drawdown_pct": -10.15,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 1.033
+              },
+              "test_kept_trades": 43,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 78,
+                "total_return_pct": 14.54,
+                "max_drawdown_pct": -31.05,
+                "win_rate_pct": 28.57,
+                "sharpe_proxy": 0.507
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 27,
+                "total_return_pct": 43.92,
+                "max_drawdown_pct": -2.51,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.788
+              },
+              "test_kept_trades": 27,
+              "test_blocked_trades": 3,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 3
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 100,
+            "total_return_pct": 64.62,
+            "max_drawdown_pct": -31.05,
+            "win_rate_pct": 44.44,
+            "sharpe_proxy": 1.356
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_10bps",
+          "extra_round_trip_bps": 10.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "oos_drawdown_too_deep",
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_base"
+          },
+          "fixed_oos_score": 35.097
+        },
+        {
+          "variant_id": "veto_base",
+          "thresholds": {
+            "max_gap_pct": 0.08,
+            "max_intraday_range_pct": 0.15,
+            "min_dollar_volume_krw": 10000000.0,
+            "max_prev_volatility_20d": 0.1
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 5,
+                "total_return_pct": -0.06,
+                "max_drawdown_pct": -5.88,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.025
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 30,
+                "total_return_pct": -18.12,
+                "max_drawdown_pct": -26.84,
+                "win_rate_pct": 18.18,
+                "sharpe_proxy": -1.374
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 3,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 2,
+                "excessive_intraday_range": 3,
+                "excessive_prev_volatility_20d": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 35,
+                "total_return_pct": -18.17,
+                "max_drawdown_pct": -26.84,
+                "win_rate_pct": 23.08,
+                "sharpe_proxy": -1.129
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 43,
+                "total_return_pct": 36.11,
+                "max_drawdown_pct": -10.87,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 0.992
+              },
+              "test_kept_trades": 43,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 78,
+                "total_return_pct": 11.39,
+                "max_drawdown_pct": -32.37,
+                "win_rate_pct": 28.57,
+                "sharpe_proxy": 0.438
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 27,
+                "total_return_pct": 42.54,
+                "max_drawdown_pct": -2.61,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.714
+              },
+              "test_kept_trades": 27,
+              "test_blocked_trades": 3,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 3
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 100,
+            "total_return_pct": 58.86,
+            "max_drawdown_pct": -32.37,
+            "win_rate_pct": 44.44,
+            "sharpe_proxy": 1.272
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_20bps",
+          "extra_round_trip_bps": 20.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "oos_drawdown_too_deep",
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_base"
+          },
+          "fixed_oos_score": 27.177
+        },
+        {
+          "variant_id": "veto_base",
+          "thresholds": {
+            "max_gap_pct": 0.08,
+            "max_intraday_range_pct": 0.15,
+            "min_dollar_volume_krw": 10000000.0,
+            "max_prev_volatility_20d": 0.1
+          },
+          "folds": [
+            {
+              "train_years": [
+                2022
+              ],
+              "test_year": 2023,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 2,
+                "total_trades": 5,
+                "total_return_pct": -0.26,
+                "max_drawdown_pct": -5.98,
+                "win_rate_pct": 50.0,
+                "sharpe_proxy": 0.009
+              },
+              "test_performance": {
+                "periods": 11,
+                "total_trades": 30,
+                "total_return_pct": -19.03,
+                "max_drawdown_pct": -27.52,
+                "win_rate_pct": 18.18,
+                "sharpe_proxy": -1.453
+              },
+              "test_kept_trades": 30,
+              "test_blocked_trades": 3,
+              "test_blocked_counts_by_reason": {
+                "excessive_gap": 2,
+                "excessive_intraday_range": 3,
+                "excessive_prev_volatility_20d": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023
+              ],
+              "test_year": 2024,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 13,
+                "total_trades": 35,
+                "total_return_pct": -19.24,
+                "max_drawdown_pct": -27.52,
+                "win_rate_pct": 23.08,
+                "sharpe_proxy": -1.208
+              },
+              "test_performance": {
+                "periods": 15,
+                "total_trades": 43,
+                "total_return_pct": 34.12,
+                "max_drawdown_pct": -11.6,
+                "win_rate_pct": 33.33,
+                "sharpe_proxy": 0.952
+              },
+              "test_kept_trades": 43,
+              "test_blocked_trades": 2,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 1,
+                "excessive_gap": 1
+              }
+            },
+            {
+              "train_years": [
+                2022,
+                2023,
+                2024
+              ],
+              "test_year": 2025,
+              "variant_id": "veto_base",
+              "train_performance": {
+                "periods": 28,
+                "total_trades": 78,
+                "total_return_pct": 8.31,
+                "max_drawdown_pct": -33.67,
+                "win_rate_pct": 28.57,
+                "sharpe_proxy": 0.37
+              },
+              "test_performance": {
+                "periods": 10,
+                "total_trades": 27,
+                "total_return_pct": 41.17,
+                "max_drawdown_pct": -2.71,
+                "win_rate_pct": 90.0,
+                "sharpe_proxy": 2.64
+              },
+              "test_kept_trades": 27,
+              "test_blocked_trades": 3,
+              "test_blocked_counts_by_reason": {
+                "excessive_intraday_range": 3
+              }
+            }
+          ],
+          "aggregate_oos": {
+            "periods": 36,
+            "total_trades": 100,
+            "total_return_pct": 53.3,
+            "max_drawdown_pct": -33.67,
+            "win_rate_pct": 44.44,
+            "sharpe_proxy": 1.188
+          },
+          "negative_test_years": 1,
+          "positive_test_years": 2,
+          "consistency_ratio": 0.6666666666666666,
+          "scenario_id": "stress_plus_30bps",
+          "extra_round_trip_bps": 30.0,
+          "gate": {
+            "approved": false,
+            "reasons": [
+              "oos_drawdown_too_deep",
+              "negative_test_years_exceeded",
+              "consistency_ratio_too_low"
+            ],
+            "variant_id": "veto_base"
+          },
+          "fixed_oos_score": 19.477
+        }
+      ],
+      "base_scenario": {
+        "variant_id": "veto_base",
+        "thresholds": {
+          "max_gap_pct": 0.08,
+          "max_intraday_range_pct": 0.15,
+          "min_dollar_volume_krw": 10000000.0,
+          "max_prev_volatility_20d": 0.1
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_base",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 5,
+              "total_return_pct": 0.34,
+              "max_drawdown_pct": -5.68,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": 0.058
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 30,
+              "total_return_pct": -16.26,
+              "max_drawdown_pct": -25.46,
+              "win_rate_pct": 18.18,
+              "sharpe_proxy": -1.214
+            },
+            "test_kept_trades": 30,
+            "test_blocked_trades": 3,
+            "test_blocked_counts_by_reason": {
+              "excessive_gap": 2,
+              "excessive_intraday_range": 3,
+              "excessive_prev_volatility_20d": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_base",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 35,
+              "total_return_pct": -15.98,
+              "max_drawdown_pct": -25.46,
+              "win_rate_pct": 23.08,
+              "sharpe_proxy": -0.972
+            },
+            "test_performance": {
+              "periods": 15,
+              "total_trades": 43,
+              "total_return_pct": 40.18,
+              "max_drawdown_pct": -9.42,
+              "win_rate_pct": 53.33,
+              "sharpe_proxy": 1.073
+            },
+            "test_kept_trades": 43,
+            "test_blocked_trades": 2,
+            "test_blocked_counts_by_reason": {
+              "excessive_intraday_range": 1,
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_base",
+            "train_performance": {
+              "periods": 28,
+              "total_trades": 78,
+              "total_return_pct": 17.78,
+              "max_drawdown_pct": -29.7,
+              "win_rate_pct": 39.29,
+              "sharpe_proxy": 0.575
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 27,
+              "total_return_pct": 45.31,
+              "max_drawdown_pct": -2.41,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.861
+            },
+            "test_kept_trades": 27,
+            "test_blocked_trades": 3,
+            "test_blocked_counts_by_reason": {
+              "excessive_intraday_range": 3
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 36,
+          "total_trades": 100,
+          "total_return_pct": 70.57,
+          "max_drawdown_pct": -29.7,
+          "win_rate_pct": 52.78,
+          "sharpe_proxy": 1.44
+        },
+        "negative_test_years": 1,
+        "positive_test_years": 2,
+        "consistency_ratio": 0.6666666666666666,
+        "scenario_id": "base",
+        "extra_round_trip_bps": 0.0,
+        "gate": {
+          "approved": false,
+          "reasons": [
+            "negative_test_years_exceeded",
+            "consistency_ratio_too_low"
+          ],
+          "variant_id": "veto_base"
+        },
+        "fixed_oos_score": 43.237
+      },
+      "base_gate_approved_count": 0,
+      "stress_pass_count": 0,
+      "all_scenarios_approved": false,
+      "robust_score": 31.51,
+      "worst_case_return_pct": 53.3,
+      "worst_case_drawdown_pct": -33.67
+    }
+  ],
+  "robust_winner": {
+    "variant_id": "veto_higher_liquidity_looser_range",
+    "thresholds": {
+      "max_gap_pct": 0.08,
+      "max_intraday_range_pct": 0.22,
+      "min_dollar_volume_krw": 1000000000.0,
+      "max_prev_volatility_20d": 0.1
+    },
+    "scenarios": [
+      {
+        "variant_id": "veto_higher_liquidity_looser_range",
+        "thresholds": {
+          "max_gap_pct": 0.08,
+          "max_intraday_range_pct": 0.22,
+          "min_dollar_volume_krw": 1000000000.0,
+          "max_prev_volatility_20d": 0.1
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 6,
+              "total_return_pct": -1.25,
+              "max_drawdown_pct": -5.68,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": -0.095
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 25,
+              "total_return_pct": 4.36,
+              "max_drawdown_pct": -9.43,
+              "win_rate_pct": 54.55,
+              "sharpe_proxy": 0.351
+            },
+            "test_kept_trades": 25,
+            "test_blocked_trades": 8,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 6,
+              "excessive_gap": 2,
+              "excessive_intraday_range": 1,
+              "excessive_prev_volatility_20d": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 31,
+              "total_return_pct": 3.05,
+              "max_drawdown_pct": -9.43,
+              "win_rate_pct": 53.85,
+              "sharpe_proxy": 0.256
+            },
+            "test_performance": {
+              "periods": 14,
+              "total_trades": 30,
+              "total_return_pct": 14.63,
+              "max_drawdown_pct": -18.07,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": 0.504
+            },
+            "test_kept_trades": 30,
+            "test_blocked_trades": 15,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 14,
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 27,
+              "total_trades": 61,
+              "total_return_pct": 18.13,
+              "max_drawdown_pct": -21.21,
+              "win_rate_pct": 51.85,
+              "sharpe_proxy": 0.573
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 21,
+              "total_return_pct": 82.41,
+              "max_drawdown_pct": -4.5,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.572
+            },
+            "test_kept_trades": 21,
+            "test_blocked_trades": 9,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 8,
+              "excessive_intraday_range": 1
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 35,
+          "total_trades": 76,
+          "total_return_pct": 118.22,
+          "max_drawdown_pct": -21.21,
+          "win_rate_pct": 62.86,
+          "sharpe_proxy": 1.762
+        },
+        "negative_test_years": 0,
+        "positive_test_years": 3,
+        "consistency_ratio": 1.0,
+        "scenario_id": "base",
+        "extra_round_trip_bps": 0.0,
+        "gate": {
+          "approved": true,
+          "reasons": [],
+          "variant_id": "veto_higher_liquidity_looser_range"
+        },
+        "fixed_oos_score": 114.63
+      },
+      {
+        "variant_id": "veto_higher_liquidity_looser_range",
+        "thresholds": {
+          "max_gap_pct": 0.08,
+          "max_intraday_range_pct": 0.22,
+          "min_dollar_volume_krw": 1000000000.0,
+          "max_prev_volatility_20d": 0.1
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 6,
+              "total_return_pct": -1.45,
+              "max_drawdown_pct": -5.78,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": -0.114
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 25,
+              "total_return_pct": 3.22,
+              "max_drawdown_pct": -9.8,
+              "win_rate_pct": 54.55,
+              "sharpe_proxy": 0.278
+            },
+            "test_kept_trades": 25,
+            "test_blocked_trades": 8,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 6,
+              "excessive_gap": 2,
+              "excessive_intraday_range": 1,
+              "excessive_prev_volatility_20d": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 31,
+              "total_return_pct": 1.72,
+              "max_drawdown_pct": -9.8,
+              "win_rate_pct": 53.85,
+              "sharpe_proxy": 0.179
+            },
+            "test_performance": {
+              "periods": 14,
+              "total_trades": 30,
+              "total_return_pct": 13.05,
+              "max_drawdown_pct": -18.82,
+              "win_rate_pct": 35.71,
+              "sharpe_proxy": 0.471
+            },
+            "test_kept_trades": 30,
+            "test_blocked_trades": 15,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 14,
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 27,
+              "total_trades": 61,
+              "total_return_pct": 14.99,
+              "max_drawdown_pct": -22.4,
+              "win_rate_pct": 44.44,
+              "sharpe_proxy": 0.511
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 21,
+              "total_return_pct": 80.7,
+              "max_drawdown_pct": -4.6,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.532
+            },
+            "test_kept_trades": 21,
+            "test_blocked_trades": 9,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 8,
+              "excessive_intraday_range": 1
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 35,
+          "total_trades": 76,
+          "total_return_pct": 110.85,
+          "max_drawdown_pct": -22.4,
+          "win_rate_pct": 57.14,
+          "sharpe_proxy": 1.694
+        },
+        "negative_test_years": 0,
+        "positive_test_years": 3,
+        "consistency_ratio": 1.0,
+        "scenario_id": "stress_plus_10bps",
+        "extra_round_trip_bps": 10.0,
+        "gate": {
+          "approved": true,
+          "reasons": [],
+          "variant_id": "veto_higher_liquidity_looser_range"
+        },
+        "fixed_oos_score": 105.39
+      },
+      {
+        "variant_id": "veto_higher_liquidity_looser_range",
+        "thresholds": {
+          "max_gap_pct": 0.08,
+          "max_intraday_range_pct": 0.22,
+          "min_dollar_volume_krw": 1000000000.0,
+          "max_prev_volatility_20d": 0.1
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 6,
+              "total_return_pct": -1.65,
+              "max_drawdown_pct": -5.88,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": -0.134
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 25,
+              "total_return_pct": 2.09,
+              "max_drawdown_pct": -10.17,
+              "win_rate_pct": 54.55,
+              "sharpe_proxy": 0.205
+            },
+            "test_kept_trades": 25,
+            "test_blocked_trades": 8,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 6,
+              "excessive_gap": 2,
+              "excessive_intraday_range": 1,
+              "excessive_prev_volatility_20d": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 31,
+              "total_return_pct": 0.41,
+              "max_drawdown_pct": -10.17,
+              "win_rate_pct": 53.85,
+              "sharpe_proxy": 0.102
+            },
+            "test_performance": {
+              "periods": 14,
+              "total_trades": 30,
+              "total_return_pct": 11.48,
+              "max_drawdown_pct": -19.56,
+              "win_rate_pct": 35.71,
+              "sharpe_proxy": 0.437
+            },
+            "test_kept_trades": 30,
+            "test_blocked_trades": 15,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 14,
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 27,
+              "total_trades": 61,
+              "total_return_pct": 11.93,
+              "max_drawdown_pct": -23.58,
+              "win_rate_pct": 44.44,
+              "sharpe_proxy": 0.45
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 21,
+              "total_return_pct": 79.0,
+              "max_drawdown_pct": -4.7,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.492
+            },
+            "test_kept_trades": 21,
+            "test_blocked_trades": 9,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 8,
+              "excessive_intraday_range": 1
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 35,
+          "total_trades": 76,
+          "total_return_pct": 103.72,
+          "max_drawdown_pct": -23.58,
+          "win_rate_pct": 57.14,
+          "sharpe_proxy": 1.626
+        },
+        "negative_test_years": 0,
+        "positive_test_years": 3,
+        "consistency_ratio": 1.0,
+        "scenario_id": "stress_plus_20bps",
+        "extra_round_trip_bps": 20.0,
+        "gate": {
+          "approved": true,
+          "reasons": [],
+          "variant_id": "veto_higher_liquidity_looser_range"
+        },
+        "fixed_oos_score": 96.4
+      },
+      {
+        "variant_id": "veto_higher_liquidity_looser_range",
+        "thresholds": {
+          "max_gap_pct": 0.08,
+          "max_intraday_range_pct": 0.22,
+          "min_dollar_volume_krw": 1000000000.0,
+          "max_prev_volatility_20d": 0.1
+        },
+        "folds": [
+          {
+            "train_years": [
+              2022
+            ],
+            "test_year": 2023,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 2,
+              "total_trades": 6,
+              "total_return_pct": -1.85,
+              "max_drawdown_pct": -5.98,
+              "win_rate_pct": 50.0,
+              "sharpe_proxy": -0.153
+            },
+            "test_performance": {
+              "periods": 11,
+              "total_trades": 25,
+              "total_return_pct": 0.98,
+              "max_drawdown_pct": -10.54,
+              "win_rate_pct": 54.55,
+              "sharpe_proxy": 0.133
+            },
+            "test_kept_trades": 25,
+            "test_blocked_trades": 8,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 6,
+              "excessive_gap": 2,
+              "excessive_intraday_range": 1,
+              "excessive_prev_volatility_20d": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023
+            ],
+            "test_year": 2024,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 13,
+              "total_trades": 31,
+              "total_return_pct": -0.89,
+              "max_drawdown_pct": -10.54,
+              "win_rate_pct": 53.85,
+              "sharpe_proxy": 0.025
+            },
+            "test_performance": {
+              "periods": 14,
+              "total_trades": 30,
+              "total_return_pct": 9.94,
+              "max_drawdown_pct": -20.3,
+              "win_rate_pct": 35.71,
+              "sharpe_proxy": 0.403
+            },
+            "test_kept_trades": 30,
+            "test_blocked_trades": 15,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 14,
+              "excessive_gap": 1
+            }
+          },
+          {
+            "train_years": [
+              2022,
+              2023,
+              2024
+            ],
+            "test_year": 2025,
+            "variant_id": "veto_higher_liquidity_looser_range",
+            "train_performance": {
+              "periods": 27,
+              "total_trades": 61,
+              "total_return_pct": 8.95,
+              "max_drawdown_pct": -24.74,
+              "win_rate_pct": 44.44,
+              "sharpe_proxy": 0.388
+            },
+            "test_performance": {
+              "periods": 10,
+              "total_trades": 21,
+              "total_return_pct": 77.31,
+              "max_drawdown_pct": -4.8,
+              "win_rate_pct": 90.0,
+              "sharpe_proxy": 2.452
+            },
+            "test_kept_trades": 21,
+            "test_blocked_trades": 9,
+            "test_blocked_counts_by_reason": {
+              "low_dollar_volume": 8,
+              "excessive_intraday_range": 1
+            }
+          }
+        ],
+        "aggregate_oos": {
+          "periods": 35,
+          "total_trades": 76,
+          "total_return_pct": 96.83,
+          "max_drawdown_pct": -24.74,
+          "win_rate_pct": 57.14,
+          "sharpe_proxy": 1.558
+        },
+        "negative_test_years": 0,
+        "positive_test_years": 3,
+        "consistency_ratio": 1.0,
+        "scenario_id": "stress_plus_30bps",
+        "extra_round_trip_bps": 30.0,
+        "gate": {
+          "approved": true,
+          "reasons": [],
+          "variant_id": "veto_higher_liquidity_looser_range"
+        },
+        "fixed_oos_score": 87.67
+      }
+    ],
+    "base_scenario": {
+      "variant_id": "veto_higher_liquidity_looser_range",
+      "thresholds": {
+        "max_gap_pct": 0.08,
+        "max_intraday_range_pct": 0.22,
+        "min_dollar_volume_krw": 1000000000.0,
+        "max_prev_volatility_20d": 0.1
+      },
+      "folds": [
+        {
+          "train_years": [
+            2022
+          ],
+          "test_year": 2023,
+          "variant_id": "veto_higher_liquidity_looser_range",
+          "train_performance": {
+            "periods": 2,
+            "total_trades": 6,
+            "total_return_pct": -1.25,
+            "max_drawdown_pct": -5.68,
+            "win_rate_pct": 50.0,
+            "sharpe_proxy": -0.095
+          },
+          "test_performance": {
+            "periods": 11,
+            "total_trades": 25,
+            "total_return_pct": 4.36,
+            "max_drawdown_pct": -9.43,
+            "win_rate_pct": 54.55,
+            "sharpe_proxy": 0.351
+          },
+          "test_kept_trades": 25,
+          "test_blocked_trades": 8,
+          "test_blocked_counts_by_reason": {
+            "low_dollar_volume": 6,
+            "excessive_gap": 2,
+            "excessive_intraday_range": 1,
+            "excessive_prev_volatility_20d": 1
+          }
+        },
+        {
+          "train_years": [
+            2022,
+            2023
+          ],
+          "test_year": 2024,
+          "variant_id": "veto_higher_liquidity_looser_range",
+          "train_performance": {
+            "periods": 13,
+            "total_trades": 31,
+            "total_return_pct": 3.05,
+            "max_drawdown_pct": -9.43,
+            "win_rate_pct": 53.85,
+            "sharpe_proxy": 0.256
+          },
+          "test_performance": {
+            "periods": 14,
+            "total_trades": 30,
+            "total_return_pct": 14.63,
+            "max_drawdown_pct": -18.07,
+            "win_rate_pct": 50.0,
+            "sharpe_proxy": 0.504
+          },
+          "test_kept_trades": 30,
+          "test_blocked_trades": 15,
+          "test_blocked_counts_by_reason": {
+            "low_dollar_volume": 14,
+            "excessive_gap": 1
+          }
+        },
+        {
+          "train_years": [
+            2022,
+            2023,
+            2024
+          ],
+          "test_year": 2025,
+          "variant_id": "veto_higher_liquidity_looser_range",
+          "train_performance": {
+            "periods": 27,
+            "total_trades": 61,
+            "total_return_pct": 18.13,
+            "max_drawdown_pct": -21.21,
+            "win_rate_pct": 51.85,
+            "sharpe_proxy": 0.573
+          },
+          "test_performance": {
+            "periods": 10,
+            "total_trades": 21,
+            "total_return_pct": 82.41,
+            "max_drawdown_pct": -4.5,
+            "win_rate_pct": 90.0,
+            "sharpe_proxy": 2.572
+          },
+          "test_kept_trades": 21,
+          "test_blocked_trades": 9,
+          "test_blocked_counts_by_reason": {
+            "low_dollar_volume": 8,
+            "excessive_intraday_range": 1
+          }
+        }
+      ],
+      "aggregate_oos": {
+        "periods": 35,
+        "total_trades": 76,
+        "total_return_pct": 118.22,
+        "max_drawdown_pct": -21.21,
+        "win_rate_pct": 62.86,
+        "sharpe_proxy": 1.762
+      },
+      "negative_test_years": 0,
+      "positive_test_years": 3,
+      "consistency_ratio": 1.0,
+      "scenario_id": "base",
+      "extra_round_trip_bps": 0.0,
+      "gate": {
+        "approved": true,
+        "reasons": [],
+        "variant_id": "veto_higher_liquidity_looser_range"
+      },
+      "fixed_oos_score": 114.63
+    },
+    "base_gate_approved_count": 1,
+    "stress_pass_count": 4,
+    "all_scenarios_approved": true,
+    "robust_score": 107.67,
+    "worst_case_return_pct": 96.83,
+    "worst_case_drawdown_pct": -24.74
+  },
+  "robust_winner_count": 2,
+  "promoted_policy_written": true,
+  "disclaimer": "Walk-forward fixed-variant stress revalidation on historical data only. Not investment advice. Live orders not submitted."
+}

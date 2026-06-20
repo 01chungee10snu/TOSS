@@ -1,0 +1,5 @@
+cost_bps,total_return_pct,max_drawdown_pct,total_trades,winning_trades,win_rate_pct,sharpe_ratio,final_equity_krw,initial_cash_krw,transaction_cost_bps,total_cost_krw
+0,-2.05,-11.26,38,13,34.21,-0.2524,979500.19,1000000,0,0.0
+10,-2.77,-11.57,38,13,34.21,-0.3882,972339.01,1000000,10,7575.09
+20,-3.48,-11.88,38,13,34.21,-0.524,965177.84,1000000,20,15150.17
+30,-4.2,-12.2,38,13,34.21,-0.6598,958016.67,1000000,30,22725.26

@@ -1,0 +1,9 @@
+{
+  "generated_at_utc": "2026-06-17T13:00:13.546585+00:00",
+  "as_of": "2025-11-27",
+  "status": "NO_TRADE",
+  "reason": "situation_not_approved:down_high_vol",
+  "situation": "down_high_vol",
+  "live_order_submitted": false,
+  "orders": []
+}

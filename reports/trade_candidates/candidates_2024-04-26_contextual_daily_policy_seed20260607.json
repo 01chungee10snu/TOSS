@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:14.032222+00:00",
+  "as_of": "2024-04-26",
+  "status": "CANDIDATES",
+  "situation": "down_low_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "002070",
+      "name": "비비안",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 29879.517578125,
+      "score": 5.632360411802605,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "288330",
+      "name": "파라택시스코리아",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 1675.7431640625,
+      "score": 4.801885589194558,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "259960",
+      "name": "크래프톤",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 227567.359375,
+      "score": 4.418059359397084,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

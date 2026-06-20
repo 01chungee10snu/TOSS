@@ -5,3 +5,8 @@ PyYAML
 pytest
 yfinance
 finance-datareader
+scikit-learn
+xgboost
+lightgbm
+optuna
+pyarrow

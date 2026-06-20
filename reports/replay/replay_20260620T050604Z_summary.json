@@ -1,0 +1,10 @@
+{
+  "total_return_pct": 7.12,
+  "max_drawdown_pct": -11.24,
+  "total_trades": 135,
+  "winning_trades": 54,
+  "win_rate_pct": 40.0,
+  "sharpe_ratio": 0.6981,
+  "final_equity_krw": 1071193.75,
+  "initial_cash_krw": 1000000
+}

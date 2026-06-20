@@ -1,0 +1,3 @@
+name,step,score_threshold,stop_loss_pct,take_profit_pct,max_holding_steps,max_positions,trailing_stop_pct,sizing_mode,min_volume,rebalance_mode,total_return_pct,max_drawdown_pct,sharpe_ratio,total_trades,win_rate_pct,final_equity_krw
+low_thresh,5,50.0,0.05,0.08,20,1,0.0,flat,0.0,hold_until_exit,2.96,0.0,59.4401,4,100.0,1029601.09
+high_thresh,5,80.0,0.05,0.08,20,1,0.0,flat,0.0,hold_until_exit,0.84,0.0,10.2469,1,100.0,1008386.58

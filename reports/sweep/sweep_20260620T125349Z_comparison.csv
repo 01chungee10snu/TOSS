@@ -1,0 +1,4 @@
+name,step,score_threshold,stop_loss_pct,take_profit_pct,max_holding_steps,max_positions,trailing_stop_pct,sizing_mode,min_volume,rebalance_mode,total_return_pct,max_drawdown_pct,sharpe_ratio,total_trades,win_rate_pct,final_equity_krw
+s5_t55_sl12_tp20_h10_mp4_tr0_flat_hold,5,55.0,0.12,0.2,10,4,0.0,flat,0.0,hold_until_exit,49.2,-10.14,2.5876,142,45.07,1492044.52
+s5_t55_sl12_tp20_h10_mp4_tr0_flat_topn,5,55.0,0.12,0.2,10,4,0.0,flat,0.0,top_n_rotation,-9.78,-20.63,-0.394,521,40.31,902170.72
+s5_t55_sl12_tp20_h10_mp4_tr0_flat_full,5,55.0,0.12,0.2,10,4,0.0,flat,0.0,full_liquidate_every_step,-9.75,-20.55,-0.3932,552,40.94,902491.17

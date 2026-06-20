@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:23.563202+00:00",
+  "as_of": "2023-11-10",
+  "status": "CANDIDATES",
+  "situation": "flat_high_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "227610",
+      "name": "아우딘퓨쳐스",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 3680.0,
+      "score": 8.721022338336523,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "348080",
+      "name": "큐라티스",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 2760.0,
+      "score": 7.962040805383835,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "060590",
+      "name": "씨티씨바이오",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 8500.0,
+      "score": 7.790678706651541,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

@@ -1,0 +1,7 @@
+name,step,score_threshold,stop_loss_pct,take_profit_pct,max_holding_steps,max_positions,trailing_stop_pct,sizing_mode,min_volume,total_return_pct,max_drawdown_pct,sharpe_ratio,total_trades,win_rate_pct,final_equity_krw
+s5_t60_sl10_tp15_h20_mp3_tr0_flat,5,60.0,0.1,0.15,20,3,0.0,flat,0.0,34.97,-9.41,2.2852,113,47.79,1349686.67
+s5_t60_sl10_tp15_h20_mp3_tr0_score_weighted,5,60.0,0.1,0.15,20,3,0.0,score_weighted,0.0,20.61,-7.94,1.8142,113,46.9,1206096.47
+s5_t65_sl10_tp15_h20_mp3_tr0_flat,5,65.0,0.1,0.15,20,3,0.0,flat,0.0,34.75,-9.43,2.2798,108,47.22,1347472.0
+s5_t65_sl10_tp15_h20_mp3_tr0_score_weighted,5,65.0,0.1,0.15,20,3,0.0,score_weighted,0.0,20.5,-7.95,1.8073,108,46.3,1204989.14
+s5_t70_sl10_tp15_h20_mp3_tr0_flat,5,70.0,0.1,0.15,20,3,0.0,flat,0.0,34.75,-9.43,2.2798,108,47.22,1347472.0
+s5_t70_sl10_tp15_h20_mp3_tr0_score_weighted,5,70.0,0.1,0.15,20,3,0.0,score_weighted,0.0,20.5,-7.95,1.8073,108,46.3,1204989.14

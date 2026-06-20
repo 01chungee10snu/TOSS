@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:45.621741+00:00",
+  "as_of": "2023-01-10",
+  "status": "CANDIDATES",
+  "situation": "flat_high_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "032790",
+      "name": "엠젠솔루션",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 4222.11767578125,
+      "score": 8.857676982421529,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "014830",
+      "name": "유니드",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 76682.0703125,
+      "score": 8.311418898578681,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "039560",
+      "name": "다산네트웍스",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 4119.599609375,
+      "score": 7.673707312964243,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

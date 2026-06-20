@@ -1,0 +1,9 @@
+name,step,score_threshold,stop_loss_pct,take_profit_pct,max_holding_steps,max_positions,trailing_stop_pct,sizing_mode,min_volume,total_return_pct,max_drawdown_pct,sharpe_ratio,total_trades,win_rate_pct,final_equity_krw
+s10_t60_sl7_tp15_h20_mp1_tr0_flat,10,60.0,0.07,0.15,20,1,0.0,flat,0.0,5.27,-3.59,1.3446,26,46.15,1052715.27
+s10_t60_sl7_tp20_h20_mp1_tr0_flat,10,60.0,0.07,0.2,20,1,0.0,flat,0.0,3.21,-3.67,0.8558,25,44.0,1032140.16
+s10_t60_sl10_tp15_h20_mp1_tr0_flat,10,60.0,0.1,0.15,20,1,0.0,flat,0.0,4.69,-5.69,1.1365,25,44.0,1046906.74
+s10_t60_sl10_tp20_h20_mp1_tr0_flat,10,60.0,0.1,0.2,20,1,0.0,flat,0.0,2.63,-5.8,0.6721,24,41.67,1026331.63
+s10_t65_sl7_tp15_h20_mp1_tr0_flat,10,65.0,0.07,0.15,20,1,0.0,flat,0.0,5.57,-3.58,1.4217,25,48.0,1055700.34
+s10_t65_sl7_tp20_h20_mp1_tr0_flat,10,65.0,0.07,0.2,20,1,0.0,flat,0.0,3.51,-3.66,0.9329,24,45.83,1035125.23
+s10_t65_sl10_tp15_h20_mp1_tr0_flat,10,65.0,0.1,0.15,20,1,0.0,flat,0.0,4.99,-5.67,1.2082,24,45.83,1049891.82
+s10_t65_sl10_tp20_h20_mp1_tr0_flat,10,65.0,0.1,0.2,20,1,0.0,flat,0.0,2.93,-5.78,0.7438,23,43.48,1029316.71

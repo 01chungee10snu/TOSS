@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:52.750475+00:00",
+  "as_of": "2022-10-31",
+  "status": "CANDIDATES",
+  "situation": "flat_high_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "005300",
+      "name": "롯데칠성",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 126932.5703125,
+      "score": 8.541818107055493,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "005110",
+      "name": "한창",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 4305.0,
+      "score": 7.677242665969799,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "323410",
+      "name": "카카오뱅크",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 16436.603515625,
+      "score": 7.616585422134941,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

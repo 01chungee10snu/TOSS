@@ -1,0 +1,220 @@
+{
+  "panel": {
+    "path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_2022-01-01_2026-latest_ohlcv_panel.csv",
+    "rows": 506152,
+    "codes": 496,
+    "start": "2022-01-04",
+    "end": "2026-06-19"
+  },
+  "config": {
+    "step": 5,
+    "score_threshold": 55,
+    "stop_loss_pct": 0.12,
+    "take_profit_pct": 0.2,
+    "max_holding_steps": 10,
+    "max_positions": 4,
+    "trailing_stop_pct": 0.0,
+    "sizing_mode": "flat",
+    "rebalance_mode": "hold_until_exit"
+  },
+  "cost_stress": [
+    {
+      "cost_bps": 0,
+      "total_return_pct": 55.29,
+      "max_drawdown_pct": -10.14,
+      "sharpe_ratio": 2.5896,
+      "win_rate_pct": 46.05,
+      "total_trades": 152,
+      "final_equity_krw": 1552885.06,
+      "total_cost_krw": 0.0
+    },
+    {
+      "cost_bps": 10,
+      "total_return_pct": 52.19,
+      "max_drawdown_pct": -10.41,
+      "sharpe_ratio": 2.456,
+      "win_rate_pct": 46.05,
+      "total_trades": 152,
+      "final_equity_krw": 1521932.17,
+      "total_cost_krw": 30952.89
+    },
+    {
+      "cost_bps": 20,
+      "total_return_pct": 49.1,
+      "max_drawdown_pct": -10.67,
+      "sharpe_ratio": 2.3216,
+      "win_rate_pct": 45.39,
+      "total_trades": 152,
+      "final_equity_krw": 1490979.29,
+      "total_cost_krw": 61905.77
+    },
+    {
+      "cost_bps": 30,
+      "total_return_pct": 46.0,
+      "max_drawdown_pct": -10.95,
+      "sharpe_ratio": 2.1865,
+      "win_rate_pct": 45.39,
+      "total_trades": 152,
+      "final_equity_krw": 1460026.4,
+      "total_cost_krw": 92858.66
+    }
+  ],
+  "yearly_0bps": [
+    {
+      "year": 2022,
+      "cost_bps": 0,
+      "total_return_pct": 13.97,
+      "max_drawdown_pct": -3.77,
+      "sharpe_ratio": 3.5556,
+      "win_rate_pct": 59.26,
+      "total_trades": 27,
+      "final_equity_krw": 1139687.37,
+      "total_cost_krw": 0.0
+    },
+    {
+      "year": 2023,
+      "cost_bps": 0,
+      "total_return_pct": -2.05,
+      "max_drawdown_pct": -11.26,
+      "sharpe_ratio": -0.2524,
+      "win_rate_pct": 34.21,
+      "total_trades": 38,
+      "final_equity_krw": 979500.19,
+      "total_cost_krw": 0.0
+    },
+    {
+      "year": 2024,
+      "cost_bps": 0,
+      "total_return_pct": 2.6,
+      "max_drawdown_pct": -7.45,
+      "sharpe_ratio": 0.772,
+      "win_rate_pct": 37.93,
+      "total_trades": 29,
+      "final_equity_krw": 1026027.38,
+      "total_cost_krw": 0.0
+    },
+    {
+      "year": 2025,
+      "cost_bps": 0,
+      "total_return_pct": 97.45,
+      "max_drawdown_pct": -4.19,
+      "sharpe_ratio": 2.6061,
+      "win_rate_pct": 43.59,
+      "total_trades": 39,
+      "final_equity_krw": 1974461.82,
+      "total_cost_krw": 0.0
+    },
+    {
+      "year": 2026,
+      "cost_bps": 0,
+      "total_return_pct": 2.54,
+      "max_drawdown_pct": -9.58,
+      "sharpe_ratio": 0.9163,
+      "win_rate_pct": 35.0,
+      "total_trades": 20,
+      "final_equity_krw": 1025380.64,
+      "total_cost_krw": 0.0
+    }
+  ],
+  "yearly_30bps": [
+    {
+      "year": 2022,
+      "cost_bps": 30,
+      "total_return_pct": 12.43,
+      "max_drawdown_pct": -4.12,
+      "sharpe_ratio": 3.1853,
+      "win_rate_pct": 59.26,
+      "total_trades": 27,
+      "final_equity_krw": 1124310.09,
+      "total_cost_krw": 16628.78
+    },
+    {
+      "year": 2023,
+      "cost_bps": 30,
+      "total_return_pct": -4.2,
+      "max_drawdown_pct": -12.2,
+      "sharpe_ratio": -0.6598,
+      "win_rate_pct": 34.21,
+      "total_trades": 38,
+      "final_equity_krw": 958016.67,
+      "total_cost_krw": 22725.26
+    },
+    {
+      "year": 2024,
+      "cost_bps": 30,
+      "total_return_pct": 0.97,
+      "max_drawdown_pct": -8.0,
+      "sharpe_ratio": 0.3532,
+      "win_rate_pct": 37.93,
+      "total_trades": 29,
+      "final_equity_krw": 1009716.84,
+      "total_cost_krw": 17448.22
+    },
+    {
+      "year": 2025,
+      "cost_bps": 30,
+      "total_return_pct": 94.93,
+      "max_drawdown_pct": -4.52,
+      "sharpe_ratio": 2.5718,
+      "win_rate_pct": 43.59,
+      "total_trades": 39,
+      "final_equity_krw": 1949338.1,
+      "total_cost_krw": 26323.39
+    },
+    {
+      "year": 2026,
+      "cost_bps": 30,
+      "total_return_pct": 1.33,
+      "max_drawdown_pct": -10.28,
+      "sharpe_ratio": 0.5769,
+      "win_rate_pct": 35.0,
+      "total_trades": 20,
+      "final_equity_krw": 1013304.5,
+      "total_cost_krw": 12076.14
+    }
+  ],
+  "bnh": {
+    "all_start_available": {
+      "n": 429,
+      "return_pct": 592.2389,
+      "final_equity_1m": 6922389,
+      "mdd_pct": -29.9233,
+      "sharpe": 0.7039,
+      "median_stock_return_pct": -41.3078,
+      "win_rate_pct": 26.8065
+    },
+    "end_volume_positive": {
+      "n": 402,
+      "return_pct": 19.955,
+      "final_equity_1m": 1199550,
+      "mdd_pct": -30.1427,
+      "sharpe": 0.3011,
+      "median_stock_return_pct": -39.0656,
+      "win_rate_pct": 27.3632
+    },
+    "exclude_000300_only": {
+      "n": 428,
+      "return_pct": 16.8954,
+      "final_equity_1m": 1168954,
+      "mdd_pct": -29.9096,
+      "sharpe": 0.2746,
+      "median_stock_return_pct": -41.4153,
+      "win_rate_pct": 26.6355
+    },
+    "exclude_return_over_1000pct": {
+      "n": 423,
+      "return_pct": -8.1353,
+      "final_equity_1m": 918647,
+      "mdd_pct": -35.9731,
+      "sharpe": 0.016,
+      "median_stock_return_pct": -42.3628,
+      "win_rate_pct": 25.7683
+    }
+  },
+  "artifacts": {
+    "cost_csv": "/Users/01chungee10/Github/TOSS/reports/harness/cost_stress_20260620T181201Z.csv",
+    "yearly_0_csv": "/Users/01chungee10/Github/TOSS/reports/harness/yearly_split_20260620T181225Z.csv",
+    "yearly_30_csv": "/Users/01chungee10/Github/TOSS/reports/harness/yearly_split_20260620T181249Z.csv",
+    "trades_csv": "/Users/01chungee10/Github/TOSS/reports/harness/frontier_extended_2026_all_trades_20260621.csv"
+  }
+}

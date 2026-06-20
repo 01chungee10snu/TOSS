@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:36.732435+00:00",
+  "as_of": "2023-04-06",
+  "status": "CANDIDATES",
+  "situation": "flat_high_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "006380",
+      "name": "카프로",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 698.0,
+      "score": 7.988500930565495,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "095570",
+      "name": "AJ네트웍스",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 3843.324951171875,
+      "score": 7.601657547036807,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "082640",
+      "name": "동양생명",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 3362.73974609375,
+      "score": 7.52482134010916,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

@@ -16,12 +16,12 @@ Research-only. 실주문 없음. 투자 조언 아님.
 - close_to_next_close_top_5d_momentum: return -99.7%, CAGR -76.76%, MDD -99.76%, Sharpe -3.533, win 39.4%, trades 9650
 - open_to_next_open_top_5d_momentum: return -99.98%, CAGR -88.06%, MDD -99.98%, Sharpe -4.761, win 35.57%, trades 9650
 - intraday_top_5d_momentum: return -99.99%, CAGR -91.37%, MDD -99.99%, Sharpe -6.584, win 33.47%, trades 9660
-- intraday_top_1d_momentum: return -100.0%, CAGR -91.87%, MDD -100.0%, Sharpe -6.787, win 32.54%, trades 9693
+- intraday_top_1d_momentum: return -100.0%, CAGR -91.86%, MDD -100.0%, Sharpe -6.781, win 32.54%, trades 9693
 
 ## Best variant
 - {'name': 'open_to_next_open_bottom_5d_reversal', 'score_col': 'mom_5d_prev', 'ascending': True, 'return_col': 'open_open_ret', 'active_days': 967, 'total_trades': 9660, 'final_value_krw': 36233.62, 'total_return_pct': -96.38, 'cagr_pct': -56.49, 'max_drawdown_pct': -96.71, 'sharpe': -2.019, 'win_rate_pct': 44.05, 'profit_factor': 0.721}
 
 ## Outputs
-- summary_csv: /mnt/c/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31_summary.csv
-- best_picks_csv: /mnt/c/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31_best_picks.csv
-- json: /mnt/c/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31.json
+- summary_csv: /Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31_summary.csv
+- best_picks_csv: /Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31_best_picks.csv
+- json: /Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31.json

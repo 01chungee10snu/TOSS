@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:28.966620+00:00",
+  "as_of": "2023-08-29",
+  "status": "CANDIDATES",
+  "situation": "flat_high_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "131290",
+      "name": "티에스이",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 40816.34375,
+      "score": 10.626425292561672,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "000880",
+      "name": "한화",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 23535.3671875,
+      "score": 8.914252409664426,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    },
+    {
+      "symbol": "127980",
+      "name": "화인써키트",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 8566.6396484375,
+      "score": 8.150531015955936,
+      "reason": "approved_situation=flat_high_vol; reversal mom_20d/vol_20d; exit=oo_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:00.770886+00:00",
+  "as_of": "2024-10-28",
+  "status": "CANDIDATES",
+  "situation": "down_low_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "080530",
+      "name": "코디",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 7350.0,
+      "score": 7.421564398129084,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "198440",
+      "name": "강동씨앤엘",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 1442.0,
+      "score": 7.076733406217538,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "451250",
+      "name": "삐아",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 9376.078125,
+      "score": 6.960367513357614,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

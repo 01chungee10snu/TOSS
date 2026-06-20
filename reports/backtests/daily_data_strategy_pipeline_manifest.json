@@ -1,0 +1,83 @@
+{
+  "generated_at_utc": "2026-06-18T20:35:44.637739+00:00",
+  "purpose": "1-day OHLCV data storage, analysis, and trading strategy generation pipeline",
+  "data_storage": {
+    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_2022-01-01_2025-12-31_ohlcv_panel.csv",
+    "symbol_count": 496,
+    "period": {
+      "start": "2022-01-01",
+      "end": "2025-12-31"
+    }
+  },
+  "daily_sweep": {
+    "best_variant": {
+      "name": "open_to_next_open_bottom_5d_reversal",
+      "score_col": "mom_5d_prev",
+      "ascending": true,
+      "return_col": "open_open_ret",
+      "active_days": 967,
+      "total_trades": 9660,
+      "final_value_krw": 36233.62,
+      "total_return_pct": -96.38,
+      "cagr_pct": -56.49,
+      "max_drawdown_pct": -96.71,
+      "sharpe": -2.019,
+      "win_rate_pct": 44.05,
+      "profit_factor": 0.721
+    },
+    "summary_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31_summary.csv",
+    "best_picks_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31_best_picks.csv",
+    "report_json": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_daily_strategy_sweep_2022-01-01_2025-12-31.json"
+  },
+  "contextual_strategy": {
+    "approved_situations": [
+      "down_low_vol",
+      "flat_high_vol"
+    ],
+    "combined_train": {
+      "days": 733,
+      "active_days": 128,
+      "total_trades": 382,
+      "final_value_krw": 1157359.12,
+      "total_return_pct": 15.74,
+      "cagr_pct": 5.01,
+      "max_drawdown_pct": -18.45,
+      "sharpe": 0.36,
+      "win_rate_pct": 47.66,
+      "profit_factor": 1.162
+    },
+    "combined_test": {
+      "days": 241,
+      "active_days": 35,
+      "total_trades": 105,
+      "final_value_krw": 1257748.53,
+      "total_return_pct": 25.77,
+      "cagr_pct": 26.03,
+      "max_drawdown_pct": -9.71,
+      "sharpe": 1.379,
+      "win_rate_pct": 48.57,
+      "profit_factor": 1.872
+    },
+    "combined_all": {
+      "days": 974,
+      "active_days": 163,
+      "total_trades": 487,
+      "final_value_krw": 1455666.74,
+      "total_return_pct": 45.57,
+      "cagr_pct": 9.88,
+      "max_drawdown_pct": -19.15,
+      "sharpe": 0.612,
+      "win_rate_pct": 47.85,
+      "profit_factor": 1.296
+    },
+    "policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/contextual_daily_policy_seed20260607.json",
+    "outputs": {
+      "all_trials": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_2022-01-01_2025-12-31_all_trials.csv",
+      "selected": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_2022-01-01_2025-12-31_selected_by_situation.csv",
+      "daily": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_2022-01-01_2025-12-31_combined_daily_curve.csv",
+      "picks": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_2022-01-01_2025-12-31_combined_picks.csv"
+    },
+    "report_json": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_2022-01-01_2025-12-31.json"
+  },
+  "disclaimer": "Research-only artifacts. Not investment advice. No live orders submitted."
+}

@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-17T13:01:32.443364+00:00",
+  "as_of": "2023-07-11",
+  "status": "CANDIDATES",
+  "situation": "down_low_vol",
+  "policy_id": "contextual_daily_policy_seed20260607",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "321550",
+      "name": "티움바이오",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 8090.0,
+      "score": 11.071639385399203,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "285130",
+      "name": "SK케미칼",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 62486.89453125,
+      "score": 8.058641890892064,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    },
+    {
+      "symbol": "102460",
+      "name": "이연제약",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 15461.9912109375,
+      "score": 8.000600401737064,
+      "reason": "approved_situation=down_low_vol; reversal mom_5d/vol_20d; exit=cc_next_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

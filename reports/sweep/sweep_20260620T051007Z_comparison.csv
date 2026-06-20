@@ -1,0 +1,4 @@
+name,step,score_threshold,stop_loss_pct,take_profit_pct,max_holding_steps,total_return_pct,max_drawdown_pct,sharpe_ratio,total_trades,win_rate_pct,final_equity_krw
+baseline,5,70.0,0.05,0.08,20,2.47,0.0,17.3848,4,75.0,1024671.51
+aggressive,5,60.0,0.05,0.08,20,5.79,0.0,50.6868,9,100.0,1057892.28
+selective,10,75.0,0.05,0.08,20,1.0,0.0,8.5823,2,100.0,1009955.01

@@ -1,0 +1,4 @@
+name,step,score_threshold,stop_loss_pct,take_profit_pct,max_holding_steps,max_positions,trailing_stop_pct,sizing_mode,min_volume,rebalance_mode,total_return_pct,max_drawdown_pct,sharpe_ratio,total_trades,win_rate_pct,final_equity_krw
+baseline,5,70.0,0.05,0.08,20,1,0.0,flat,0.0,hold_until_exit,1.81,0.0,18.8403,3,66.67,1018072.93
+aggressive,5,60.0,0.05,0.08,20,1,0.0,flat,0.0,hold_until_exit,2.96,0.0,59.4401,4,100.0,1029601.09
+selective,10,75.0,0.05,0.08,20,1,0.0,flat,0.0,hold_until_exit,0.67,0.0,9.1651,1,100.0,1006709.27

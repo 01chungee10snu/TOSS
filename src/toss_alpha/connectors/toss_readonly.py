@@ -6,6 +6,8 @@ from typing import Any
 
 import requests
 
+from toss_alpha.data.schema import AccountSnapshot, PositionSnapshot
+
 BASE_URL = "https://openapi.tossinvest.com"
 RATE_LIMIT_HEADERS = (
     "X-RateLimit-Limit",
@@ -88,3 +90,70 @@ class TossReadOnlyClient:
 
     def holdings(self) -> dict[str, Any]:
         return self._request("GET", "/api/v1/holdings", account=True)
+
+    def account_snapshot(self) -> AccountSnapshot:
+        payload = self.accounts()["json"] or {}
+        record = _first_record(payload)
+        account_id = str(
+            record.get("accountSeq")
+            or record.get("account_seq")
+            or record.get("accountId")
+            or record.get("account_id")
+            or self.account_seq
+            or "unknown"
+        )
+        return AccountSnapshot(
+            account_id=account_id,
+            cash=_to_float(record.get("cash") or record.get("cashBalance") or record.get("cash_balance")),
+            buying_power=_to_float(record.get("buyingPower") or record.get("buying_power")),
+            total_equity=_to_float(record.get("totalEquity") or record.get("total_equity") or record.get("equity")),
+            source="toss",
+        )
+
+    def position_snapshots(self) -> list[PositionSnapshot]:
+        payload = self.holdings()["json"] or {}
+        records = _records_list(payload)
+        positions: list[PositionSnapshot] = []
+        for record in records:
+            symbol = str(record.get("symbol") or record.get("code") or record.get("stockCode") or record.get("stock_code") or "").strip()
+            if not symbol:
+                continue
+            positions.append(
+                PositionSnapshot(
+                    symbol=symbol,
+                    quantity=float(record.get("quantity") or record.get("qty") or 0.0),
+                    sellable_quantity=_to_float(record.get("sellableQuantity") or record.get("sellable_quantity") or record.get("sellableQty")),
+                    avg_price=_to_float(record.get("avgPrice") or record.get("averagePrice") or record.get("avg_price")),
+                    market_value=_to_float(record.get("marketValue") or record.get("market_value")),
+                    unrealized_pnl=_to_float(record.get("unrealizedPnl") or record.get("unrealized_pnl")),
+                    source="toss",
+                )
+            )
+        return positions
+
+
+def _to_float(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    return float(value)
+
+
+def _first_record(payload: dict[str, Any]) -> dict[str, Any]:
+    result = payload.get("result", payload)
+    if isinstance(result, list):
+        return result[0] if result else {}
+    if isinstance(result, dict):
+        return result
+    return {}
+
+
+def _records_list(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    result = payload.get("result", payload)
+    if isinstance(result, list):
+        return [item for item in result if isinstance(item, dict)]
+    if isinstance(result, dict):
+        for key in ("holdings", "positions", "items"):
+            value = result.get(key)
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+    return []

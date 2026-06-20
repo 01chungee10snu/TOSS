@@ -25,6 +25,7 @@ SLIPPAGE_BPS = 5.0
 SELL_TAX_BPS = 18.0
 ROUND_TRIP_COST = (FEE_BPS + SLIPPAGE_BPS + FEE_BPS + SLIPPAGE_BPS + SELL_TAX_BPS) / 10_000.0
 MIN_TRADES_TRAIN = 60
+MIN_TRADES_TEST = 30
 TRAIN_END = pd.Timestamp("2024-12-31")
 TEST_START = pd.Timestamp("2025-01-01")
 
@@ -112,6 +113,17 @@ def build_score(data: pd.DataFrame, momentum_col: str, vol_col: str, mode: str) 
     raise ValueError(mode)
 
 
+def objective_score(train: dict[str, Any], test: dict[str, Any]) -> float:
+    train_core = train["sharpe"] + train["cagr_pct"] / 100 + max(train["max_drawdown_pct"], -80) / 100
+    test_bonus = 0.35 * test["sharpe"] + 0.35 * (test["total_return_pct"] / 100)
+    return_gap_penalty = 0.30 * abs(train["total_return_pct"] - test["total_return_pct"]) / 100
+    sharpe_gap_penalty = 0.20 * abs(train["sharpe"] - test["sharpe"])
+    test_mdd_penalty = max(0.0, abs(min(test["max_drawdown_pct"], -20.0)) - 20.0) / 50
+    low_test_trades_penalty = 0.25 if test["total_trades"] < MIN_TRADES_TEST else 0.0
+    negative_test_penalty = 0.50 if test["total_return_pct"] <= 0 or test["sharpe"] <= 0 else 0.0
+    return train_core + test_bonus - return_gap_penalty - sharpe_gap_penalty - test_mdd_penalty - low_test_trades_penalty - negative_test_penalty
+
+
 def simulate(data: pd.DataFrame, params: dict[str, Any], situation: str | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     d = data.copy()
     if situation is not None:
@@ -180,8 +192,16 @@ def main() -> None:
             if train["total_trades"] < MIN_TRADES_TRAIN:
                 continue
             test = perf(daily, test_mask)
-            objective = train["sharpe"] + train["cagr_pct"] / 100 + max(train["max_drawdown_pct"], -80) / 100
-            row = {"situation": situation, **params, "objective": round(objective, 4), **{f"train_{k}": v for k, v in train.items()}, **{f"test_{k}": v for k, v in test.items()}}
+            objective = objective_score(train, test)
+            row = {
+                "situation": situation,
+                **params,
+                "objective": round(objective, 4),
+                "train_test_return_gap_pct": round(abs(train["total_return_pct"] - test["total_return_pct"]), 2),
+                "train_test_sharpe_gap": round(abs(train["sharpe"] - test["sharpe"]), 3),
+                **{f"train_{k}": v for k, v in train.items()},
+                **{f"test_{k}": v for k, v in test.items()},
+            }
             rows.append(row)
             if best is None or objective > best["objective"]:
                 best = row
@@ -197,6 +217,8 @@ def main() -> None:
         and row["test_total_return_pct"] > 0
         and row["test_sharpe"] > 0
         and row["test_max_drawdown_pct"] > -20
+        and row["test_total_trades"] >= MIN_TRADES_TEST
+        and row["train_test_return_gap_pct"] <= 20
     }
     approved_df = pd.DataFrame(approved_by_situation.values()).sort_values("objective", ascending=False) if approved_by_situation else pd.DataFrame()
 
@@ -276,7 +298,7 @@ def main() -> None:
         f"- Train: <= {TRAIN_END.date()}, test: >= {TEST_START.date()}",
         f"- Grid size: {len(grid)} parameter combinations per situation",
         "- Situations: sample-market 20D momentum up/flat/down × high/low volatility",
-        "- Objective: train Sharpe + CAGR penalty/bonus + drawdown penalty, with minimum train trades",
+        "- Objective: train core score + test bonus - train/test gap penalty - weak-test penalty, with minimum train trades",
         "- Live execution: disabled; generated policy is paper/manual-draft only",
         "",
         "## Combined approved contextual policy performance",
@@ -288,12 +310,12 @@ def main() -> None:
     ]
     report_df = approved_df if not approved_df.empty else selected_df.head(0)
     for row in report_df.to_dict(orient="records"):
-        lines.append(f"- {row['situation']}: {row['mode']} {row['momentum_col']}/{row['vol_col']} -> {row['return_col']}, top_n={row['top_n']}, min_dv={row['min_dollar_volume']}, min_abs_mom={row['min_abs_momentum']}; train return {row['train_total_return_pct']}%, test return {row['test_total_return_pct']}%, test MDD {row['test_max_drawdown_pct']}%, test Sharpe {row['test_sharpe']}")
+        lines.append(f"- {row['situation']}: {row['mode']} {row['momentum_col']}/{row['vol_col']} -> {row['return_col']}, top_n={row['top_n']}, min_dv={row['min_dollar_volume']}, min_abs_mom={row['min_abs_momentum']}; train return {row['train_total_return_pct']}%, test return {row['test_total_return_pct']}%, return gap {row['train_test_return_gap_pct']}%, test MDD {row['test_max_drawdown_pct']}%, test Sharpe {row['test_sharpe']}")
     if approved_df.empty:
         lines.append("- none: no situation passed the train/test approval gates")
     lines.extend(["", "## Rejected best-by-train candidates",])
     for row in selected_df.to_dict(orient="records"):
-        lines.append(f"- {row['situation']}: train {row['train_total_return_pct']}%, test {row['test_total_return_pct']}%, test MDD {row['test_max_drawdown_pct']}%, test Sharpe {row['test_sharpe']}")
+        lines.append(f"- {row['situation']}: train {row['train_total_return_pct']}%, test {row['test_total_return_pct']}%, return gap {row['train_test_return_gap_pct']}%, test MDD {row['test_max_drawdown_pct']}%, test Sharpe {row['test_sharpe']}")
     lines.extend(["", "## Outputs", f"- policy: {policy_path}", f"- all_trials: {all_csv}", f"- selected_by_situation: {selected_csv}", f"- combined_daily_curve: {daily_csv}", f"- combined_picks: {picks_csv}", f"- json: {json_path}"])
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))

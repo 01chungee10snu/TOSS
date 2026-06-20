@@ -1,0 +1,5 @@
+exit_reason,trades,pnl_krw,avg_pnl_pct,median_pnl_pct,win_rate_pct
+stop_loss,13,-187354.86,-14.412307692307694,-13.81,0.0
+regime_risk_off,16,-17375.61,-1.08625,-1.54,31.25
+end_of_replay,4,13915.519999999999,3.4775,3.225,75.0
+take_profit,5,165900.95,33.182,23.49,100.0

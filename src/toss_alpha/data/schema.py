@@ -7,6 +7,16 @@ from typing import Any, Literal
 from uuid import uuid4
 
 HarnessMode = Literal["research_only", "backtest_only", "paper_only", "manual_draft_only"]
+ExecutionMode = Literal["manual_draft_only", "paper_auto", "live_auto_guarded"]
+PositionState = Literal[
+    "FLAT",
+    "ENTRY_PENDING",
+    "LONG",
+    "TRIM_PENDING",
+    "EXIT_PENDING",
+    "COOLDOWN",
+    "BLOCKED",
+]
 
 
 def _now_utc() -> datetime:
@@ -124,7 +134,7 @@ class OrderIntent:
     order_type: str = "MARKET"
     limit_price: float | None = None
     time_in_force: str = "DAY"
-    mode: Literal["manual_draft_only"] = "manual_draft_only"
+    mode: ExecutionMode = "manual_draft_only"
     not_live_order: bool = True
     intent_id: str = field(default_factory=lambda: str(uuid4()))
     created_at: datetime = field(default_factory=_now_utc)

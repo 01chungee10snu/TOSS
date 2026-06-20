@@ -1,0 +1,111 @@
+goal_id: kr_profit_compound_autotrading_v1
+mode: backtest_only
+universe:
+  # Current loader requires a concrete symbol list.
+  # Use this as a seed universe until the dynamic universe builder is wired in.
+  symbols:
+    - "101730" # 위메이드맥스
+    - "267260" # HD현대일렉트릭
+    - "004000" # 롯데정밀화학
+    - "005300" # 롯데칠성
+    - "014830" # 유니드
+    - "033780" # KT&G
+    - "053800" # 안랩
+    - "060570" # 드림어스컴퍼니
+    - "203690" # 아크솔루션스
+    - "214370" # 케어젠
+    - "284740" # 쿠쿠홈시스
+    - "344820" # KCC글라스
+  universe_builder: dynamic_liquidity_then_contextual_rank
+  notes:
+    - "Seed symbols were taken from recent realized contextual strategy picks so the first /goal artifact is grounded in repo data."
+    - "Promote later to a full daily liquid-universe snapshot once runner/universe-builder support lands."
+period:
+  start: "2022-01-01"
+  end: "2025-12-31"
+strategy:
+  name: contextual_daily_with_monfri_submode
+  params:
+    thesis: "Make money by combining a broad daily contextual engine with a narrow Monday->Friday specialty mode, while treating external/event information as veto and review input rather than headline alpha."
+    primary_cycle: "contextual_daily"
+    secondary_cycle: "mon_fri_specialty"
+    secondary_activation_rule: "only when regime resembles flat_low_vol and out-of-sample gates remain positive"
+    ranking_features:
+      - short_momentum
+      - medium_momentum
+      - volatility_adjusted_momentum
+      - turnover_strength
+      - pullback_quality
+      - sector_relative_strength
+      - overextension_penalty
+    use_previous_close_features_only: true
+    liquidity_floor_krw: 100000000
+    top_n_primary: 3
+    top_n_secondary: 3
+    regime_engine:
+      - index_momentum
+      - market_breadth
+      - volatility_regime
+      - liquidity_concentration
+      - sector_strength
+    fast_veto:
+      enabled: true
+      tune_per_cycle: true
+      current_reference: "src/toss_alpha/execution/fast_veto.py"
+      warning: "Do not reuse daily thresholds blindly for mon_fri. Recent replay showed raw default veto hurt mon_fri returns and MDD."
+    slow_qual:
+      enabled: true
+      role: "veto_or_manual_review"
+      sources:
+        - opendart
+      review_required_events:
+        - earnings_shock
+        - capital_raise
+        - convertibles_or_bw
+        - major_shareholder_change
+        - trading_halt_or_delisting_risk
+      fail_closed_when_negative_event_present: true
+external_information:
+  principles:
+    - "Use structured external info as risk/quality gates before using it as score alpha."
+    - "OpenDart belongs to slow qual, not intraday timing alpha."
+    - "Prefer reproducible market internals over discretionary news headlines."
+  sources:
+    - name: market_breadth
+      role: regime_filter
+    - name: sector_relative_strength
+      role: ranking_tailwind
+    - name: liquidity_concentration
+      role: regime_filter
+    - name: opendart_disclosures
+      role: slow_veto_or_review
+    - name: notebooklm_doc_qa
+      role: operator_research_support_only
+risk_profile: conservative
+risk_gates:
+  execution_mode: manual_draft_only
+  max_positions: 10
+  max_notional_krw_per_position: 100000
+  max_total_notional_krw: 1000000
+  require_manual_confirmation: true
+  live_trading_enabled: false
+promotion_gates:
+  require_walk_forward: true
+  require_costs_and_slippage: true
+  require_train_test_gap_limit: true
+  require_min_test_trades: true
+  prefer_sample_thickness_over_peak_return: true
+  objective_priority:
+    - stable_out_of_sample_return
+    - max_drawdown_control
+    - trade_frequency_sufficiency
+    - bad_week_suppression
+    - explainability
+outputs:
+  report: true
+  policy_json: true
+  candidate_draft: true
+  paper_trading: false
+notes:
+  - "This /goal is a durable research spec, not a promise of safe live automation."
+  - "Best current architecture in this repo: quant engine first, qual as veto, live blocked by default."

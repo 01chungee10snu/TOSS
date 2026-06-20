@@ -146,3 +146,65 @@ def test_module_has_no_shortcut_buy_sell_callables():
     forbidden = {"buy", "sell", "auto_trade"}
     callables = {name for name, value in inspect.getmembers(live_ready, callable)}
     assert forbidden.isdisjoint(callables)
+
+
+def test_kis_live_readiness_detects_missing_account_fields():
+    status = live_readiness(
+        env={"BROKER_PROVIDER": "kis", "KIS_APP_KEY": "app", "KIS_APP_SECRET": "sec"},
+        policy=RiskPolicy(),
+    )
+    assert status["provider"] == "kis"
+    assert status["ready"] is False
+    assert "live_trading_disabled" in status["missing"]
+    assert "cano" in status["missing"]
+    assert "account_product_code" in status["missing"]
+
+
+def test_kis_real_submission_uses_hashkey_and_kis_headers(monkeypatch):
+    calls = []
+
+    class FakeResponse:
+        def __init__(self, payload, status_code=200, headers=None, text="ok"):
+            self._payload = payload
+            self.status_code = status_code
+            self.headers = headers or {}
+            self.text = text
+            self.ok = 200 <= status_code < 300
+
+        def json(self):
+            return self._payload
+
+    def fake_post(url, headers=None, json=None, data=None, timeout=None):
+        calls.append({"url": url, "headers": headers, "json": json, "data": data, "timeout": timeout})
+        if url.endswith("/uapi/hashkey"):
+            return FakeResponse({"HASH": "hash-1"})
+        return FakeResponse({"order_id": "kis-ord-1"}, headers={"X-Request-Id": "req-kis-1"})
+
+    monkeypatch.setattr(requests, "post", fake_post)
+    executor = GuardedLiveExecutor(
+        config=LiveExecutionConfig(
+            provider="kis",
+            app_key="app",
+            app_secret="sec",
+            cano="12345678",
+            account_product_code="01",
+            order_endpoint_path="/uapi/domestic-stock/v1/trading/order-cash",
+            access_token="token",
+            live_trading_env_enabled=True,
+            base_url="https://openapi.koreainvestment.com:9443",
+            kis_order_tr_id_buy="TTTC0802U",
+            kis_order_tr_id_sell="TTTC0801U",
+        ),
+        policy=RiskPolicy(live_trading_enabled=True, max_order_krw=100_000),
+    )
+    result = executor.submit_manual_draft(
+        OrderIntent(strategy_id="s1", symbol="005930", side="BUY", quantity=1, reason="manual approved candidate"),
+        RiskDecision.allowed(),
+        confirmation_phrase="I UNDERSTAND THIS IS A REAL ORDER",
+        dry_run=False,
+    )
+    assert result["status"] == "SUBMITTED"
+    assert calls[0]["url"].endswith("/uapi/hashkey")
+    assert calls[1]["headers"]["tr_id"] == "TTTC0802U"
+    assert calls[1]["headers"]["hashkey"] == "hash-1"
+    assert calls[1]["json"]["CANO"] == "12345678"

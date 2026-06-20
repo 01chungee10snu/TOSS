@@ -1,0 +1,41 @@
+{
+  "panel": {
+    "rows": 450104,
+    "codes": 496,
+    "start": "2022-01-04",
+    "end": "2025-12-30"
+  },
+  "start_day_equal_weight_hold": {
+    "definition": "first trading day equal capital into stocks with available close, hold to final date",
+    "n_stocks": 429,
+    "total_return_pct": 582.5702,
+    "final_equity_1m": 6825702,
+    "mdd_pct": -29.9233,
+    "sharpe": 0.7402,
+    "mean_stock_return_pct": 582.5702,
+    "median_stock_return_pct": -36.1871,
+    "win_rate_pct": 27.2727
+  },
+  "each_code_first_available_hold_simple_avg": {
+    "definition": "for all codes, buy at each code first available close and hold to last available close; simple average stock return",
+    "n_stocks": 496,
+    "simple_avg_return_pct": 502.2649,
+    "median_stock_return_pct": -38.181,
+    "win_rate_pct": 26.2097
+  },
+  "daily_equal_weight_rebalanced_context": {
+    "definition": "context only: daily equal-weight rebalanced index, not hold benchmark",
+    "total_return_pct": 10.3848,
+    "final_equity_1m": 1103848,
+    "mdd_pct": -30.4088,
+    "sharpe": 0.2298
+  },
+  "strategy_verified_frontier": {
+    "definition": "hold_until_exit, step5, threshold55, sl12, tp20, h10, max_positions4, flat",
+    "total_return_pct_0bps": 49.2045,
+    "final_equity_1m_0bps": 1492045,
+    "mdd_pct_0bps": -10.14,
+    "sharpe_0bps": 2.5876,
+    "total_return_pct_30bps": 40.66
+  }
+}

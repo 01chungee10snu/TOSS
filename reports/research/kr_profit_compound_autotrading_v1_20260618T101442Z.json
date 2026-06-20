@@ -1,0 +1,208 @@
+{
+  "goal_id": "kr_profit_compound_autotrading_v1",
+  "goal_path": "goals/profit_compound_autotrading_v1.yaml",
+  "panel_csv": "reports/backtests/random500_seed20260607_2022-01-01_2025-12-31_ohlcv_panel.csv",
+  "selected_symbol": "005300",
+  "data_as_of": "2025-12-30T00:00:00",
+  "signals": [
+    {
+      "name": "005300",
+      "score": 0.0574241020072368,
+      "rationale": "momentum=0.092060; vol_penalty=-0.034635; short_ma=130737.8305, long_ma=119716.7612; daily_return_stdev=0.034635",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "284740",
+      "score": 0.01710085925057668,
+      "rationale": "momentum=0.027566; vol_penalty=-0.010465; short_ma=24251.6934, long_ma=23601.1160; daily_return_stdev=0.010465",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "053800",
+      "score": 0.011374594432878802,
+      "rationale": "momentum=0.024476; vol_penalty=-0.013102; short_ma=60908.1113, long_ma=59452.9260; daily_return_stdev=0.013102",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "033780",
+      "score": 0.00903411175941249,
+      "rationale": "momentum=0.024609; vol_penalty=-0.015575; short_ma=140167.6953, long_ma=136801.1374; daily_return_stdev=0.015575",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "267260",
+      "score": 0.006707771859428578,
+      "rationale": "momentum=0.033057; vol_penalty=-0.026349; short_ma=808307.9531, long_ma=782443.0219; daily_return_stdev=0.026349",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "214370",
+      "score": 0.003987840063857162,
+      "rationale": "momentum=0.038886; vol_penalty=-0.034899; short_ma=69769.6586, long_ma=67158.1217; daily_return_stdev=0.034899",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "344820",
+      "score": 0.00034912110843865647,
+      "rationale": "momentum=0.008872; vol_penalty=-0.008523; short_ma=26137.6933, long_ma=25907.8423; daily_return_stdev=0.008523",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "203690",
+      "score": 0.0,
+      "rationale": "momentum=0.000000; vol_penalty=-0.000000; short_ma=4425.0000, long_ma=4425.0000; daily_return_stdev=0.000000",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "004000",
+      "score": -0.007469663391028036,
+      "rationale": "momentum=0.007210; vol_penalty=-0.014679; short_ma=45444.7867, long_ma=45119.4876; daily_return_stdev=0.014679",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "014830",
+      "score": -0.027210365372522357,
+      "rationale": "momentum=-0.015128; vol_penalty=-0.012083; short_ma=66307.7363, long_ma=67326.2283; daily_return_stdev=0.012083",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "101730",
+      "score": -0.032873892932508655,
+      "rationale": "momentum=-0.015992; vol_penalty=-0.016882; short_ma=6502.0000, long_ma=6607.6667; daily_return_stdev=0.016882",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    },
+    {
+      "name": "060570",
+      "score": -0.06079965703547663,
+      "rationale": "momentum=-0.039595; vol_penalty=-0.021205; short_ma=1573.0000, long_ma=1637.8500; daily_return_stdev=0.021205",
+      "research_only": true,
+      "not_investment_advice": true,
+      "data_as_of": null,
+      "known_limitations": []
+    }
+  ],
+  "backtest": {
+    "strategy_id": "kr_profit_compound_autotrading_v1",
+    "status": "PASS",
+    "total_return": 0.19999994452078246,
+    "max_drawdown": -0.08623422248033034,
+    "trades": 1,
+    "fees_krw": 0.0,
+    "slippage_krw": 0.0,
+    "metrics": {
+      "entry_price": 112654.796875,
+      "exit_price": 135185.75,
+      "starting_cash_krw": 1000000.0,
+      "final_value_krw": 1199999.9445207824
+    },
+    "violations": [],
+    "contains_live_order": false,
+    "research_only": true
+  },
+  "risk_decision": {
+    "allow": false,
+    "status": "BLOCK",
+    "violations": [
+      "live_trading_disabled",
+      "manual_confirmation_required",
+      "max_position_pct_exceeded"
+    ],
+    "checked_policy_version": "unknown",
+    "checked_data_snapshot_id": null,
+    "timestamp": "2026-06-18 10:14:42.131305+00:00"
+  },
+  "qual_gate": {
+    "status": "BLOCKED_QUAL_DATA",
+    "reasons": [
+      "missing_opendart_api_key"
+    ],
+    "checked_symbols": [],
+    "pending_symbols": [
+      "005300"
+    ],
+    "event_counts": {},
+    "review_required_symbols": [],
+    "fetch_errors": {}
+  },
+  "manual_draft": {
+    "status": "BLOCK",
+    "mode": "manual_draft_only",
+    "not_live_order": true,
+    "intent": {
+      "strategy_id": "kr_profit_compound_autotrading_v1",
+      "symbol": "005300",
+      "side": "BUY",
+      "reason": "top ranked symbol from contextual_daily_with_monfri_submode",
+      "notional_krw": 100000.0,
+      "quantity": null,
+      "order_type": "MARKET",
+      "limit_price": null,
+      "time_in_force": "DAY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "intent_id": "08907f13-1510-4642-ad65-ccd006c3f1b8",
+      "created_at": "2026-06-18 10:14:42.131533+00:00",
+      "expires_at": null
+    },
+    "risk_decision": {
+      "allow": false,
+      "status": "BLOCK",
+      "violations": [
+        "live_trading_disabled",
+        "manual_confirmation_required",
+        "max_position_pct_exceeded"
+      ],
+      "checked_policy_version": "unknown",
+      "checked_data_snapshot_id": null,
+      "timestamp": "2026-06-18 10:14:42.131305+00:00"
+    },
+    "violations": [
+      "live_trading_disabled",
+      "manual_confirmation_required",
+      "max_position_pct_exceeded"
+    ],
+    "rationale": "selected highest combined score among 12 tracked symbols",
+    "evidence": [
+      "panel_csv=reports/backtests/random500_seed20260607_2022-01-01_2025-12-31_ohlcv_panel.csv",
+      "selected_symbol=005300",
+      "qual_gate_status=BLOCKED_QUAL_DATA",
+      "backtest_status=PASS"
+    ],
+    "markdown": "## 수동 주문 검토 초안\n- 상태: BLOCK\n- 모드: manual_draft_only\n- 안전 문구: 실주문 아님 / 수동 확인 필요\n- 종목: 005300\n- 방향 후보: BUY\n- 금액 후보: 100000.0\n- 사유: top ranked symbol from contextual_daily_with_monfri_submode\n- 리스크 위반: live_trading_disabled, manual_confirmation_required, max_position_pct_exceeded\n- 판단 근거: selected highest combined score among 12 tracked symbols\n### Evidence\n- panel_csv=reports/backtests/random500_seed20260607_2022-01-01_2025-12-31_ohlcv_panel.csv\n- selected_symbol=005300\n- qual_gate_status=BLOCKED_QUAL_DATA\n- backtest_status=PASS\n"
+  },
+  "report_path": "reports/research/kr_profit_compound_autotrading_v1_20260618T101442Z.md",
+  "json_path": "reports/research/kr_profit_compound_autotrading_v1_20260618T101442Z.json"
+}

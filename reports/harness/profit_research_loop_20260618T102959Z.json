@@ -1,0 +1,211 @@
+{
+  "generated_at_utc": "2026-06-18T10:29:59.801569+00:00",
+  "inputs": {
+    "daily_json": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_2022-01-01_2025-12-31.json",
+    "monfri_json": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31.json",
+    "monfri_picks": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31_combined_picks.csv",
+    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_2022-01-01_2025-12-31_ohlcv_panel.csv"
+  },
+  "branches": [
+    {
+      "branch_id": "daily_contextual_baseline",
+      "cycle": "daily",
+      "method": "baseline",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_2022-01-01_2025-12-31.json",
+      "performance": {
+        "periods": 163,
+        "total_trades": 487,
+        "total_return_pct": 45.57,
+        "max_drawdown_pct": -19.15,
+        "win_rate_pct": 47.85,
+        "sharpe_proxy": 0.612
+      }
+    },
+    {
+      "branch_id": "monfri_contextual_baseline",
+      "cycle": "monfri",
+      "method": "baseline",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31.json",
+      "performance": {
+        "periods": 38,
+        "total_trades": 114,
+        "total_return_pct": 79.43,
+        "max_drawdown_pct": -22.83,
+        "win_rate_pct": 55.26,
+        "sharpe_proxy": 0.804
+      }
+    },
+    {
+      "branch_id": "monfri_veto_base",
+      "cycle": "monfri",
+      "method": "fast_veto_frontier",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31_combined_picks.csv",
+      "thresholds": {
+        "max_gap_pct": 0.08,
+        "max_intraday_range_pct": 0.15,
+        "min_dollar_volume_krw": 10000000.0,
+        "max_prev_volatility_20d": 0.1
+      },
+      "blocked_trades": 114,
+      "kept_trades": 0,
+      "blocked_counts_by_reason": {
+        "invalid_price_inputs": 114
+      },
+      "performance": {
+        "periods": 0,
+        "total_trades": 0,
+        "total_return_pct": 0.0,
+        "max_drawdown_pct": 0.0,
+        "win_rate_pct": 0.0,
+        "sharpe_proxy": 0.0
+      }
+    },
+    {
+      "branch_id": "monfri_veto_looser_range",
+      "cycle": "monfri",
+      "method": "fast_veto_frontier",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31_combined_picks.csv",
+      "thresholds": {
+        "max_gap_pct": 0.1,
+        "max_intraday_range_pct": 0.22,
+        "min_dollar_volume_krw": 10000000.0,
+        "max_prev_volatility_20d": 0.12
+      },
+      "blocked_trades": 114,
+      "kept_trades": 0,
+      "blocked_counts_by_reason": {
+        "invalid_price_inputs": 114
+      },
+      "performance": {
+        "periods": 0,
+        "total_trades": 0,
+        "total_return_pct": 0.0,
+        "max_drawdown_pct": 0.0,
+        "win_rate_pct": 0.0,
+        "sharpe_proxy": 0.0
+      }
+    },
+    {
+      "branch_id": "monfri_veto_higher_liquidity",
+      "cycle": "monfri",
+      "method": "fast_veto_frontier",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31_combined_picks.csv",
+      "thresholds": {
+        "max_gap_pct": 0.1,
+        "max_intraday_range_pct": 0.2,
+        "min_dollar_volume_krw": 1000000000.0,
+        "max_prev_volatility_20d": 0.12
+      },
+      "blocked_trades": 114,
+      "kept_trades": 0,
+      "blocked_counts_by_reason": {
+        "invalid_price_inputs": 114
+      },
+      "performance": {
+        "periods": 0,
+        "total_trades": 0,
+        "total_return_pct": 0.0,
+        "max_drawdown_pct": 0.0,
+        "win_rate_pct": 0.0,
+        "sharpe_proxy": 0.0
+      }
+    },
+    {
+      "branch_id": "monfri_veto_looser_all",
+      "cycle": "monfri",
+      "method": "fast_veto_frontier",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31_combined_picks.csv",
+      "thresholds": {
+        "max_gap_pct": 0.12,
+        "max_intraday_range_pct": 0.25,
+        "min_dollar_volume_krw": 0.0,
+        "max_prev_volatility_20d": 0.2
+      },
+      "blocked_trades": 114,
+      "kept_trades": 0,
+      "blocked_counts_by_reason": {
+        "invalid_price_inputs": 114
+      },
+      "performance": {
+        "periods": 0,
+        "total_trades": 0,
+        "total_return_pct": 0.0,
+        "max_drawdown_pct": 0.0,
+        "win_rate_pct": 0.0,
+        "sharpe_proxy": 0.0
+      }
+    }
+  ],
+  "best_branch": {
+    "branch_id": "monfri_contextual_baseline",
+    "cycle": "monfri",
+    "method": "baseline",
+    "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31.json",
+    "performance": {
+      "periods": 38,
+      "total_trades": 114,
+      "total_return_pct": 79.43,
+      "max_drawdown_pct": -22.83,
+      "win_rate_pct": 55.26,
+      "sharpe_proxy": 0.804
+    },
+    "score": 64.64,
+    "recommendation": "promote_to_next_replay"
+  },
+  "top3": [
+    {
+      "branch_id": "monfri_contextual_baseline",
+      "cycle": "monfri",
+      "method": "baseline",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31.json",
+      "performance": {
+        "periods": 38,
+        "total_trades": 114,
+        "total_return_pct": 79.43,
+        "max_drawdown_pct": -22.83,
+        "win_rate_pct": 55.26,
+        "sharpe_proxy": 0.804
+      }
+    },
+    {
+      "branch_id": "daily_contextual_baseline",
+      "cycle": "daily",
+      "method": "baseline",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_2022-01-01_2025-12-31.json",
+      "performance": {
+        "periods": 163,
+        "total_trades": 487,
+        "total_return_pct": 45.57,
+        "max_drawdown_pct": -19.15,
+        "win_rate_pct": 47.85,
+        "sharpe_proxy": 0.612
+      }
+    },
+    {
+      "branch_id": "monfri_veto_base",
+      "cycle": "monfri",
+      "method": "fast_veto_frontier",
+      "source_path": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_contextual_optimizer_mon_fri_cycle_2022-01-01_2025-12-31_combined_picks.csv",
+      "thresholds": {
+        "max_gap_pct": 0.08,
+        "max_intraday_range_pct": 0.15,
+        "min_dollar_volume_krw": 10000000.0,
+        "max_prev_volatility_20d": 0.1
+      },
+      "blocked_trades": 114,
+      "kept_trades": 0,
+      "blocked_counts_by_reason": {
+        "invalid_price_inputs": 114
+      },
+      "performance": {
+        "periods": 0,
+        "total_trades": 0,
+        "total_return_pct": 0.0,
+        "max_drawdown_pct": 0.0,
+        "win_rate_pct": 0.0,
+        "sharpe_proxy": 0.0
+      }
+    }
+  ],
+  "disclaimer": "Research-only profitability exploration on historical data. Not investment advice. Live orders not submitted."
+}

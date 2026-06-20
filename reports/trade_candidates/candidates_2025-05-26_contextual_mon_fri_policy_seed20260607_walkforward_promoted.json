@@ -1,0 +1,53 @@
+{
+  "generated_at_utc": "2026-06-18T13:29:37.783966+00:00",
+  "as_of": "2025-05-26",
+  "status": "CANDIDATES",
+  "situation": "flat_low_vol",
+  "policy_id": "contextual_mon_fri_policy_seed20260607_walkforward_promoted",
+  "execution_stage": "paper_or_manual_draft_only",
+  "live_order_submitted": false,
+  "requires_manual_confirmation": true,
+  "risk_gates": {
+    "max_positions": 10,
+    "max_notional_krw_per_position": 100000,
+    "max_total_notional_krw": 1000000,
+    "require_manual_confirmation": true,
+    "block_if_live_trading_enabled": true
+  },
+  "orders": [
+    {
+      "symbol": "001780",
+      "name": "알루코",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 2325.0,
+      "score": 2.804302083309589,
+      "reason": "approved_situation=flat_low_vol; reversal mom_1d/vol_20d; exit=monfri_open_to_fri_close_ret"
+    },
+    {
+      "symbol": "027740",
+      "name": "마니커",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 2074.0,
+      "score": 1.8067765279940031,
+      "reason": "approved_situation=flat_low_vol; reversal mom_1d/vol_20d; exit=monfri_open_to_fri_close_ret"
+    },
+    {
+      "symbol": "000230",
+      "name": "일동홀딩스",
+      "side": "BUY",
+      "mode": "manual_draft_only",
+      "not_live_order": true,
+      "notional_krw": 100000.0,
+      "reference_close": 6686.07958984375,
+      "score": 1.755733949239708,
+      "reason": "approved_situation=flat_low_vol; reversal mom_1d/vol_20d; exit=monfri_open_to_fri_close_ret"
+    }
+  ],
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

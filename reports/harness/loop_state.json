@@ -1,0 +1,105 @@
+{
+  "generated_at_utc": "2026-06-20T21:31:45.779173+00:00",
+  "overall_status": "NO_TRADE",
+  "quant": {
+    "status": "NO_TRADE",
+    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_2022-01-01_2025-12-31_ohlcv_panel.csv",
+    "panel_exists": true,
+    "sample_csv_exists": true,
+    "policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/contextual_mon_fri_policy_seed20260607_walkforward_promoted.json",
+    "policy_exists": true,
+    "candidate_json": "/Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2025-12-30_contextual_mon_fri_policy_seed20260607_walkforward_promoted.json",
+    "steps": [
+      {
+        "name": "generate_candidates",
+        "exit_code": 0,
+        "stdout_tail": [
+          "{",
+          "  \"generated_at_utc\": \"2026-06-20T21:31:45.325616+00:00\",",
+          "  \"as_of\": \"2025-12-30\",",
+          "  \"status\": \"NO_TRADE\",",
+          "  \"reason\": \"situation_not_approved:up_low_vol\",",
+          "  \"situation\": \"up_low_vol\",",
+          "  \"live_order_submitted\": false,",
+          "  \"orders\": []",
+          "}",
+          "CANDIDATES_JSON=/Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2025-12-30_contextual_mon_fri_policy_seed20260607_walkforward_promoted.json"
+        ],
+        "stderr_tail": []
+      }
+    ],
+    "candidate_payload": {
+      "generated_at_utc": "2026-06-20T21:31:45.325616+00:00",
+      "as_of": "2025-12-30",
+      "status": "NO_TRADE",
+      "reason": "situation_not_approved:up_low_vol",
+      "situation": "up_low_vol",
+      "live_order_submitted": false,
+      "orders": []
+    }
+  },
+  "fast": {
+    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_2022-01-01_2025-12-31_ohlcv_panel.csv",
+    "panel_exists": true,
+    "status": "SKIPPED_NO_CANDIDATES",
+    "reasons": [
+      "no_candidate_symbols"
+    ],
+    "allowed_orders": [],
+    "vetoed_symbols": [],
+    "reasons_by_symbol": {},
+    "checked_symbols": [],
+    "policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/contextual_mon_fri_policy_seed20260607_walkforward_promoted.json",
+    "allowed_count": 0,
+    "original_order_count": 0,
+    "effective_candidate_payload": {
+      "generated_at_utc": "2026-06-20T21:31:45.325616+00:00",
+      "as_of": "2025-12-30",
+      "status": "NO_TRADE",
+      "reason": "situation_not_approved:up_low_vol",
+      "situation": "up_low_vol",
+      "live_order_submitted": false,
+      "orders": []
+    }
+  },
+  "qual": {
+    "connector_path": "/Users/01chungee10/Github/TOSS/src/toss_alpha/connectors/dart_events.py",
+    "connector_exists": true,
+    "opendart_api_key_present": false,
+    "status": "SKIPPED_NO_CANDIDATES",
+    "reasons": [
+      "no_candidate_symbols"
+    ],
+    "checked_symbols": [],
+    "pending_symbols": [],
+    "event_counts": {},
+    "review_required_symbols": [],
+    "fetch_errors": {}
+  },
+  "live": {
+    "status": "LIVE_BLOCKED",
+    "ready": "False",
+    "default_mode": "BLOCK_UNLESS_DOUBLE_OPT_IN",
+    "missing": [
+      "live_trading_disabled",
+      "env_live_trading_not_enabled",
+      "client_credentials",
+      "account_seq",
+      "order_endpoint_path"
+    ],
+    "dry_run_available": "False",
+    "exit_code": 0,
+    "stdout_tail": [
+      "ready: False",
+      "default_mode: BLOCK_UNLESS_DOUBLE_OPT_IN",
+      "missing:",
+      "- live_trading_disabled",
+      "- env_live_trading_not_enabled",
+      "- client_credentials",
+      "- account_seq",
+      "- order_endpoint_path",
+      "dry_run_available: False"
+    ],
+    "stderr_tail": []
+  }
+}
