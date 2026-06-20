@@ -1,0 +1,13 @@
+total_return_pct,max_drawdown_pct,total_trades,winning_trades,win_rate_pct,sharpe_ratio,final_equity_krw,initial_cash_krw,transaction_cost_bps,total_cost_krw,candidate,year,overlay
+94.93,-4.52,39,17,43.59,2.5718,1949338.1,1000000,30.0,26323.39,canonical_base,2025,none
+93.94,-5.44,41,19,46.34,2.5565,1939391.49,1000000,30.0,27497.07,sentiment_penalty_a5,2025,penalty
+89.72,-5.75,40,17,42.5,2.4905,1897220.45,1000000,30.0,26768.44,sentiment_penalty_a10,2025,penalty
+89.72,-5.75,40,17,42.5,2.4905,1897220.45,1000000,30.0,26768.44,sentiment_penalty_a20,2025,penalty
+89.72,-5.75,40,17,42.5,2.4905,1897220.45,1000000,30.0,26768.44,sentiment_penalty_a50,2025,penalty
+94.42,-4.41,36,16,44.44,2.5638,1944197.23,1000000,30.0,24502.39,sentiment_rerank,2025,rerank
+1.33,-10.28,20,7,35.0,0.5769,1013304.5,1000000,30.0,12076.14,canonical_base,2026,none
+2.24,-6.8,14,6,42.86,0.8881,1022449.51,1000000,30.0,8492.83,sentiment_penalty_a5,2026,penalty
+5.2,-3.94,15,6,40.0,2.0768,1052020.49,1000000,30.0,9183.61,sentiment_penalty_a10,2026,penalty
+5.2,-3.94,15,6,40.0,2.0768,1052020.49,1000000,30.0,9183.61,sentiment_penalty_a20,2026,penalty
+5.2,-3.94,15,6,40.0,2.0768,1052020.49,1000000,30.0,9183.61,sentiment_penalty_a50,2026,penalty
+9.42,-9.6,20,11,55.0,3.3364,1094151.39,1000000,30.0,12319.41,sentiment_rerank,2026,rerank
