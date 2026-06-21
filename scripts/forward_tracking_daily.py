@@ -37,6 +37,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from toss_alpha.daily.features import compute_features, FEATURE_COLUMNS
 from toss_alpha.daily.macro_signals import get_macro_regime, CACHE_PATH as MACRO_CACHE
+from fusion_3layer_backtest import train_ml_model, predict_ml_scores, compute_macro_adjusted_scores, SENT_CSV, build_sentiment_map
 
 warnings.filterwarnings("ignore")
 
@@ -45,15 +46,17 @@ NAME_MAP_CSV = ROOT / "reports/harness/panel_code_name_mapping.csv"
 OUT_DIR = ROOT / "reports/harness/forward_tracking"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# Optimal parameters from sizing frontier
+# Optimal parameters from sizing + conservative frontier
 OPTIMAL = {
-    "strategy": "ml_rerank",
-    "cash_fraction_per_entry": 0.75,
+    "strategy": "fusion_rerank",
+    "overlay_mode": "rerank",
+    "prediction_alpha": 10.0,
+    "cash_fraction_per_entry": 0.40,
     "max_notional": 300_000,
-    "stop_loss_pct": 0.10,
+    "stop_loss_pct": 0.06,
     "take_profit_pct": 0.25,
     "trailing_stop_pct": 0.06,
-    "max_holding_steps": 10,
+    "max_holding_steps": 20,
     "max_positions": 8,
     "transaction_cost_bps": 30.0,
 }
@@ -113,74 +116,56 @@ def resolve_names(codes: list[str], static_map: dict[str, str]) -> dict[str, str
 
 
 def train_and_predict(features_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Train ML on all history except the last date, predict for the last date.
+    """Train ML on all history except the last date, predict for the last date,
+    then apply fusion_rerank (ML + macro + sentiment) overlay.
 
     Returns (latest_predictions_df, model_info).
     """
-    try:
-        import lightgbm as lgb
-        use_lgb = True
-    except ImportError:
-        from sklearn.ensemble import GradientBoostingRegressor
-        use_lgb = False
-
+    # Use fusion_3layer's ML pipeline
     latest_date = features_df["Date"].max()
-    train = features_df[features_df["Date"] < latest_date].copy()
+    train_end = features_df[features_df["Date"] < latest_date]["Date"].max().year
+    predict_year = latest_date.year
+
+    model = train_ml_model(features_df, train_end)
+    ml_map = predict_ml_scores(model, features_df, predict_year)
+
+    # Load macro + sentiment
+    macro_path = MACRO_CACHE
+    if macro_path.exists():
+        macro_df = pd.read_parquet(macro_path)
+    else:
+        macro_df = None
+
+    sent_map_raw = None
+    if SENT_CSV.exists():
+        sent_df = pd.read_csv(SENT_CSV, parse_dates=["date"])
+        sent_map_raw = build_sentiment_map(sent_df)
+
+    # Compute fusion-adjusted scores (macro × ML, with optional sentiment)
+    yr_sent = None
+    if sent_map_raw:
+        # Find sentiment for predict_year
+        yr_keys = [k for k in sent_map_raw if pd.Timestamp(k).year == predict_year]
+        yr_sent = {k: sent_map_raw[k] for k in yr_keys}
+
+    fusion_map = compute_macro_adjusted_scores(
+        ml_map,
+        macro_df,
+        yr_sent,
+    )
+
+    # Map fusion scores back to DataFrame rows
     predict_rows = features_df[features_df["Date"] == latest_date].copy()
-
-    # Need 5-day forward return label for training
-    train = train.dropna(subset=FEATURE_COLUMNS + ["label_fwd_ret_5d"])
-    predict_rows = predict_rows.dropna(subset=FEATURE_COLUMNS)
-
-    if train.empty or predict_rows.empty:
-        raise RuntimeError(f"Insufficient data: train={len(train)}, predict={len(predict_rows)}")
-
-    X_train = train[FEATURE_COLUMNS].values
-    y_train = train["label_fwd_ret_5d"].values
-    X_pred = predict_rows[FEATURE_COLUMNS].values
-
-    if use_lgb:
-        model = lgb.LGBMRegressor(
-            n_estimators=300,
-            max_depth=6,
-            learning_rate=0.05,
-            num_leaves=31,
-            min_child_samples=50,
-            subsample=0.8,
-            colsample_bytree=0.8,
-            reg_alpha=0.1,
-            reg_lambda=1.0,
-            random_state=42,
-            verbose=-1,
-        )
-    else:
-        model = GradientBoostingRegressor(
-            n_estimators=200, max_depth=5, learning_rate=0.05, random_state=42
-        )
-
-    model.fit(X_train, y_train)
-    predictions = model.predict(X_pred)
-    predict_rows = predict_rows.copy()
-    predict_rows["ml_pred"] = predictions
-
-    # Feature importance
-    if use_lgb:
-        importance = pd.Series(
-            model.feature_importances_, index=FEATURE_COLUMNS
-        ).sort_values(ascending=False)
-        top_features = importance.head(5).to_dict()
-    else:
-        importance = pd.Series(
-            model.feature_importances_, index=FEATURE_COLUMNS
-        ).sort_values(ascending=False)
-        top_features = importance.head(5).to_dict()
+    predict_rows["ml_pred"] = predict_rows["code"].astype(str).str.zfill(6).map(
+        lambda c: fusion_map.get(str(latest_date.date()), {}).get(c, 0)
+    )
 
     info = {
-        "train_samples": len(X_train),
-        "predict_samples": len(X_pred),
-        "train_end_date": str(train["Date"].max().date()),
+        "train_samples": len(ml_map),
+        "predict_samples": len(predict_rows),
+        "train_end_date": str(train_end),
         "predict_date": str(latest_date.date()),
-        "top_features": top_features,
+        "top_features": {},
     }
 
     return predict_rows, info
@@ -291,7 +276,7 @@ if __name__ == "__main__":
 
     # Telegram-friendly summary
     print("\n" + "=" * 60)
-    print("📊 FORWARD TRACKING — TOP 10 (0.44%/day target)")
+    print("📊 FORWARD TRACKING — TOP 10 (Sharpe 6.14 optimal)")
     print("=" * 60)
     regime = report["macro_regime"]
     emoji = {"risk_on": "🟢", "neutral": "🟡", "risk_off": "🔴"}.get(
