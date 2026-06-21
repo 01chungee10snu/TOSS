@@ -106,6 +106,32 @@ def test_replay_engine_respects_max_positions_cap():
     assert max(row["open_positions"] for row in result["equity_curve"]) <= 3
 
 
+def test_replay_engine_cash_fraction_per_entry_controls_position_notional():
+    panel = _make_panel(days=80, n_symbols=3)
+    symbols = sorted(panel["code"].unique().tolist())
+
+    def first_trade_quantity(cash_fraction: float) -> float:
+        engine = ReplayEngine(
+            panel=panel,
+            symbols=symbols,
+            initial_cash_krw=1_000_000,
+            max_notional_krw=1_000_000,
+            max_positions=1,
+            score_threshold=0.0,
+            max_holding_steps=1,
+            cash_fraction_per_entry=cash_fraction,
+            transaction_cost_bps=0.0,
+        )
+        result = engine.run(step=5)
+        assert result["trades"]
+        return result["trades"][0]["quantity"]
+
+    qty_25 = first_trade_quantity(0.25)
+    qty_50 = first_trade_quantity(0.50)
+
+    assert qty_50 == pytest.approx(qty_25 * 2, rel=0.02)
+
+
 def test_full_liquidate_rebalance_closes_positions_every_step():
     panel = _make_panel(days=120, n_symbols=8)
     symbols = sorted(panel["code"].unique().tolist())

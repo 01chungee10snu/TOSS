@@ -70,6 +70,7 @@ class ReplayEngine:
         max_positions: int = 1,
         trailing_stop_pct: float = 0.0,
         sizing_mode: str = "flat",
+        cash_fraction_per_entry: float = 0.25,
         min_volume: float = 0.0,
         transaction_cost_bps: float = 0.0,
         rebalance_mode: str = "hold_until_exit",
@@ -90,6 +91,7 @@ class ReplayEngine:
         self.max_positions = max_positions
         self.trailing_stop_pct = trailing_stop_pct
         self.sizing_mode = sizing_mode
+        self.cash_fraction_per_entry = cash_fraction_per_entry
         self.min_volume = min_volume
         self.transaction_cost_bps = transaction_cost_bps
         self.total_cost_krw = 0.0
@@ -455,9 +457,9 @@ class ReplayEngine:
             if self.sizing_mode == "score_weighted":
                 # score 60-100 maps to 50%-100% of max_notional
                 weight = max(0.5, min(1.0, (cand["final_score"] - 50) / 50))
-                notional = min(self.max_notional_krw * weight, self.cash * 0.25)
+                notional = min(self.max_notional_krw * weight, self.cash * self.cash_fraction_per_entry)
             else:
-                notional = min(self.max_notional_krw, self.cash * 0.25)
+                notional = min(self.max_notional_krw, self.cash * self.cash_fraction_per_entry)
 
             if notional < price:
                 continue

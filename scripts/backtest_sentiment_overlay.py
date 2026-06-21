@@ -40,7 +40,7 @@ ENGINE_BASE = {
     "trailing_stop_pct": 0.0,
     "sizing_mode": "flat",
     "rebalance_mode": "hold_until_exit",
-    "min_volume": 0,
+    "min_volume": 10_000,  # block zero-volume phantom stocks
 }
 
 
@@ -97,7 +97,17 @@ def filter_sentiment_map_by_year(sent_map: dict, year: int) -> dict:
     return {d: s for d, s in sent_map.items() if pd.Timestamp(d).year == year}
 
 
-def run_engine(panel: pd.DataFrame, *, sentiment_map=None, overlay_mode=None, alpha=10.0, cost_bps=30.0, year=None) -> dict[str, Any]:
+def run_engine(
+    panel: pd.DataFrame,
+    *,
+    sentiment_map=None,
+    overlay_mode=None,
+    alpha=10.0,
+    cost_bps=30.0,
+    year=None,
+    max_notional_krw=100_000,
+    cash_fraction_per_entry=0.25,
+) -> dict[str, Any]:
     p = panel if year is None else panel[panel["Date"].dt.year == year].copy()
     cfg = dict(ENGINE_BASE)
     step = int(cfg.pop("step"))
@@ -106,7 +116,8 @@ def run_engine(panel: pd.DataFrame, *, sentiment_map=None, overlay_mode=None, al
         panel=p,
         symbols=symbols_of(p),
         initial_cash_krw=1_000_000,
-        max_notional_krw=100_000,
+        max_notional_krw=max_notional_krw,
+        cash_fraction_per_entry=cash_fraction_per_entry,
         transaction_cost_bps=cost_bps,
         prediction_map=sentiment_map,
     )
