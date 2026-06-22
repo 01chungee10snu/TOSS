@@ -1,6 +1,6 @@
 # TOSS ttak autotrading loop report
 
-- generated_at_utc: 2026-06-20T21:31:45.779173+00:00
+- generated_at_utc: 2026-06-22T06:21:36.298746+00:00
 - overall_status: NO_TRADE
 
 ## Quant

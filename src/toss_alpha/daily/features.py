@@ -28,7 +28,7 @@ def compute_features(panel: pd.DataFrame) -> pd.DataFrame:
         df[f"ret_{period}d"] = grouped["Close"].pct_change(period)
 
     # --- Log returns (for momentum signals) ---
-    df["log_ret_1d"] = grouped["Close"].apply(lambda s: np.log(s / s.shift(1)))
+    df["log_ret_1d"] = grouped["Close"].transform(lambda s: np.log(s / s.shift(1)))
 
     # --- Volatility (rolling std of daily returns) ---
     df["vol_5d"] = grouped["log_ret_1d"].rolling(5).std().reset_index(level=0, drop=True)

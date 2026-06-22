@@ -76,6 +76,8 @@ class TossReadOnlyClient:
             raise RuntimeError(f"request failed: HTTP {response.status_code} {response.text[:500]}")
         return result
 
+    # ── Market Data (시세) ──────────────────────────────────────
+
     def stocks(self, symbols: str) -> dict[str, Any]:
         return self._request("GET", "/api/v1/stocks", params={"symbols": symbols})
 
@@ -85,11 +87,60 @@ class TossReadOnlyClient:
     def candles(self, symbol: str, interval: str = "1D") -> dict[str, Any]:
         return self._request("GET", "/api/v1/candles", params={"symbol": symbol, "interval": interval})
 
+    def orderbook(self, symbols: str) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/orderbook", params={"symbols": symbols})
+
+    def trades(self, symbols: str) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/trades", params={"symbols": symbols})
+
+    def price_limits(self, symbols: str) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/price-limits", params={"symbols": symbols})
+
+    # ── Stock Info (종목 정보) ──────────────────────────────────
+
+    def warnings(self, symbol: str) -> dict[str, Any]:
+        return self._request("GET", f"/api/v1/stocks/{symbol}/warnings")
+
+    # ── Market Info (환율·장 운영) ─────────────────────────────
+
+    def exchange_rate(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/exchange-rate")
+
+    def market_calendar_kr(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/market-calendar/KR")
+
+    def market_calendar_us(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/market-calendar/US")
+
+    # ── Account · Asset (계좌·자산) ────────────────────────────
+
     def accounts(self) -> dict[str, Any]:
         return self._request("GET", "/api/v1/accounts", account=True)
 
     def holdings(self) -> dict[str, Any]:
         return self._request("GET", "/api/v1/holdings", account=True)
+
+    # ── Order Info (거래 가능 정보 — read-only) ────────────────
+
+    def buying_power(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/buying-power", account=True)
+
+    def sellable_quantity(self, symbol: str) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/sellable-quantity", params={"symbol": symbol}, account=True)
+
+    def commissions(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/commissions", account=True)
+
+    # ── Order History (주문 조회 — read-only) ──────────────────
+
+    def orders(self, status: str | None = None) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if status:
+            params["status"] = status
+        return self._request("GET", "/api/v1/orders", params=params or None, account=True)
+
+    def order_detail(self, order_id: str) -> dict[str, Any]:
+        return self._request("GET", f"/api/v1/orders/{order_id}", account=True)
 
     def account_snapshot(self) -> AccountSnapshot:
         payload = self.accounts()["json"] or {}

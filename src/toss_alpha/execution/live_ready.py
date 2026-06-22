@@ -79,6 +79,10 @@ class LiveExecutionConfig:
         )
 
 
+def _valid_toss_order_endpoint_path(path: str | None) -> bool:
+    return path == "/api/v1/orders"
+
+
 def _blank_to_none(value: str | None) -> str | None:
     if value is None or value.strip() == "":
         return None
@@ -120,6 +124,8 @@ def live_readiness(env: Mapping[str, str] | None = None, policy: RiskPolicy | No
             missing.append("account_seq")
         if not config.order_endpoint_path:
             missing.append("order_endpoint_path")
+        elif not _valid_toss_order_endpoint_path(config.order_endpoint_path):
+            missing.append("unconfirmed_toss_order_endpoint_path")
     return {
         "provider": config.provider,
         "ready": not missing,
@@ -208,7 +214,19 @@ class GuardedLiveExecutor:
                 "ORD_QTY": _quantity_text(intent.quantity),
                 "ORD_UNPR": _price_text(intent),
             }
-        return build_order_payload(intent)
+        # ── Toss Securities official spec ────────────────────
+        # POST /api/v1/orders
+        # { symbol, side, orderType, quantity, price }
+        payload: dict[str, Any] = {
+            "symbol": intent.symbol,
+            "side": intent.side,
+            "orderType": intent.order_type.upper(),
+        }
+        if intent.quantity is not None:
+            payload["quantity"] = intent.quantity
+        if intent.order_type.upper() == "LIMIT" and intent.limit_price is not None:
+            payload["price"] = intent.limit_price
+        return payload
 
     def _submission_headers(self, *, intent: OrderIntent, payload: dict[str, Any]) -> dict[str, str]:
         if self.config.provider == "kis":
@@ -251,6 +269,8 @@ class GuardedLiveExecutor:
         else:
             if not self.config.account_seq:
                 violations.append("account_seq_missing")
+            if not _valid_toss_order_endpoint_path(self.config.order_endpoint_path):
+                violations.append("unconfirmed_toss_order_endpoint_path")
         return list(dict.fromkeys(violations))
 
     def _kis_tr_id(self, side: str) -> str:

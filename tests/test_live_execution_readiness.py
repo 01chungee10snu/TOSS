@@ -77,6 +77,54 @@ def test_dry_run_prepares_payload_without_http(monkeypatch):
     assert result["payload"]["symbol"] == "005930"
 
 
+def test_toss_live_readiness_rejects_unconfirmed_v1_order_prefix():
+    status = live_readiness(
+        env={
+            "TOSSINVEST_CLIENT_ID": "cid",
+            "TOSSINVEST_CLIENT_SECRET": "sec",
+            "TOSSINVEST_ACCOUNT_SEQ": "acc",
+            "TOSSINVEST_LIVE_TRADING_ENABLED": "true",
+            "TOSSINVEST_LIVE_ORDER_ENDPOINT": "/v1/orders",
+        },
+        policy=RiskPolicy(live_trading_enabled=True),
+    )
+
+    assert status["ready"] is False
+    assert "unconfirmed_toss_order_endpoint_path" in status["missing"]
+
+
+def test_toss_real_submission_blocks_unconfirmed_v1_order_prefix(monkeypatch):
+    calls = []
+
+    def fake_post(*args, **kwargs):
+        calls.append({"args": args, "kwargs": kwargs})
+        raise AssertionError("unconfirmed Toss endpoint must fail closed before HTTP")
+
+    monkeypatch.setattr(requests, "post", fake_post)
+    executor = GuardedLiveExecutor(
+        config=LiveExecutionConfig(
+            client_id="cid",
+            client_secret="sec",
+            account_seq="acc",
+            order_endpoint_path="/v1/orders",
+            access_token="token",
+            live_trading_env_enabled=True,
+        ),
+        policy=RiskPolicy(live_trading_enabled=True, max_order_krw=100_000),
+    )
+
+    result = executor.submit_manual_draft(
+        _intent(),
+        RiskDecision.allowed(),
+        confirmation_phrase="I UNDERSTAND THIS IS A REAL ORDER",
+        dry_run=False,
+    )
+
+    assert result["status"] == "BLOCK"
+    assert "unconfirmed_toss_order_endpoint_path" in result["violations"]
+    assert calls == []
+
+
 def test_real_submission_requires_double_opt_in_and_confirmation(monkeypatch):
     calls = []
 
