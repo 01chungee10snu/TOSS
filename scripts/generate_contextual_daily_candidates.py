@@ -33,7 +33,8 @@ def prepare_features(panel: pd.DataFrame) -> pd.DataFrame:
     data["mom_20d"] = g["Close"].shift(1) / g["Close"].shift(21) - 1
     data["vol_10d"] = g["ret_cc"].transform(lambda s: s.shift(1).rolling(10).std())
     data["vol_20d"] = g["ret_cc"].transform(lambda s: s.shift(1).rolling(20).std())
-    data["dollar_volume"] = g.apply(lambda x: (x["Close"] * x["Volume"]).shift(1)).reset_index(level=0, drop=True)
+    data["raw_dollar_volume"] = data["Close"] * data["Volume"]
+    data["dollar_volume"] = data.groupby("code")["raw_dollar_volume"].shift(1)
 
     market = data.pivot_table(index="Date", columns="code", values="Close").sort_index()
     market_eq = market.pct_change().mean(axis=1, skipna=True).fillna(0)

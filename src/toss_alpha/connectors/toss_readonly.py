@@ -6,6 +6,8 @@ from typing import Any
 
 import requests
 
+from toss_alpha.data.schema import AccountSnapshot, PositionSnapshot
+
 BASE_URL = "https://openapi.tossinvest.com"
 RATE_LIMIT_HEADERS = (
     "X-RateLimit-Limit",
@@ -74,6 +76,8 @@ class TossReadOnlyClient:
             raise RuntimeError(f"request failed: HTTP {response.status_code} {response.text[:500]}")
         return result
 
+    # ── Market Data (시세) ──────────────────────────────────────
+
     def stocks(self, symbols: str) -> dict[str, Any]:
         return self._request("GET", "/api/v1/stocks", params={"symbols": symbols})
 
@@ -83,8 +87,124 @@ class TossReadOnlyClient:
     def candles(self, symbol: str, interval: str = "1D") -> dict[str, Any]:
         return self._request("GET", "/api/v1/candles", params={"symbol": symbol, "interval": interval})
 
+    def orderbook(self, symbols: str) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/orderbook", params={"symbols": symbols})
+
+    def trades(self, symbols: str) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/trades", params={"symbols": symbols})
+
+    def price_limits(self, symbols: str) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/price-limits", params={"symbols": symbols})
+
+    # ── Stock Info (종목 정보) ──────────────────────────────────
+
+    def warnings(self, symbol: str) -> dict[str, Any]:
+        return self._request("GET", f"/api/v1/stocks/{symbol}/warnings")
+
+    # ── Market Info (환율·장 운영) ─────────────────────────────
+
+    def exchange_rate(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/exchange-rate")
+
+    def market_calendar_kr(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/market-calendar/KR")
+
+    def market_calendar_us(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/market-calendar/US")
+
+    # ── Account · Asset (계좌·자산) ────────────────────────────
+
     def accounts(self) -> dict[str, Any]:
         return self._request("GET", "/api/v1/accounts", account=True)
 
     def holdings(self) -> dict[str, Any]:
         return self._request("GET", "/api/v1/holdings", account=True)
+
+    # ── Order Info (거래 가능 정보 — read-only) ────────────────
+
+    def buying_power(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/buying-power", account=True)
+
+    def sellable_quantity(self, symbol: str) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/sellable-quantity", params={"symbol": symbol}, account=True)
+
+    def commissions(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/commissions", account=True)
+
+    # ── Order History (주문 조회 — read-only) ──────────────────
+
+    def orders(self, status: str | None = None) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if status:
+            params["status"] = status
+        return self._request("GET", "/api/v1/orders", params=params or None, account=True)
+
+    def order_detail(self, order_id: str) -> dict[str, Any]:
+        return self._request("GET", f"/api/v1/orders/{order_id}", account=True)
+
+    def account_snapshot(self) -> AccountSnapshot:
+        payload = self.accounts()["json"] or {}
+        record = _first_record(payload)
+        account_id = str(
+            record.get("accountSeq")
+            or record.get("account_seq")
+            or record.get("accountId")
+            or record.get("account_id")
+            or self.account_seq
+            or "unknown"
+        )
+        return AccountSnapshot(
+            account_id=account_id,
+            cash=_to_float(record.get("cash") or record.get("cashBalance") or record.get("cash_balance")),
+            buying_power=_to_float(record.get("buyingPower") or record.get("buying_power")),
+            total_equity=_to_float(record.get("totalEquity") or record.get("total_equity") or record.get("equity")),
+            source="toss",
+        )
+
+    def position_snapshots(self) -> list[PositionSnapshot]:
+        payload = self.holdings()["json"] or {}
+        records = _records_list(payload)
+        positions: list[PositionSnapshot] = []
+        for record in records:
+            symbol = str(record.get("symbol") or record.get("code") or record.get("stockCode") or record.get("stock_code") or "").strip()
+            if not symbol:
+                continue
+            positions.append(
+                PositionSnapshot(
+                    symbol=symbol,
+                    quantity=float(record.get("quantity") or record.get("qty") or 0.0),
+                    sellable_quantity=_to_float(record.get("sellableQuantity") or record.get("sellable_quantity") or record.get("sellableQty")),
+                    avg_price=_to_float(record.get("avgPrice") or record.get("averagePrice") or record.get("avg_price")),
+                    market_value=_to_float(record.get("marketValue") or record.get("market_value")),
+                    unrealized_pnl=_to_float(record.get("unrealizedPnl") or record.get("unrealized_pnl")),
+                    source="toss",
+                )
+            )
+        return positions
+
+
+def _to_float(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    return float(value)
+
+
+def _first_record(payload: dict[str, Any]) -> dict[str, Any]:
+    result = payload.get("result", payload)
+    if isinstance(result, list):
+        return result[0] if result else {}
+    if isinstance(result, dict):
+        return result
+    return {}
+
+
+def _records_list(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    result = payload.get("result", payload)
+    if isinstance(result, list):
+        return [item for item in result if isinstance(item, dict)]
+    if isinstance(result, dict):
+        for key in ("holdings", "positions", "items"):
+            value = result.get(key)
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+    return []
