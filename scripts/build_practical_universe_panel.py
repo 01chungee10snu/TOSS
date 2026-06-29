@@ -19,10 +19,12 @@ Usage:
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import FinanceDataReader as fdr
@@ -34,12 +36,54 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from toss_alpha.daily.universe import UniverseConfig, build_practical_universe
 
-GAPI = f"python {Path.home()}/.hermes/skills/productivity/google-workspace/scripts/google_api.py"
+def resolve_google_api_script() -> Path:
+    hermes_home = Path(os.environ.get("HERMES_HOME", str(Path.home() / ".hermes" / "profiles" / "work")))
+    candidates = [
+        Path(os.environ["TOSS_ALPHA_GOOGLE_API_SCRIPT"]) if os.environ.get("TOSS_ALPHA_GOOGLE_API_SCRIPT") else None,
+        hermes_home / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py",
+        Path.home() / ".hermes" / "profiles" / "work" / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py",
+        Path.home() / ".hermes" / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py",
+        Path.home() / ".hermes" / "hermes-agent" / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py",
+    ]
+    for candidate in candidates:
+        if candidate and candidate.exists():
+            return candidate
+    checked = "\n".join(str(candidate) for candidate in candidates if candidate)
+    raise FileNotFoundError(f"google_api.py not found. Checked:\n{checked}")
+
+
+def python_can_import_googleapiclient(python_path: str | Path) -> bool:
+    result = subprocess.run(
+        [str(python_path), "-c", "import googleapiclient"],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    return result.returncode == 0
+
+
+def resolve_google_api_python() -> str:
+    candidates = [
+        os.environ.get("TOSS_ALPHA_GOOGLE_API_PYTHON"),
+        Path.home() / ".hermes" / "hermes-agent" / "venv" / "bin" / "python",
+        sys.executable,
+        "python3",
+        "python",
+    ]
+    for candidate in candidates:
+        if candidate and python_can_import_googleapiclient(candidate):
+            return str(candidate)
+    return sys.executable
+
+
+GAPI = f"{resolve_google_api_python()} {resolve_google_api_script()}"
 DRIVE_PARQUET = ROOT / "reports/backtests/practical_universe_panel.parquet"
 DRIVE_PARQUET.parent.mkdir(parents=True, exist_ok=True)
 
 START = "2022-01-01"
-END = "2026-06-21"
+# yfinance treats `end` as exclusive. Keep this dynamic so the daily forward
+# tracking cron does not freeze on the last manually configured end date.
+END = (date.today() + timedelta(days=1)).isoformat()
 SPREADSHEET_TITLE = "TOSS Practical Universe"
 UNIVERSE_SIZE = 400
 FORCE_INCLUDE_TOP_N = 80
