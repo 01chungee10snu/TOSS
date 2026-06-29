@@ -14,9 +14,59 @@ from toss_alpha.execution.daily_paper import DailyPaperExecutionResult, DailyPap
 from toss_alpha.data.schema import OrderIntent
 
 _DEFAULT_HERMES_HOME = Path(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes/profiles/work")))
-_DEFAULT_GOOGLE_API_SCRIPT = str(
-    _DEFAULT_HERMES_HOME / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py"
-)
+
+
+def _candidate_google_api_scripts() -> list[Path]:
+    candidates: list[Path] = []
+    if os.environ.get("TOSS_ALPHA_GOOGLE_API_SCRIPT"):
+        candidates.append(Path(os.path.expanduser(os.environ["TOSS_ALPHA_GOOGLE_API_SCRIPT"])))
+    candidates.extend(
+        [
+            _DEFAULT_HERMES_HOME / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py",
+            Path.home() / ".hermes" / "profiles" / "work" / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py",
+            Path.home() / ".hermes" / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py",
+            Path.home() / ".hermes" / "hermes-agent" / "skills" / "productivity" / "google-workspace" / "scripts" / "google_api.py",
+        ]
+    )
+    return candidates
+
+
+def _resolve_google_api_script(script_path: str | None = None) -> str:
+    if script_path:
+        return os.path.expanduser(script_path)
+    for candidate in _candidate_google_api_scripts():
+        if candidate.exists():
+            return str(candidate)
+    checked = "\n".join(str(candidate) for candidate in _candidate_google_api_scripts())
+    raise FileNotFoundError(f"google_api.py not found. Checked:\n{checked}")
+
+
+def _python_can_import_googleapiclient(python_path: str | Path) -> bool:
+    result = subprocess.run(
+        [str(python_path), "-c", "import googleapiclient"],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    return result.returncode == 0
+
+
+def _resolve_google_api_python(python_executable: str | None = None) -> str:
+    if python_executable:
+        return python_executable
+    env_python = os.environ.get("TOSS_ALPHA_GOOGLE_API_PYTHON")
+    if env_python:
+        return env_python
+    candidates: list[str | Path | None] = [
+        Path.home() / ".hermes" / "hermes-agent" / "venv" / "bin" / "python",
+        shutil.which("python"),
+        sys.executable,
+        shutil.which("python3"),
+    ]
+    for candidate in candidates:
+        if candidate and _python_can_import_googleapiclient(candidate):
+            return str(candidate)
+    return sys.executable
 
 
 @dataclass(frozen=True)
@@ -31,9 +81,8 @@ class GoogleSheetsLayout:
 
 class GoogleSheetsClient:
     def __init__(self, script_path: str | None = None, python_executable: str | None = None) -> None:
-        self.script_path = os.path.expanduser(script_path or os.environ.get("TOSS_ALPHA_GOOGLE_API_SCRIPT", _DEFAULT_GOOGLE_API_SCRIPT))
-        default_python = os.environ.get("TOSS_ALPHA_GOOGLE_API_PYTHON") or shutil.which("python") or sys.executable
-        self.python_executable = python_executable or default_python
+        self.script_path = _resolve_google_api_script(script_path)
+        self.python_executable = _resolve_google_api_python(python_executable)
 
     def create_spreadsheet(self, title: str, sheet_names: list[str] | None = None) -> dict[str, object]:
         names = sheet_names or ["settings"]
