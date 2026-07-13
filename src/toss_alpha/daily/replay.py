@@ -67,8 +67,10 @@ class ReplayEngine:
         stop_loss_pct: float = STOP_LOSS_PCT,
         take_profit_pct: float = TAKE_PROFIT_PCT,
         max_holding_steps: int = MAX_HOLDING_STEPS,
+        max_holding_trading_days: int | None = None,
         max_positions: int = 1,
         trailing_stop_pct: float = 0.0,
+        trailing_stop_activation_gain_pct: float = 0.0,
         sizing_mode: str = "flat",
         cash_fraction_per_entry: float = 0.25,
         min_volume: float = 0.0,
@@ -78,6 +80,8 @@ class ReplayEngine:
         prediction_min_score: float | None = None,
         prediction_overlay_mode: str | None = None,
         prediction_alpha: float = 10.0,
+        max_equity_drawdown_stop_pct: float = 0.0,
+        risk_cooldown_steps: int = 0,
     ) -> None:
         self.panel = panel.copy()
         self.panel["code"] = self.panel["code"].astype(str).str.zfill(6)
@@ -88,8 +92,14 @@ class ReplayEngine:
         self.stop_loss_pct = stop_loss_pct
         self.take_profit_pct = take_profit_pct
         self.max_holding_steps = max_holding_steps
+        self.max_holding_trading_days = (
+            None if max_holding_trading_days is None
+            else max(0, int(max_holding_trading_days))
+        )
+        self._run_step = 1
         self.max_positions = max_positions
         self.trailing_stop_pct = trailing_stop_pct
+        self.trailing_stop_activation_gain_pct = max(0.0, float(trailing_stop_activation_gain_pct))
         self.sizing_mode = sizing_mode
         self.cash_fraction_per_entry = cash_fraction_per_entry
         self.min_volume = min_volume
@@ -99,6 +109,11 @@ class ReplayEngine:
         self.prediction_min_score = prediction_min_score
         self.prediction_overlay_mode = prediction_overlay_mode
         self.prediction_alpha = prediction_alpha
+        self.max_equity_drawdown_stop_pct = max(0.0, float(max_equity_drawdown_stop_pct))
+        self.risk_cooldown_steps = max(0, int(risk_cooldown_steps))
+        self.risk_stop_count = 0
+        self._risk_peak_equity = float(initial_cash_krw)
+        self._risk_cooldown_until_step = -1
         if rebalance_mode not in {"hold_until_exit", "top_n_rotation", "full_liquidate_every_step"}:
             raise ValueError(f"unsupported rebalance_mode: {rebalance_mode}")
         self.rebalance_mode = rebalance_mode
@@ -110,6 +125,7 @@ class ReplayEngine:
 
     def run(self, *, step: int = 5) -> dict[str, Any]:
         """Step through all available dates, scoring and trading."""
+        self._run_step = max(1, int(step))
         all_dates = sorted(self.panel["Date"].unique())
         replay_dates = all_dates[::step]
 
@@ -134,9 +150,16 @@ class ReplayEngine:
 
             # --- exits first --- (also counts current open positions for entry logic)
             self._check_exits(close_prices, date_str, step_idx, regime)
+            risk_stop_now = self._apply_equity_drawdown_guard(close_prices, date_str, step_idx)
 
             # --- entries ---
-            if regime["status"] != "risk_off" and len(self.open_positions) < self.max_positions:
+            risk_cooldown_active = step_idx < self._risk_cooldown_until_step
+            if (
+                not risk_stop_now
+                and not risk_cooldown_active
+                and regime["status"] != "risk_off"
+                and len(self.open_positions) < self.max_positions
+            ):
                 volume_lookup = self._latest_volumes(sub)
                 self._check_entries(candidates, close_prices, date_str, step_idx, volume_lookup)
 
@@ -377,10 +400,15 @@ class ReplayEngine:
                 exit_reason = "take_profit"
             elif (
                 self.trailing_stop_pct > 0.0
-                and pos.peak_price > pos.entry_price
+                and pos.peak_price >= pos.entry_price * (1.0 + self.trailing_stop_activation_gain_pct)
                 and current_price <= pos.peak_price * (1.0 - self.trailing_stop_pct)
             ):
                 exit_reason = "trailing_stop"
+            elif (
+                self.max_holding_trading_days is not None
+                and holding_steps * self._run_step >= self.max_holding_trading_days
+            ):
+                exit_reason = "time_exit"
             elif holding_steps >= self.max_holding_steps:
                 exit_reason = "time_exit"
             elif regime["status"] == "risk_off":
@@ -419,6 +447,51 @@ class ReplayEngine:
             ml_prediction=pos.ml_prediction,
         ))
         del self.open_positions[pos.symbol]
+
+    def _current_equity(self, close_prices: dict[str, float]) -> float:
+        positions_value = sum(
+            pos.quantity * close_prices.get(pos.symbol, pos.entry_price)
+            for pos in self.open_positions.values()
+        )
+        return self.cash + positions_value
+
+    def _apply_equity_drawdown_guard(
+        self,
+        close_prices: dict[str, float],
+        date_str: str,
+        step_idx: int,
+    ) -> bool:
+        """Liquidate and pause entries when portfolio drawdown breaches a guard.
+
+        This is paper-only risk-control logic for research. It approximates a
+        portfolio-level kill switch: once marked equity falls below the allowed
+        drawdown from the running peak, all open positions are closed at the
+        current close and new entries are blocked for ``risk_cooldown_steps``.
+        """
+        if self.max_equity_drawdown_stop_pct <= 0.0:
+            return False
+        equity = self._current_equity(close_prices)
+        if equity > self._risk_peak_equity:
+            self._risk_peak_equity = equity
+            return False
+        if self._risk_peak_equity <= 0:
+            return False
+        drawdown = equity / self._risk_peak_equity - 1.0
+        if drawdown > -self.max_equity_drawdown_stop_pct:
+            return False
+        for symbol in list(self.open_positions):
+            pos = self.open_positions[symbol]
+            px = close_prices.get(symbol, pos.entry_price)
+            self._close_position(pos, px, date_str, step_idx, "equity_drawdown_stop")
+        self.risk_stop_count += 1
+        self._risk_cooldown_until_step = max(
+            self._risk_cooldown_until_step,
+            step_idx + self.risk_cooldown_steps,
+        )
+        # Reset peak after forced liquidation so the next deployment starts from
+        # the protected equity level rather than repeatedly firing on old highs.
+        self._risk_peak_equity = self.cash
+        return True
 
     def _check_entries(
         self,
@@ -545,6 +618,9 @@ class ReplayEngine:
                 "initial_cash_krw": self.initial_cash_krw,
                 "transaction_cost_bps": self.transaction_cost_bps,
                 "total_cost_krw": round(self.total_cost_krw, 2),
+                "risk_stop_count": self.risk_stop_count,
+                "max_equity_drawdown_stop_pct": self.max_equity_drawdown_stop_pct,
+                "risk_cooldown_steps": self.risk_cooldown_steps,
             },
         }
 

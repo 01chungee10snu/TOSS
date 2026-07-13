@@ -53,6 +53,16 @@ def _prepare_panel(panel: pd.DataFrame) -> pd.DataFrame:
     data["dollar_volume"] = data["Close"] * data["Volume"]
     data["ret_cc"] = data.groupby("code")["Close"].pct_change()
     data["prev_volatility_20d"] = data.groupby("code")["ret_cc"].transform(lambda s: s.shift(1).rolling(20, min_periods=1).std())
+    # Monday-open decisions may only use observations known before the open,
+    # except for the opening gap itself. Keep session-level risk inputs lagged.
+    data["intraday_range_pct"] = (data["High"] - data["Low"]) / data["prev_close"]
+    data["volume_median_20d"] = data.groupby("code")["Volume"].transform(
+        lambda s: s.shift(1).rolling(20, min_periods=5).median()
+    )
+    data["volume_surge_20d"] = data["Volume"] / data["volume_median_20d"]
+    data["prev_intraday_range_pct"] = data.groupby("code")["intraday_range_pct"].shift(1)
+    data["prev_dollar_volume"] = data.groupby("code")["dollar_volume"].shift(1)
+    data["prev_volume_surge_20d"] = data.groupby("code")["volume_surge_20d"].shift(1)
     return data
 
 
@@ -60,22 +70,28 @@ def _reasons_for_trade(row: pd.Series, thresholds: dict[str, float]) -> list[str
     reasons: list[str] = []
     prev_close = float(row.get("prev_close") or 0.0)
     open_px = float(row.get("Open") or 0.0)
-    high_px = float(row.get("High") or 0.0)
-    low_px = float(row.get("Low") or 0.0)
-    if prev_close <= 0 or open_px <= 0 or high_px <= 0 or low_px <= 0:
+    if prev_close <= 0 or open_px <= 0:
         reasons.append("invalid_price_inputs")
         return reasons
     gap_pct = abs(open_px / prev_close - 1.0)
-    intraday_range_pct = (high_px - low_px) / prev_close
+    prev_intraday_range = row.get("prev_intraday_range_pct")
     if gap_pct > thresholds["max_gap_pct"]:
         reasons.append("excessive_gap")
-    if intraday_range_pct > thresholds["max_intraday_range_pct"]:
-        reasons.append("excessive_intraday_range")
-    if float(row.get("dollar_volume") or 0.0) < thresholds["min_dollar_volume_krw"]:
-        reasons.append("low_dollar_volume")
+    tail_risk_reasons: list[str] = []
+    if pd.notna(prev_intraday_range) and float(prev_intraday_range) > thresholds["max_intraday_range_pct"]:
+        tail_risk_reasons.append("excessive_prev_intraday_range")
     prev_vol = row.get("prev_volatility_20d")
     if pd.notna(prev_vol) and float(prev_vol) > thresholds["max_prev_volatility_20d"]:
-        reasons.append("excessive_prev_volatility_20d")
+        tail_risk_reasons.append("excessive_prev_volatility_20d")
+    max_prev_volume_surge = thresholds.get("max_prev_volume_surge_20d")
+    prev_volume_surge = row.get("prev_volume_surge_20d")
+    if max_prev_volume_surge is not None and pd.notna(prev_volume_surge) and float(prev_volume_surge) > float(max_prev_volume_surge):
+        tail_risk_reasons.append("excessive_prev_volume_surge_20d")
+    min_tail_flags = max(1, int(thresholds.get("min_tail_risk_flags", 1)))
+    if len(tail_risk_reasons) >= min_tail_flags:
+        reasons.extend(tail_risk_reasons)
+    if float(row.get("prev_dollar_volume") or 0.0) < thresholds["min_dollar_volume_krw"]:
+        reasons.append("low_prev_dollar_volume")
     return reasons
 
 
@@ -99,11 +115,16 @@ def evaluate_fast_veto_variant(
     frame = picks.copy()
     frame["Date"] = pd.to_datetime(frame["Date"])
     frame["code"] = frame["code"].astype(str).str.zfill(6)
-    overlap_cols = [col for col in ["Open", "High", "Low", "Close", "Volume", "prev_close", "dollar_volume", "prev_volatility_20d"] if col in frame.columns]
+    risk_cols = [
+        "Open", "High", "Low", "Close", "Volume", "prev_close", "dollar_volume",
+        "prev_intraday_range_pct", "prev_dollar_volume", "prev_volume_surge_20d",
+        "prev_volatility_20d",
+    ]
+    overlap_cols = [col for col in risk_cols if col in frame.columns]
     if overlap_cols:
         frame = frame.drop(columns=overlap_cols)
     merged = frame.merge(
-        prepared[["Date", "code", "Open", "High", "Low", "Close", "Volume", "prev_close", "dollar_volume", "prev_volatility_20d"]],
+        prepared[["Date", "code", *risk_cols]],
         on=["Date", "code"],
         how="left",
     )

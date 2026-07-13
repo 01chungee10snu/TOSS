@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Mapping
 
 
 @dataclass(frozen=True)
@@ -13,6 +14,28 @@ class RiskPolicy:
     allow_short_selling: bool = False
     allow_leverage: bool = False
     allow_options: bool = False
+
+    @classmethod
+    def from_env(cls, env: Mapping[str, str] | None = None) -> "RiskPolicy":
+        """Build the live-risk gate from explicit environment opt-ins only."""
+        import os
+
+        source = os.environ if env is None else env
+        return cls(
+            live_trading_enabled=_env_true(source.get("TOSS_RISK_LIVE_TRADING_ENABLED")),
+            max_position_pct=float(source.get("TOSS_MAX_POSITION_PCT", 0.05)),
+            max_daily_loss_pct=float(source.get("TOSS_MAX_DAILY_LOSS_PCT", 0.01)),
+            max_order_krw=int(float(source.get("TOSS_MAX_ORDER_KRW", 100_000))),
+            require_manual_confirmation=not _env_false(source.get("TOSS_REQUIRE_MANUAL_CONFIRMATION")),
+        )
+
+
+def _env_true(value: str | None) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _env_false(value: str | None) -> bool:
+    return str(value or "").strip().lower() in {"0", "false", "no", "n", "off"}
 
 
 def validate_order_intent(
