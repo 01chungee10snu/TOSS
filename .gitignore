@@ -55,3 +55,7 @@ reports/harness/latest_position_exit_report.json
 reports/harness/panel_refresh_status.json
 reports/sweep/
 reports/trade_candidates/
+
+# large ML prediction files (>50MB, not tracked)
+reports/harness/ml_direct_pred_*.csv
+reports/harness/ml_direct_features_*.parquet
