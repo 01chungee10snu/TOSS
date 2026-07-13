@@ -25,7 +25,7 @@ def prepare_features(panel: pd.DataFrame) -> pd.DataFrame:
     for col in ["Open", "High", "Low", "Close", "Volume"]:
         data[col] = pd.to_numeric(data[col], errors="coerce")
     g = data.groupby("code", group_keys=False)
-    data["ret_cc"] = g["Close"].pct_change()
+    data["ret_cc"] = g["Close"].pct_change(fill_method=None)
     data["mom_1d"] = g["Close"].shift(1) / g["Close"].shift(2) - 1
     data["mom_3d"] = g["Close"].shift(1) / g["Close"].shift(4) - 1
     data["mom_5d"] = g["Close"].shift(1) / g["Close"].shift(6) - 1
@@ -33,10 +33,11 @@ def prepare_features(panel: pd.DataFrame) -> pd.DataFrame:
     data["mom_20d"] = g["Close"].shift(1) / g["Close"].shift(21) - 1
     data["vol_10d"] = g["ret_cc"].transform(lambda s: s.shift(1).rolling(10).std())
     data["vol_20d"] = g["ret_cc"].transform(lambda s: s.shift(1).rolling(20).std())
-    data["dollar_volume"] = g.apply(lambda x: (x["Close"] * x["Volume"]).shift(1)).reset_index(level=0, drop=True)
+    data["raw_dollar_volume"] = data["Close"] * data["Volume"]
+    data["dollar_volume"] = data.groupby("code")["raw_dollar_volume"].shift(1)
 
     market = data.pivot_table(index="Date", columns="code", values="Close").sort_index()
-    market_eq = market.pct_change().mean(axis=1, skipna=True).fillna(0)
+    market_eq = market.pct_change(fill_method=None).mean(axis=1, skipna=True).fillna(0)
     market_close = (1 + market_eq).cumprod()
     regime = pd.DataFrame({"Date": market_close.index, "market_ret": market_eq.values, "market_close": market_close.values})
     regime["market_mom_20d"] = regime["market_close"].shift(1) / regime["market_close"].shift(21) - 1
@@ -54,6 +55,38 @@ def prepare_features(panel: pd.DataFrame) -> pd.DataFrame:
 def score(frame: pd.DataFrame, params: dict[str, Any]) -> pd.Series:
     base = frame[params["momentum_col"]] / frame[params["vol_col"]].replace(0, pd.NA)
     return -base if params["mode"] == "reversal" else base
+
+
+def krx_tick_size(price: float) -> int:
+    """Return a conservative KRX tick size for a share price."""
+    if price < 2_000:
+        return 1
+    if price < 5_000:
+        return 5
+    if price < 20_000:
+        return 10
+    if price < 50_000:
+        return 50
+    if price < 200_000:
+        return 100
+    if price < 500_000:
+        return 500
+    return 1_000
+
+
+def round_up_to_tick(price: float) -> int:
+    tick = krx_tick_size(price)
+    return int(((float(price) + tick - 1) // tick) * tick)
+
+
+def buy_limit_price(reference_close: float, *, aggressiveness_pct: float = 0.005) -> int:
+    return round_up_to_tick(float(reference_close) * (1.0 + aggressiveness_pct))
+
+
+def whole_share_quantity(budget_krw: float, limit_price: float) -> int:
+    if budget_krw <= 0 or limit_price <= 0:
+        return 0
+    return int(float(budget_krw) // float(limit_price))
 
 
 def generate(policy: dict[str, Any], panel: pd.DataFrame, as_of: str | None = None) -> dict[str, Any]:
@@ -90,19 +123,55 @@ def generate(policy: dict[str, Any], panel: pd.DataFrame, as_of: str | None = No
     picks = eligible.sort_values("score", ascending=False).head(int(params["top_n"]))
     max_total = float(risk.get("max_total_notional_krw", 1_000_000))
     max_per = float(risk.get("max_notional_krw_per_position", 100_000))
-    per_position = min(max_per, max_total / max(len(picks), 1))
+    cash_fraction = float(risk.get("cash_fraction_per_entry", 0.0) or 0.0)
+    portfolio_value = float(
+        risk.get("portfolio_value_krw")
+        or risk.get("assumed_initial_cash_krw")
+        or max_total
+    )
+    cash_fraction_budget = portfolio_value * cash_fraction if cash_fraction > 0 else max_per
+    per_position_budget = min(max_per, cash_fraction_budget, max_total / max(len(picks), 1))
+    limit_aggressiveness_pct = float(risk.get("buy_limit_aggressiveness_pct", 0.005))
     orders = []
+    skipped_orders = []
+    planned_total = 0.0
     for _, row in picks.iterrows():
+        reference_close = float(row["Close"])
+        limit_price = buy_limit_price(reference_close, aggressiveness_pct=limit_aggressiveness_pct)
+        remaining_total_budget = max_total - planned_total
+        budget_krw = min(per_position_budget, max_per, cash_fraction_budget, remaining_total_budget)
+        quantity = whole_share_quantity(budget_krw, limit_price)
+        symbol = str(row["code"]).zfill(6)
+        name = row.get("name", "")
+        if quantity < 1:
+            skipped_orders.append({
+                "symbol": symbol,
+                "name": name,
+                "side": "BUY",
+                "skip_reason": "cannot_buy_one_whole_share_with_budget",
+                "budget_krw": round(budget_krw, 0),
+                "reference_close": reference_close,
+                "limit_price": limit_price,
+                "minimum_required_krw": limit_price,
+                "score": float(row["score"]),
+            })
+            continue
+        estimated_notional = float(quantity * limit_price)
+        planned_total += estimated_notional
         orders.append({
-            "symbol": str(row["code"]).zfill(6),
-            "name": row.get("name", ""),
+            "symbol": symbol,
+            "name": name,
             "side": "BUY",
             "mode": "manual_draft_only",
             "not_live_order": True,
-            "notional_krw": round(per_position, 0),
-            "reference_close": float(row["Close"]),
+            "order_type": "LIMIT",
+            "budget_krw": round(budget_krw, 0),
+            "notional_krw": round(estimated_notional, 0),
+            "quantity": quantity,
+            "limit_price": limit_price,
+            "reference_close": reference_close,
             "score": float(row["score"]),
-            "reason": f"approved_situation={situation}; {params['mode']} {params['momentum_col']}/{params['vol_col']}; exit={params['return_col']}",
+            "reason": f"approved_situation={situation}; whole_share_qty={quantity}; limit_price={limit_price}; budget_krw={round(budget_krw, 0)}; {params['mode']} {params['momentum_col']}/{params['vol_col']}; exit={params['return_col']}",
         })
     return {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -115,6 +184,17 @@ def generate(policy: dict[str, Any], panel: pd.DataFrame, as_of: str | None = No
         "requires_manual_confirmation": True,
         "risk_gates": risk,
         "orders": orders,
+        "skipped_orders": skipped_orders,
+        "planned_total_notional_krw": round(planned_total, 0),
+        "sizing_model": "whole_share_limit_order_budget_to_quantity_with_cash_fraction_cap",
+        "sizing_inputs": {
+            "max_total_notional_krw": max_total,
+            "max_notional_krw_per_position": max_per,
+            "cash_fraction_per_entry": cash_fraction,
+            "portfolio_value_krw": portfolio_value,
+            "cash_fraction_budget_krw": cash_fraction_budget,
+            "per_position_budget_krw": per_position_budget,
+        },
         "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
     }
 
