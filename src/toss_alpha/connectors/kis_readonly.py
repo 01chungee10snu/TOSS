@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any
 
 import requests
 
-from toss_alpha.data.schema import AccountSnapshot, PositionSnapshot
+from toss_alpha.connectors.kis_rate_limit import kis_post, kis_request
+from toss_alpha.connectors.kis_token_cache import cached_kis_access_token
+from toss_alpha.data.schema import AccountSnapshot, PositionSnapshot, Quote
 
 LIVE_BASE_URL = "https://openapi.koreainvestment.com:9443"
 MOCK_BASE_URL = "https://openapivts.koreainvestment.com:29443"
@@ -30,26 +33,31 @@ class KisReadOnlyClient:
     base_url: str | None = None
     timeout: int = 20
     balance_path: str = "/uapi/domestic-stock/v1/trading/inquire-balance"
+    quote_path: str = "/uapi/domestic-stock/v1/quotations/inquire-price"
     balance_tr_id: str | None = None
+    quote_tr_id: str | None = None
 
     def token(self) -> str:
-        response = requests.post(
-            f"{self._resolved_base_url()}/oauth2/tokenP",
-            headers={"Content-Type": "application/json"},
-            json={
-                "grant_type": "client_credentials",
-                "appkey": self.app_key,
-                "appsecret": self.app_secret,
-            },
-            timeout=self.timeout,
+        def fetch_token() -> dict[str, Any]:
+            response = kis_post(
+                f"{self._resolved_base_url()}/oauth2/tokenP",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "grant_type": "client_credentials",
+                    "appkey": self.app_key,
+                    "appsecret": self.app_secret,
+                },
+                timeout=self.timeout,
+            )
+            if not response.ok:
+                raise RuntimeError(f"token failed: HTTP {response.status_code} {response.text[:500]}")
+            return response.json()
+
+        return cached_kis_access_token(
+            app_key=self.app_key,
+            base_url=self._resolved_base_url(),
+            fetch_token=fetch_token,
         )
-        if not response.ok:
-            raise RuntimeError(f"token failed: HTTP {response.status_code} {response.text[:500]}")
-        data = response.json()
-        access_token = data.get("access_token")
-        if not access_token:
-            raise RuntimeError(f"token response has no access_token: {data}")
-        return access_token
 
     def _resolved_base_url(self) -> str:
         if self.base_url:
@@ -58,6 +66,9 @@ class KisReadOnlyClient:
 
     def _default_balance_tr_id(self) -> str:
         return "VTTC8434R" if self.mock_trading else "TTTC8434R"
+
+    def _default_quote_tr_id(self) -> str:
+        return "FHKST01010100"
 
     def _headers(self, *, tr_id: str | None = None) -> dict[str, str]:
         return {
@@ -69,7 +80,7 @@ class KisReadOnlyClient:
         }
 
     def _request(self, method: str, path: str, *, params: dict[str, Any] | None = None, tr_id: str | None = None) -> dict[str, Any]:
-        response = requests.request(
+        response = kis_request(
             method,
             f"{self._resolved_base_url()}{path}",
             headers=self._headers(tr_id=tr_id),
@@ -89,6 +100,10 @@ class KisReadOnlyClient:
         }
         if not response.ok:
             raise RuntimeError(f"request failed: HTTP {response.status_code} {response.text[:500]}")
+        if isinstance(payload, dict) and "rt_cd" in payload and str(payload.get("rt_cd")) != "0":
+            msg_cd = str(payload.get("msg_cd") or "unknown")
+            msg = str(payload.get("msg1") or "KIS business error")
+            raise RuntimeError(f"request failed: KIS {msg_cd} {msg[:300]}")
         return result
 
     def balance(self, *, query: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -99,6 +114,35 @@ class KisReadOnlyClient:
         if query:
             params.update(query)
         return self._request("GET", self.balance_path, params=params)
+
+    def quote(self, symbol: str) -> dict[str, Any]:
+        """Return KIS domestic stock current-price payload for a symbol.
+
+        This is read-only market data. It never places or amends orders.
+        """
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": str(symbol).strip().zfill(6),
+        }
+        return self._request(
+            "GET",
+            self.quote_path,
+            params=params,
+            tr_id=self.quote_tr_id or self._default_quote_tr_id(),
+        )
+
+    def quote_snapshot(self, symbol: str) -> Quote:
+        payload = self.quote(symbol)["json"] or {}
+        record = _first_record(payload)
+        return Quote(
+            symbol=str(symbol).strip().zfill(6),
+            timestamp=datetime.now(timezone.utc),
+            last=_to_float(record.get("stck_prpr") or record.get("last") or record.get("price")) or 0.0,
+            bid=_to_float(record.get("bidp") or record.get("bid")),
+            ask=_to_float(record.get("askp") or record.get("ask")),
+            volume=_to_float(record.get("acml_vol") or record.get("volume")),
+            source="kis",
+        )
 
     def account_snapshot(self) -> AccountSnapshot:
         payload = self.balance()["json"] or {}
