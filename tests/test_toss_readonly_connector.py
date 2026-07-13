@@ -45,7 +45,7 @@ def test_account_endpoints_require_account_seq(monkeypatch):
 
 def test_connector_exposes_only_readonly_methods():
     client = TossReadOnlyClient(client_id="cid", client_secret="sec", account_seq="acc")
-    for name in ["token", "stocks", "prices", "candles", "accounts", "holdings"]:
+    for name in ["token", "stocks", "prices", "candles", "accounts", "holdings", "orders", "order_detail"]:
         assert callable(getattr(client, name))
-    for forbidden in ["orders", "place_order", "buy", "sell"]:
+    for forbidden in ["place_order", "cancel_order", "buy", "sell"]:
         assert not hasattr(client, forbidden)

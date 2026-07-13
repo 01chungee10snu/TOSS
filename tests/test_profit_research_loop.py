@@ -3,6 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 from toss_alpha.research.profit_loop import (
+    _reasons_for_trade,
     apply_extra_cost_bps,
     build_fast_veto_grid,
     build_walkforward_folds,
@@ -89,9 +90,62 @@ def test_evaluate_fast_veto_variant_filters_symbols_by_thresholds():
 
     assert result["kept_trades"] == 2
     assert result["blocked_trades"] == 1
-    assert result["blocked_counts_by_reason"]["low_dollar_volume"] == 1
+    assert result["blocked_counts_by_reason"]["low_prev_dollar_volume"] == 1
     assert result["performance"]["total_trades"] == 2
     assert round(result["performance"]["total_return_pct"], 2) == 5.84
+
+
+def test_fast_veto_does_not_use_entry_day_high_low_close_or_volume():
+    picks = pd.DataFrame([
+        {"Date": "2024-01-08", "week_key": "2024-W02", "code": "111111", "trade_return": 0.03}
+    ])
+    base_panel = pd.DataFrame([
+        {"Date": "2024-01-05", "code": "111111", "Open": 100, "High": 102, "Low": 98, "Close": 100, "Volume": 1_000_000},
+        {"Date": "2024-01-08", "code": "111111", "Open": 101, "High": 102, "Low": 99, "Close": 101, "Volume": 1_000_000},
+    ])
+    mutated_panel = base_panel.copy()
+    monday = mutated_panel["Date"] == "2024-01-08"
+    mutated_panel.loc[monday, ["High", "Low", "Close", "Volume"]] = [500, 1, 400, 1]
+    thresholds = {
+        "max_gap_pct": 0.05,
+        "max_intraday_range_pct": 0.10,
+        "min_dollar_volume_krw": 1_000_000,
+        "max_prev_volatility_20d": 1.0,
+        "max_prev_volume_surge_20d": 3.0,
+    }
+
+    base = evaluate_fast_veto_variant(picks=picks, panel=base_panel, thresholds=thresholds, group_col="week_key")
+    mutated = evaluate_fast_veto_variant(picks=picks, panel=mutated_panel, thresholds=thresholds, group_col="week_key")
+
+    assert base["kept_trades"] == 1
+    assert mutated["kept_trades"] == 1
+    assert base["blocked_counts_by_reason"] == mutated["blocked_counts_by_reason"] == {}
+
+
+def test_tail_risk_veto_can_require_two_simultaneous_flags():
+    row = pd.Series({
+        "prev_close": 100.0,
+        "Open": 101.0,
+        "prev_intraday_range_pct": 0.09,
+        "prev_dollar_volume": 2_000_000_000.0,
+        "prev_volatility_20d": 0.04,
+        "prev_volume_surge_20d": 2.0,
+    })
+    thresholds = {
+        "max_gap_pct": 0.05,
+        "max_intraday_range_pct": 0.08,
+        "min_dollar_volume_krw": 1_000_000_000.0,
+        "max_prev_volatility_20d": 0.06,
+        "max_prev_volume_surge_20d": 3.0,
+        "min_tail_risk_flags": 2,
+    }
+
+    assert _reasons_for_trade(row, thresholds) == []
+    row["prev_volume_surge_20d"] = 4.0
+    assert _reasons_for_trade(row, thresholds) == [
+        "excessive_prev_intraday_range",
+        "excessive_prev_volume_surge_20d",
+    ]
 
 
 def test_choose_best_branch_prefers_positive_return_with_better_risk_adjusted_score():

@@ -40,7 +40,7 @@ def test_kis_connector_builds_authorization_and_app_headers(monkeypatch):
 
 def test_kis_connector_exposes_only_readonly_methods():
     client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
-    for name in ["token", "balance", "account_snapshot", "position_snapshots"]:
+    for name in ["token", "balance", "account_snapshot", "position_snapshots", "quote", "quote_snapshot"]:
         assert callable(getattr(client, name))
     for forbidden in ["orders", "place_order", "buy", "sell"]:
         assert not hasattr(client, forbidden)
@@ -78,3 +78,58 @@ def test_kis_account_snapshot_and_positions_parse_outputs(monkeypatch):
     assert positions[0].symbol == "005930"
     assert positions[0].quantity == 3.0
     assert positions[0].sellable_quantity == 2.0
+
+
+def test_kis_quote_uses_readonly_current_price_endpoint(monkeypatch):
+    calls = []
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        return FakeResponse(payload={"access_token": "kis-token"})
+
+    def fake_request(method, url, headers=None, params=None, timeout=None):
+        calls.append({"method": method, "url": url, "headers": headers, "params": params})
+        return FakeResponse(payload={"output": {"stck_prpr": "70100", "bidp": "70000", "askp": "70200", "acml_vol": "12345"}})
+
+    monkeypatch.setattr("requests.post", fake_post)
+    monkeypatch.setattr("requests.request", fake_request)
+
+    client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
+    result = client.quote("5930")
+
+    assert result["ok"] is True
+    assert calls[0]["method"] == "GET"
+    assert calls[0]["url"].endswith("/uapi/domestic-stock/v1/quotations/inquire-price")
+    assert calls[0]["headers"]["tr_id"] == "FHKST01010100"
+    assert calls[0]["params"] == {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": "005930"}
+
+
+def test_kis_quote_snapshot_parses_price_payload(monkeypatch):
+    monkeypatch.setattr(
+        KisReadOnlyClient,
+        "quote",
+        lambda self, symbol: {"json": {"output": {"stck_prpr": "70100", "bidp": "70000", "askp": "70200", "acml_vol": "12345"}}},
+    )
+    client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
+
+    quote = client.quote_snapshot("5930")
+
+    assert quote.symbol == "005930"
+    assert quote.last == 70100.0
+    assert quote.bid == 70000.0
+    assert quote.ask == 70200.0
+    assert quote.volume == 12345.0
+    assert quote.source == "kis"
+
+
+def test_kis_business_error_under_http_200_raises(monkeypatch):
+    monkeypatch.setattr(KisReadOnlyClient, "token", lambda self: "token")
+    monkeypatch.setattr(
+        "requests.request",
+        lambda *args, **kwargs: FakeResponse(
+            payload={"rt_cd": "1", "msg_cd": "EGW00133", "msg1": "expired token"}
+        ),
+    )
+    client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
+
+    with pytest.raises(RuntimeError, match="KIS EGW00133"):
+        client.balance()
