@@ -16,3 +16,42 @@ reports/backtests/*_ohlcv_panel.csv
 
 # notebooks
 .ipynb_checkpoints/
+
+# runtime / operational artifacts
+logs/
+reports/harness/live_submit_*.json
+reports/harness/live_paper_divergence_*
+reports/harness/live_order_ledger*
+reports/harness/live_equity_guard_state*
+reports/harness/live_position_tracker.json
+reports/harness/toss-ttak-loop.lock
+reports/harness/forward_tracking/
+reports/harness/sentiment_forward/
+reports/harness/settlements/
+reports/harness/paper_portfolio/
+reports/harness/current_issues/
+reports/harness/kis_*.json
+reports/harness/kis_*.jsonl
+reports/harness/kis_*.lock
+reports/harness/intraday_realtime_guard_*
+reports/harness/rebound_*
+reports/harness/profit_research_walkforward_stress_*
+reports/harness/quote_eval_*
+reports/harness/sell_dry_run_*
+reports/harness/loss_averse_*
+reports/harness/ml_trade_condition_*
+reports/harness/trailing_activation_*
+reports/harness/operational_policy_parity_*
+reports/harness/fill_regime_research_*
+reports/harness/toss_strategy_research_*
+reports/harness/inverse_sleeve_overlay_*
+reports/harness/strict_live_quality_gate_*
+reports/harness/entry_gap_veto_*
+reports/harness/daily_entry_veto_*
+reports/harness/manual_*
+reports/harness/risk_off_inverse_*
+reports/harness/strategic_live_decision_harness_audit.json
+reports/harness/latest_position_exit_report.json
+reports/harness/panel_refresh_status.json
+reports/sweep/
+reports/trade_candidates/

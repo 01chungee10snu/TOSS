@@ -7,7 +7,7 @@ description: "TOSS 레포에서 ttak 자문자답 기반 quant/qual/live-readine
 
 ## 목적
 
-이 오케스트레이터는 TOSS 레포를 다음 3계층 loop로 돌린다.
+이 오케스트레이터는 TOSS 레포를 다음 4계층 loop로 돌린다.
 
 1. **Quant lane**
    - 패널 준비 여부 확인
@@ -19,12 +19,15 @@ description: "TOSS 레포에서 ttak 자문자답 기반 quant/qual/live-readine
 3. **Execution gate**
    - `live-readiness` 결과 확인
    - 기본값은 live blocked
+4. **Live-submit gate**
+   - KIS 주문 payload를 dry-run으로 감사
+   - 실제 제출은 broker/risk/submit 3중 opt-in, 정확한 확인 문구, qual gate 통과, 중복주문 ledger 통과가 모두 필요
 
 ## 운영 원칙
 
 - 기본값은 fail-closed.
 - 정량은 엔진, 정성은 veto/gate/override.
-- 실주문은 범위 밖이다.
+- 실주문은 기본 범위 밖이며, `live-submit`은 fail-closed guarded executor로만 다룬다.
 - loop는 evidence-backed artifact를 `reports/harness/`에 남긴다.
 - cron은 state change 또는 actionable candidate가 있을 때만 사용자에게 출력한다.
 
@@ -58,3 +61,6 @@ cd /Users/01chungee10/Github/TOSS
 - `BLOCKED_QUANT_DATA`: 정량 입력 부족
 - `BLOCKED_QUAL_DATA`: 정성 입력 파이프 미구현/비활성
 - `LIVE_BLOCKED`: readiness 상 실거래 차단 상태 유지
+- `LIVE_SUBMIT_DRY_RUN_READY`: 주문 payload dry-run 감사 통과, 실제 제출 없음
+- `LIVE_SUBMIT_DRY_RUN_BLOCKED`: 주문 payload는 만들었지만 qual/ledger/risk 등으로 제출 차단
+- `LIVE_SUBMITTED`: 3중 opt-in과 확인 문구, ledger 통과 후 broker submit 완료

@@ -1,6 +1,6 @@
 {
   "policy_id": "contextual_mon_fri_policy_seed20260607_walkforward_promoted",
-  "created_at_utc": "2026-06-20T21:31:44.586418+00:00",
+  "created_at_utc": "2026-07-07T00:12:22.809870+00:00",
   "mode": "paper_or_manual_draft_only",
   "live_trading_enabled": false,
   "entry_exit_cycle": {
@@ -294,7 +294,7 @@
   },
   "disclaimer": "Research-only promoted Monday-buy Friday-sell policy with walk-forward-approved fast-veto overlay and cost stress validation. Not investment advice. Live orders not submitted.",
   "base_policy_source": "/Users/01chungee10/Github/TOSS/config/generated_policies/contextual_mon_fri_policy_seed20260607.json",
-  "walkforward_report_source": "/Users/01chungee10/Github/TOSS/reports/harness/profit_research_walkforward_stress_20260620T213144Z.json",
+  "walkforward_report_source": "/Users/01chungee10/Github/TOSS/reports/harness/profit_research_walkforward_stress_20260707T001222Z.json",
   "fast_veto_overlay": {
     "variant_id": "veto_higher_liquidity_looser_range",
     "thresholds": {
