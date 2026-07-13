@@ -11,6 +11,8 @@ from typing import Any, Mapping
 
 import requests
 
+from toss_alpha.connectors.kis_rate_limit import kis_post
+from toss_alpha.connectors.kis_token_cache import cached_kis_access_token
 from toss_alpha.data.schema import OrderIntent, RiskDecision
 from toss_alpha.risk import RiskPolicy
 
@@ -102,7 +104,7 @@ def _resolve_kis_account(source: Mapping[str, str]) -> tuple[str | None, str | N
 
 def live_readiness(env: Mapping[str, str] | None = None, policy: RiskPolicy | None = None) -> dict[str, Any]:
     config = LiveExecutionConfig.from_env(env)
-    policy = policy or RiskPolicy()
+    policy = policy or RiskPolicy.from_env(env)
     missing: list[str] = []
     if not policy.live_trading_enabled:
         missing.append("live_trading_disabled")
@@ -182,7 +184,7 @@ class GuardedLiveExecutor:
         if violations:
             return {"status": "BLOCK", "not_submitted": True, "payload": payload, "violations": violations, "provider": self.config.provider}
 
-        response = requests.post(
+        response = self._post(
             f"{self.config.base_url}{self.config.order_endpoint_path}",
             headers=self._submission_headers(intent=intent, payload=payload),
             json=payload,
@@ -192,17 +194,34 @@ class GuardedLiveExecutor:
             body = response.json()
         except Exception:
             body = None
+        broker_accepted = self._broker_accepted(response=response, body=body)
         result = {
             "provider": self.config.provider,
-            "status": "SUBMITTED" if response.ok else "REJECTED",
+            "status": "SUBMITTED" if broker_accepted else "REJECTED",
             "status_code": response.status_code,
             "headers": {"X-Request-Id": response.headers.get("X-Request-Id")} if response.headers.get("X-Request-Id") else {},
             "json": body,
             "text": response.text,
         }
-        if not response.ok:
+        if not broker_accepted:
+            result["not_submitted"] = True
             result["violations"] = ["broker_rejected_order"]
         return result
+
+
+    def _post(self, url: str, **kwargs: Any) -> requests.Response:
+        if self.config.provider == "kis":
+            return kis_post(url, **kwargs)
+        return requests.post(url, **kwargs)
+
+    def _broker_accepted(self, *, response: requests.Response, body: Any) -> bool:
+        if not response.ok:
+            return False
+        if self.config.provider == "kis":
+            if not isinstance(body, Mapping):
+                return False
+            return str(body.get("rt_cd", "")).strip() == "0"
+        return True
 
     def _build_submission_payload(self, intent: OrderIntent) -> dict[str, Any]:
         if self.config.provider == "kis":
@@ -279,7 +298,7 @@ class GuardedLiveExecutor:
     def _hashkey(self, payload: dict[str, Any]) -> str:
         if self.config.provider != "kis":
             return ""
-        response = requests.post(
+        response = kis_post(
             f"{self.config.base_url}{self.config.hashkey_endpoint_path}",
             headers={
                 "appkey": self.config.app_key or "",
@@ -301,27 +320,36 @@ class GuardedLiveExecutor:
         if self.config.access_token:
             return self.config.access_token
         if self.config.provider == "kis":
-            response = requests.post(
-                f"{self.config.base_url}/oauth2/tokenP",
-                headers={"Content-Type": "application/json"},
-                json={
-                    "grant_type": "client_credentials",
-                    "appkey": self.config.app_key,
-                    "appsecret": self.config.app_secret,
-                },
-                timeout=self.config.timeout,
+            def fetch_token() -> dict[str, Any]:
+                response = kis_post(
+                    f"{self.config.base_url}/oauth2/tokenP",
+                    headers={"Content-Type": "application/json"},
+                    json={
+                        "grant_type": "client_credentials",
+                        "appkey": self.config.app_key,
+                        "appsecret": self.config.app_secret,
+                    },
+                    timeout=self.config.timeout,
+                )
+                if not response.ok:
+                    raise RuntimeError(f"token failed: HTTP {response.status_code} {response.text[:500]}")
+                return response.json()
+
+            return cached_kis_access_token(
+                app_key=self.config.app_key or "",
+                base_url=self.config.base_url,
+                fetch_token=fetch_token,
             )
-        else:
-            response = requests.post(
-                f"{self.config.base_url}/oauth2/token",
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
-                data={
-                    "grant_type": "client_credentials",
-                    "client_id": self.config.client_id,
-                    "client_secret": self.config.client_secret,
-                },
-                timeout=self.config.timeout,
-            )
+        response = requests.post(
+            f"{self.config.base_url}/oauth2/token",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data={
+                "grant_type": "client_credentials",
+                "client_id": self.config.client_id,
+                "client_secret": self.config.client_secret,
+            },
+            timeout=self.config.timeout,
+        )
         if not response.ok:
             raise RuntimeError(f"token failed: HTTP {response.status_code} {response.text[:500]}")
         token = response.json().get("access_token")
