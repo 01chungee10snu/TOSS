@@ -27,6 +27,23 @@ def test_default_live_readiness_is_not_ready_without_credentials_or_endpoint():
     assert "order_endpoint_path" in status["missing"]
 
 
+def test_kis_from_env_uses_current_official_order_tr_ids():
+    live = LiveExecutionConfig.from_env(
+        {"BROKER_PROVIDER": "kis", "KIS_APP_KEY": "app", "KIS_APP_SECRET": "secret"}
+    )
+    mock = LiveExecutionConfig.from_env(
+        {
+            "BROKER_PROVIDER": "kis",
+            "KIS_APP_KEY": "app",
+            "KIS_APP_SECRET": "secret",
+            "KIS_MOCK_TRADING": "true",
+        }
+    )
+
+    assert (live.kis_order_tr_id_buy, live.kis_order_tr_id_sell) == ("TTTC0012U", "TTTC0011U")
+    assert (mock.kis_order_tr_id_buy, mock.kis_order_tr_id_sell) == ("VTTC0012U", "VTTC0011U")
+
+
 def test_build_order_payload_is_manual_intent_shape_not_executable_by_itself():
     payload = build_order_payload(_intent())
     assert payload == {
@@ -270,8 +287,8 @@ def test_kis_real_submission_uses_hashkey_and_kis_headers(monkeypatch):
             access_token="token",
             live_trading_env_enabled=True,
             base_url="https://openapi.koreainvestment.com:9443",
-            kis_order_tr_id_buy="TTTC0802U",
-            kis_order_tr_id_sell="TTTC0801U",
+            kis_order_tr_id_buy="TTTC0012U",
+            kis_order_tr_id_sell="TTTC0011U",
         ),
         policy=RiskPolicy(live_trading_enabled=True, max_order_krw=100_000),
     )
@@ -283,9 +300,12 @@ def test_kis_real_submission_uses_hashkey_and_kis_headers(monkeypatch):
     )
     assert result["status"] == "SUBMITTED"
     assert calls[0]["url"].endswith("/uapi/hashkey")
-    assert calls[1]["headers"]["tr_id"] == "TTTC0802U"
+    assert calls[1]["headers"]["tr_id"] == "TTTC0012U"
     assert calls[1]["headers"]["hashkey"] == "hash-1"
     assert calls[1]["json"]["CANO"] == "12345678"
+    assert calls[1]["json"]["EXCG_ID_DVSN_CD"] == "KRX"
+    assert calls[1]["json"]["SLL_TYPE"] == ""
+    assert calls[1]["json"]["CNDT_PRIC"] == ""
 
 
 def test_kis_access_token_cache_reuses_token_across_live_executors(tmp_path, monkeypatch):
@@ -321,8 +341,8 @@ def test_kis_access_token_cache_reuses_token_across_live_executors(tmp_path, mon
         order_endpoint_path="/uapi/domestic-stock/v1/trading/order-cash",
         live_trading_env_enabled=True,
         base_url="https://openapi.koreainvestment.com:9443",
-        kis_order_tr_id_buy="TTTC0802U",
-        kis_order_tr_id_sell="TTTC0801U",
+        kis_order_tr_id_buy="TTTC0012U",
+        kis_order_tr_id_sell="TTTC0011U",
     )
 
     for _ in range(2):
@@ -373,7 +393,7 @@ def test_kis_order_http_200_with_error_rt_cd_is_rejected(monkeypatch):
         order_endpoint_path="/uapi/domestic-stock/v1/trading/order-cash",
         live_trading_env_enabled=True,
         base_url="https://openapi.koreainvestment.com:9443",
-        kis_order_tr_id_buy="TTTC0802U",
+        kis_order_tr_id_buy="TTTC0012U",
     )
     executor = GuardedLiveExecutor(config=config, policy=RiskPolicy(live_trading_enabled=True, max_order_krw=100_000))
 

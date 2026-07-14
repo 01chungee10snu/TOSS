@@ -202,6 +202,9 @@ def test_live_submit_dry_run_builds_kis_payload_without_http(tmp_path, monkeypat
         "ORD_DVSN": "00",
         "ORD_QTY": "2",
         "ORD_UNPR": "18890",
+        "EXCG_ID_DVSN_CD": "KRX",
+        "SLL_TYPE": "",
+        "CNDT_PRIC": "",
     }
 
 

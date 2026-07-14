@@ -87,11 +87,12 @@ class KisOrderStatusClient:
             "INQR_DVSN_1": "",
             "CTX_AREA_FK100": "",
             "CTX_AREA_NK100": "",
+            "EXCG_ID_DVSN_CD": "KRX",
         }
         response = kis_request(
             "GET",
             f"{self.config.base_url}/uapi/domestic-stock/v1/trading/inquire-daily-ccld",
-            headers=self.headers("VTTC8001R" if self.config.kis_mock_trading else "TTTC8001R"),
+            headers=self.headers("VTTC0081R" if self.config.kis_mock_trading else "TTTC0081R"),
             params=params,
             timeout=self.config.timeout,
         )
@@ -115,6 +116,7 @@ class KisOrderStatusClient:
             "ORD_QTY": "0",
             "ORD_UNPR": "0",
             "QTY_ALL_ORD_YN": "Y",
+            "EXCG_ID_DVSN_CD": "KRX",
         }
         hash_response = kis_post(
             f"{self.config.base_url}{self.config.hashkey_endpoint_path}",
@@ -127,7 +129,7 @@ class KisOrderStatusClient:
         hash_body = hash_response.json()
         response = kis_post(
             f"{self.config.base_url}/uapi/domestic-stock/v1/trading/order-rvsecncl",
-            headers={**self.headers("VTTC0803U" if self.config.kis_mock_trading else "TTTC0803U"), "hashkey": str(hash_body.get("HASH") or hash_body.get("hash") or "")},
+            headers={**self.headers("VTTC0013U" if self.config.kis_mock_trading else "TTTC0013U"), "hashkey": str(hash_body.get("HASH") or hash_body.get("hash") or "")},
             json=payload,
             timeout=self.config.timeout,
         )

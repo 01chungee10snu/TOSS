@@ -35,12 +35,25 @@ def test_kis_connector_builds_authorization_and_app_headers(monkeypatch):
     assert calls[0]["headers"]["appkey"] == "app"
     assert calls[0]["params"]["CANO"] == "12345678"
     assert calls[0]["params"]["ACNT_PRDT_CD"] == "01"
+    assert calls[0]["params"] == {
+        "CANO": "12345678",
+        "ACNT_PRDT_CD": "01",
+        "AFHR_FLPR_YN": "N",
+        "OFL_YN": "",
+        "INQR_DVSN": "01",
+        "UNPR_DVSN": "01",
+        "FUND_STTL_ICLD_YN": "N",
+        "FNCG_AMT_AUTO_RDPT_YN": "N",
+        "PRCS_DVSN": "00",
+        "CTX_AREA_FK100": "",
+        "CTX_AREA_NK100": "",
+    }
     assert result["headers"]["tr_id"]
 
 
 def test_kis_connector_exposes_only_readonly_methods():
     client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
-    for name in ["token", "balance", "account_snapshot", "position_snapshots", "quote", "orderbook", "quote_snapshot"]:
+    for name in ["token", "balance", "balance_all", "account_snapshot", "position_snapshots", "quote", "orderbook", "quote_snapshot"]:
         assert callable(getattr(client, name))
     for forbidden in ["orders", "place_order", "buy", "sell"]:
         assert not hasattr(client, forbidden)
@@ -67,7 +80,7 @@ def test_kis_account_snapshot_and_positions_parse_outputs(monkeypatch):
         ],
     }
 
-    monkeypatch.setattr(KisReadOnlyClient, "balance", lambda self, query=None: {"json": payload})
+    monkeypatch.setattr(KisReadOnlyClient, "balance", lambda self, **kwargs: {"json": payload, "headers": {}})
     client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
 
     account = client.account_snapshot()
@@ -78,6 +91,47 @@ def test_kis_account_snapshot_and_positions_parse_outputs(monkeypatch):
     assert positions[0].symbol == "005930"
     assert positions[0].quantity == 3.0
     assert positions[0].sellable_quantity == 2.0
+
+
+def test_kis_balance_all_follows_official_continuation_contract(monkeypatch):
+    calls = []
+    pages = [
+        {
+            "json": {
+                "output1": [{"pdno": "005930"}],
+                "output2": [{"tot_evlu_amt": "100"}],
+                "ctx_area_fk100": "next-fk",
+                "ctx_area_nk100": "next-nk",
+            },
+            "headers": {"tr_cont": "M"},
+        },
+        {
+            "json": {
+                "output1": [{"pdno": "000660"}],
+                "output2": [{"tot_evlu_amt": "200"}],
+            },
+            "headers": {"tr_cont": ""},
+        },
+    ]
+
+    def fake_balance(self, *, query=None, tr_cont=""):
+        calls.append({"query": query, "tr_cont": tr_cont})
+        return pages[len(calls) - 1]
+
+    monkeypatch.setattr(KisReadOnlyClient, "balance", fake_balance)
+    client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
+
+    result = client.balance_all()
+
+    assert [row["pdno"] for row in result["json"]["output1"]] == ["005930", "000660"]
+    assert result["json"]["output2"] == [{"tot_evlu_amt": "200"}]
+    assert calls == [
+        {"query": {}, "tr_cont": ""},
+        {
+            "query": {"CTX_AREA_FK100": "next-fk", "CTX_AREA_NK100": "next-nk"},
+            "tr_cont": "N",
+        },
+    ]
 
 
 def test_kis_quote_uses_readonly_current_price_endpoint(monkeypatch):

@@ -11,6 +11,79 @@ from toss_alpha.execution.order_management import (
 )
 
 
+def test_kis_order_status_client_uses_current_official_daily_fill_contract(monkeypatch):
+    from toss_alpha.execution import order_management as om
+    from toss_alpha.execution.live_ready import LiveExecutionConfig
+
+    captured = {}
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+        text = "ok"
+
+        def json(self):
+            return {"rt_cd": "0", "output1": []}
+
+    def fake_request(method, url, headers=None, params=None, timeout=None):
+        captured.update(method=method, url=url, headers=headers, params=params)
+        return FakeResponse()
+
+    monkeypatch.setattr(om, "kis_request", fake_request)
+    client = om.KisOrderStatusClient(
+        LiveExecutionConfig(
+            provider="kis", app_key="app", app_secret="secret", access_token="token",
+            cano="12345678", account_product_code="01",
+            base_url="https://openapi.koreainvestment.com:9443",
+        )
+    )
+
+    client.inquire_daily_fills(order_no="0001", order_orgno="03420", day=datetime(2026, 7, 14, tzinfo=timezone.utc))
+
+    assert captured["headers"]["tr_id"] == "TTTC0081R"
+    assert captured["params"]["EXCG_ID_DVSN_CD"] == "KRX"
+    assert captured["params"]["ODNO"] == "0001"
+
+
+def test_kis_cancel_uses_current_official_contract(monkeypatch):
+    from toss_alpha.execution import order_management as om
+    from toss_alpha.execution.live_ready import LiveExecutionConfig
+
+    calls = []
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+        text = "ok"
+
+        def __init__(self, payload):
+            self.payload = payload
+
+        def json(self):
+            return self.payload
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        calls.append({"url": url, "headers": headers, "json": json})
+        if url.endswith("/uapi/hashkey"):
+            return FakeResponse({"HASH": "hash-1"})
+        return FakeResponse({"rt_cd": "0", "output": {}})
+
+    monkeypatch.setattr(om, "kis_post", fake_post)
+    client = om.KisOrderStatusClient(
+        LiveExecutionConfig(
+            provider="kis", app_key="app", app_secret="secret", access_token="token",
+            cano="12345678", account_product_code="01",
+            base_url="https://openapi.koreainvestment.com:9443",
+        )
+    )
+
+    client.cancel_order(order_no="0001", order_orgno="03420")
+
+    assert calls[1]["headers"]["tr_id"] == "TTTC0013U"
+    assert calls[1]["json"]["EXCG_ID_DVSN_CD"] == "KRX"
+    assert calls[1]["json"]["RVSE_CNCL_DVSN_CD"] == "02"
+
+
 def test_extract_kis_order_ids_from_submit_result():
     result = {
         "json": {

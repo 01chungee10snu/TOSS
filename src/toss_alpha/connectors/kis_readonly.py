@@ -20,6 +20,7 @@ RATE_LIMIT_HEADERS = (
     "Retry-After",
     "tr_id",
     "gt_uid",
+    "tr_cont",
 )
 
 
@@ -84,11 +85,22 @@ class KisReadOnlyClient:
             "custtype": "P",
         }
 
-    def _request(self, method: str, path: str, *, params: dict[str, Any] | None = None, tr_id: str | None = None) -> dict[str, Any]:
+    def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: dict[str, Any] | None = None,
+        tr_id: str | None = None,
+        tr_cont: str = "",
+    ) -> dict[str, Any]:
+        headers = self._headers(tr_id=tr_id)
+        if tr_cont:
+            headers["tr_cont"] = tr_cont
         response = kis_request(
             method,
             f"{self._resolved_base_url()}{path}",
-            headers=self._headers(tr_id=tr_id),
+            headers=headers,
             params=params,
             timeout=self.timeout,
         )
@@ -111,14 +123,57 @@ class KisReadOnlyClient:
             raise RuntimeError(f"request failed: KIS {msg_cd} {msg[:300]}")
         return result
 
-    def balance(self, *, query: dict[str, Any] | None = None) -> dict[str, Any]:
+    def balance(self, *, query: dict[str, Any] | None = None, tr_cont: str = "") -> dict[str, Any]:
+        """Return one official KIS domestic-stock balance page."""
         params = {
             "CANO": self.cano,
             "ACNT_PRDT_CD": self.account_product_code,
+            "AFHR_FLPR_YN": "N",
+            "OFL_YN": "",
+            "INQR_DVSN": "01",
+            "UNPR_DVSN": "01",
+            "FUND_STTL_ICLD_YN": "N",
+            "FNCG_AMT_AUTO_RDPT_YN": "N",
+            "PRCS_DVSN": "00",
+            "CTX_AREA_FK100": "",
+            "CTX_AREA_NK100": "",
         }
         if query:
             params.update(query)
-        return self._request("GET", self.balance_path, params=params)
+        return self._request("GET", self.balance_path, params=params, tr_cont=tr_cont)
+
+    def balance_all(self, *, max_pages: int = 10) -> dict[str, Any]:
+        """Fetch and merge official KIS balance continuation pages."""
+        merged_positions: list[dict[str, Any]] = []
+        summary: Any = []
+        query: dict[str, Any] = {}
+        tr_cont = ""
+        latest: dict[str, Any] | None = None
+        for _ in range(max_pages):
+            latest = self.balance(query=query, tr_cont=tr_cont)
+            payload = latest.get("json") if isinstance(latest.get("json"), dict) else {}
+            rows = payload.get("output1")
+            if isinstance(rows, list):
+                merged_positions.extend(item for item in rows if isinstance(item, dict))
+            if payload.get("output2") is not None:
+                summary = payload.get("output2")
+            continuation = str(latest.get("headers", {}).get("tr_cont") or "").upper()
+            if continuation not in {"M", "F"}:
+                break
+            fk100 = str(payload.get("ctx_area_fk100") or "")
+            nk100 = str(payload.get("ctx_area_nk100") or "")
+            if not fk100 and not nk100:
+                raise RuntimeError("balance continuation advertised without CTX_AREA keys")
+            query = {"CTX_AREA_FK100": fk100, "CTX_AREA_NK100": nk100}
+            tr_cont = "N"
+        else:
+            raise RuntimeError(f"balance pagination exceeded max_pages={max_pages}")
+        if latest is None:
+            raise RuntimeError("balance pagination returned no response")
+        merged_payload = dict(latest.get("json") or {})
+        merged_payload["output1"] = merged_positions
+        merged_payload["output2"] = summary
+        return {**latest, "json": merged_payload}
 
     def quote(self, symbol: str) -> dict[str, Any]:
         """Return KIS domestic stock current-price payload for a symbol.
@@ -159,10 +214,10 @@ class KisReadOnlyClient:
         return Quote(
             symbol=str(symbol).strip().zfill(6),
             timestamp=datetime.now(timezone.utc),
-            last=_to_float(quote_record.get("stck_prpr") or quote_record.get("last") or quote_record.get("price")) or 0.0,
-            bid=_to_float(orderbook_record.get("bidp1") or orderbook_record.get("bidp") or orderbook_record.get("bid")),
-            ask=_to_float(orderbook_record.get("askp1") or orderbook_record.get("askp") or orderbook_record.get("ask")),
-            volume=_to_float(quote_record.get("acml_vol") or quote_record.get("volume")),
+            last=_to_float(quote_record.get("stck_prpr")) or 0.0,
+            bid=_to_float(orderbook_record.get("bidp1")),
+            ask=_to_float(orderbook_record.get("askp1")),
+            volume=_to_float(quote_record.get("acml_vol")),
             source="kis",
         )
 
@@ -191,7 +246,7 @@ class KisReadOnlyClient:
         )
 
     def position_snapshots(self) -> list[PositionSnapshot]:
-        payload = self.balance()["json"] or {}
+        payload = self.balance_all()["json"] or {}
         records = _positions_list(payload)
         positions: list[PositionSnapshot] = []
         for record in records:

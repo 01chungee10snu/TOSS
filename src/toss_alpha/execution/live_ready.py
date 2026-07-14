@@ -63,8 +63,8 @@ class LiveExecutionConfig:
                 base_url=_blank_to_none(source.get("KIS_BASE_URL")) or (KIS_MOCK_BASE_URL if mock_trading else KIS_LIVE_BASE_URL),
                 confirmation_phrase=source.get("KIS_REAL_ORDER_CONFIRMATION", REAL_ORDER_CONFIRMATION_PHRASE),
                 hashkey_endpoint_path=_blank_to_none(source.get("KIS_HASHKEY_ENDPOINT")) or "/uapi/hashkey",
-                kis_order_tr_id_buy=_blank_to_none(source.get("KIS_ORDER_TR_ID_BUY")) or ("VTTC0802U" if mock_trading else "TTTC0802U"),
-                kis_order_tr_id_sell=_blank_to_none(source.get("KIS_ORDER_TR_ID_SELL")) or ("VTTC0801U" if mock_trading else "TTTC0801U"),
+                kis_order_tr_id_buy=_blank_to_none(source.get("KIS_ORDER_TR_ID_BUY")) or ("VTTC0012U" if mock_trading else "TTTC0012U"),
+                kis_order_tr_id_sell=_blank_to_none(source.get("KIS_ORDER_TR_ID_SELL")) or ("VTTC0011U" if mock_trading else "TTTC0011U"),
                 kis_mock_trading=mock_trading,
                 kis_custtype=source.get("KIS_CUSTTYPE", "P"),
             )
@@ -232,6 +232,9 @@ class GuardedLiveExecutor:
                 "ORD_DVSN": "00" if intent.order_type.upper() == "LIMIT" else "01",
                 "ORD_QTY": _quantity_text(intent.quantity),
                 "ORD_UNPR": _price_text(intent),
+                "EXCG_ID_DVSN_CD": "KRX",
+                "SLL_TYPE": "",
+                "CNDT_PRIC": "",
             }
         # ── Toss Securities official spec ────────────────────
         # POST /api/v1/orders
