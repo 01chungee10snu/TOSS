@@ -503,3 +503,53 @@ def test_new_sell_intent_supersedes_active_sell_but_waits_for_terminal(tmp_path,
     assert latest["status"] == "CANCEL_REQUESTED"
     assert latest["cancel_reason"] == "superseded_by_new_sell_intent"
     assert LiveOrderLedger(ledger_path).has_live_submission(old_key) is True
+
+
+def test_superseded_sell_terminal_confirmation_releases_new_sell_reservation(tmp_path, monkeypatch):
+    from toss_alpha.execution import order_management as om
+
+    ledger_path = tmp_path / "ledger.jsonl"
+    old_key = "2026-07-14:strategy@inverse_profit_1-life1:114800:SELL"
+    new_key = "2026-07-14:strategy:114800:SELL"
+    submitted_at = datetime(2026, 7, 14, 1, 0, tzinfo=timezone.utc)
+    LiveOrderLedger(ledger_path).append({
+        "ledger_key": old_key, "status": "SUBMITTED", "timestamp": submitted_at.isoformat(),
+        "result": {"json": {"output": {"ODNO": "0001", "KRX_FWDG_ORD_ORGNO": "03420"}}},
+    })
+
+    class FakeClient:
+        terminal = False
+
+        def __init__(self, config): self.config = config
+        def inquire_daily_fills(self, **kwargs):
+            remaining = "0" if self.terminal else "10"
+            return {"json": {"output1": [{"odno": "0001", "ord_qty": "10", "tot_ccld_qty": "0", "rmn_qty": remaining}]}}
+        def cancel_order(self, **kwargs):
+            return {"ok": True, "json": {"rt_cd": "0"}, "payload": {}}
+
+    monkeypatch.setattr(om, "KisOrderStatusClient", FakeClient)
+    env = {
+        "BROKER_PROVIDER": "kis", "KIS_APP_KEY": "app", "KIS_APP_SECRET": "sec", "KIS_CANO": "12345678",
+        "TOSS_CANCEL_SUPERSEDED_SELL_ENABLED": "true",
+    }
+
+    manage_submitted_order_ledger(
+        ledger_path=ledger_path, env=env, desired_order_keys={new_key},
+        now=submitted_at + timedelta(seconds=5),
+    )
+    assert LiveOrderLedger(ledger_path).has_live_submission(old_key) is True
+    assert LiveOrderLedger(ledger_path).reserve_if_absent(
+        new_key, {"ledger_key": new_key, "status": "PENDING_SUBMIT"},
+    ) is False
+
+    FakeClient.terminal = True
+    manage_submitted_order_ledger(
+        ledger_path=ledger_path, env=env, desired_order_keys={new_key},
+        now=submitted_at + timedelta(seconds=10),
+    )
+
+    ledger = LiveOrderLedger(ledger_path)
+    assert ledger.has_live_submission(old_key) is False
+    assert ledger.reserve_if_absent(
+        new_key, {"ledger_key": new_key, "status": "PENDING_SUBMIT"},
+    ) is True

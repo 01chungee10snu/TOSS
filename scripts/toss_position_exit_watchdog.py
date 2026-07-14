@@ -38,6 +38,10 @@ def main() -> int:
     now = datetime.now(timezone.utc)
     if korea_regular_market_violation(now, env=os.environ):
         return 0
+    # A newer full-exit intent must be able to cancel an older staged SELL. The
+    # broker-terminal wait in order_management still keeps duplicate protection
+    # active until cancellation is confirmed.
+    os.environ.setdefault("TOSS_CANCEL_SUPERSEDED_SELL_ENABLED", "true")
     today = now.astimezone(KST).date().isoformat()
     candidate = {
         "generated_at_utc": now.isoformat(),
@@ -53,17 +57,14 @@ def main() -> int:
         candidate["intraday_decision"] = decision
     merged, audit = append_position_exit_orders(candidate, report_dir=REPORT_DIR, env=os.environ)
     orders = [order for order in (merged.get("orders") or []) if str(order.get("side") or "").upper() == "SELL"]
-    if not orders:
-        if audit.get("reason") in {None, "no_positions"}:
-            return 0
-        if audit.get("reason") == "position_exit_exception":
-            print(f"BLOCKED: position exit state unavailable ({audit.get('exception_type')}:{audit.get('exception')})")
-        return 0
     payload = dict(merged)
     payload["orders"] = orders
-    payload["status"] = "CANDIDATES"
+    payload["status"] = "CANDIDATES" if orders else "NO_TRADE"
     payload["strategy_type"] = "sell_only_position_watchdog"
     qual = {"status": "READY", "reasons": [], "checked_symbols": [str(o.get("symbol")) for o in orders]}
+    # Always enter the canonical submit phase, including quiet ticks. It
+    # reconciles PENDING_SUBMIT/UNKNOWN/CANCEL_REQUESTED rows before returning
+    # LIVE_SUBMIT_NO_ORDERS, so broker-terminal transitions cannot go stale.
     result = run_live_submit_phase(
         candidate_payload=payload,
         qual=qual,
@@ -72,6 +73,16 @@ def main() -> int:
         env=os.environ,
         now=now,
     )
+    if not orders:
+        if audit.get("reason") == "position_exit_exception":
+            print(f"BLOCKED: position exit state unavailable ({audit.get('exception_type')}:{audit.get('exception')})")
+        elif audit.get("block_new_buys"):
+            reasons = ",".join(str(item) for item in (audit.get("buy_block_reasons") or []))
+            print(f"BLOCKED: position exit recovery required ({reasons or audit.get('status')})")
+        reconcile = result.get("order_reconcile") or {}
+        if reconcile.get("errors"):
+            print("BLOCKED: active SELL reconciliation requires recovery")
+        return 0
     submitted = int(result.get("submitted_count") or 0)
     blocked = int(result.get("blocked_count") or 0)
     if submitted or blocked:

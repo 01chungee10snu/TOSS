@@ -24,6 +24,7 @@ reports/harness/live_paper_divergence_*
 reports/harness/live_order_ledger*
 reports/harness/live_equity_guard_state*
 reports/harness/live_position_tracker.json
+reports/harness/live_position_tracker.json.lock
 reports/harness/toss-ttak-loop.lock
 reports/harness/forward_tracking/
 reports/harness/sentiment_forward/

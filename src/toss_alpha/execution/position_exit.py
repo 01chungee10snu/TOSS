@@ -6,8 +6,10 @@ safety gates.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import asdict
 from datetime import date, datetime, timezone
+import fcntl
 import json
 import math
 import os
@@ -117,6 +119,19 @@ def _save_position_tracker(path: Path, data: dict[str, Any]) -> None:
         os.fsync(directory_fd)
     finally:
         os.close(directory_fd)
+
+
+@contextmanager
+def _position_tracker_lock(path: Path):
+    """Serialize the complete tracker read/modify/write transaction."""
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def _trading_days_between(start: date, end: date, *, env: Mapping[str, str] | None = None) -> int:
@@ -294,6 +309,7 @@ def build_position_exit_orders(
     market_regime: str | None = None,
     realtime_quotes: Mapping[str, Quote] | None = None,
     require_realtime_quotes: bool = False,
+    _tracker_lock_held: bool = False,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Return SELL orders for held positions that hit configured exit rules.
 
@@ -305,6 +321,20 @@ def build_position_exit_orders(
     - regime risk_off: market regime is risk_off → liquidate all
     - optional explicit force-exit symbols via ``TOSS_FORCE_EXIT_SYMBOLS``
     """
+    if report_dir is not None and not _tracker_lock_held:
+        tracker_path = Path(report_dir) / "live_position_tracker.json"
+        with _position_tracker_lock(tracker_path):
+            return build_position_exit_orders(
+                positions,
+                env=env,
+                as_of=as_of,
+                report_dir=report_dir,
+                market_regime=market_regime,
+                realtime_quotes=realtime_quotes,
+                require_realtime_quotes=require_realtime_quotes,
+                _tracker_lock_held=True,
+            )
+
     source = env or {}
     stop_loss_pct = _env_float(source, "TOSS_POSITION_STOP_LOSS_PCT", 0.06)
     take_profit_pct = _env_float(source, "TOSS_POSITION_TAKE_PROFIT_PCT", 0.25)
@@ -487,14 +517,16 @@ def build_position_exit_orders(
                 sold_qty = max(0.0, initial_quantity - quantity)
                 stage1_done = stage_qty > 0 and sold_qty + 1e-9 >= stage_qty
                 stage2_done = stage_qty > 0 and sold_qty + 1e-9 >= stage_qty * 2
+                stage1_remaining = max(0, int(math.ceil(stage_qty - sold_qty - 1e-9)))
+                stage2_remaining = max(0, int(math.ceil(stage_qty * 2 - sold_qty - 1e-9)))
                 gain = decision_price / avg - 1.0
                 if not reasons and stage_qty > 0:
                     if gain >= inverse_partial_1_pct and not stage1_done:
                         partial_stage = "inverse_profit_1"
-                        partial_quantity = min(stage_qty, max(0, int(quantity) - 1), int(float(sellable_quantity or 0)))
+                        partial_quantity = min(stage1_remaining, max(0, int(quantity) - 1), int(float(sellable_quantity or 0)))
                     elif gain >= inverse_partial_2_pct and stage1_done and not stage2_done:
                         partial_stage = "inverse_profit_2"
-                        partial_quantity = min(stage_qty, max(0, int(quantity) - 1), int(float(sellable_quantity or 0)))
+                        partial_quantity = min(stage2_remaining, max(0, int(quantity) - 1), int(float(sellable_quantity or 0)))
                 if partial_stage and partial_quantity and partial_quantity > 0:
                     reasons.append(f"{partial_stage}_{gain:.2%}")
             else:

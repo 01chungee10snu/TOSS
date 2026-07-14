@@ -701,6 +701,48 @@ def test_inverse_second_profit_stage_waits_for_broker_quantity_reduction(tmp_pat
     assert orders[0]["exit_stage"] == "inverse_profit_2"
 
 
+def test_inverse_first_profit_stage_reorders_only_unfilled_target_quantity(tmp_path):
+    tracker = tmp_path / "live_position_tracker.json"
+    tracker.write_text(_json.dumps({"114800": {
+        "avg_price": 1000, "quantity": 300, "initial_quantity": 300,
+        "peak_price": 1040, "first_seen_date": "2026-07-14", "lifecycle_id": "life1",
+    }}), encoding="utf-8")
+    position = PositionSnapshot(
+        symbol="114800", quantity=250, sellable_quantity=250,
+        avg_price=1000, market_value=260_000, source="kis",
+    )
+
+    orders, _ = build_position_exit_orders(
+        [position], report_dir=tmp_path,
+        realtime_quotes={"114800": _inverse_quote(1040)}, require_realtime_quotes=True,
+    )
+
+    assert len(orders) == 1
+    assert orders[0]["quantity"] == 49
+    assert orders[0]["exit_stage"] == "inverse_profit_1"
+
+
+def test_inverse_second_profit_stage_reorders_only_unfilled_target_quantity(tmp_path):
+    tracker = tmp_path / "live_position_tracker.json"
+    tracker.write_text(_json.dumps({"114800": {
+        "avg_price": 1000, "quantity": 300, "initial_quantity": 300,
+        "peak_price": 1041, "first_seen_date": "2026-07-14", "lifecycle_id": "life1",
+    }}), encoding="utf-8")
+    position = PositionSnapshot(
+        symbol="114800", quantity=151, sellable_quantity=151,
+        avg_price=1000, market_value=151 * 1041, source="kis",
+    )
+
+    orders, _ = build_position_exit_orders(
+        [position], report_dir=tmp_path,
+        realtime_quotes={"114800": _inverse_quote(1041)}, require_realtime_quotes=True,
+    )
+
+    assert len(orders) == 1
+    assert orders[0]["quantity"] == 49
+    assert orders[0]["exit_stage"] == "inverse_profit_2"
+
+
 def test_inverse_profit_lock_exits_remainder_before_gain_turns_negative(tmp_path):
     tracker = tmp_path / "live_position_tracker.json"
     tracker.write_text(_json.dumps({"114800": {
@@ -828,3 +870,47 @@ def test_append_position_exit_propagates_tracker_recovery_block_to_buy_gate(tmp_
     assert merged["buy_gate_blocked"] is True
     assert audit["block_new_buys"] is True
     assert "blocked_corrupt_position_tracker" in audit["buy_block_reasons"]
+
+
+def test_position_tracker_transaction_is_serialized_across_concurrent_calls(tmp_path, monkeypatch):
+    import threading
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    from toss_alpha.execution import position_exit as module
+
+    original_load = module._load_position_tracker
+    counter_lock = threading.Lock()
+    active = 0
+    max_active = 0
+
+    def slow_load(path):
+        nonlocal active, max_active
+        with counter_lock:
+            active += 1
+            max_active = max(max_active, active)
+        try:
+            time.sleep(0.05)
+            return original_load(path)
+        finally:
+            with counter_lock:
+                active -= 1
+
+    monkeypatch.setattr(module, "_load_position_tracker", slow_load)
+    position = PositionSnapshot(
+        symbol="114800", quantity=100, sellable_quantity=100,
+        avg_price=1000, market_value=104_000, source="kis",
+    )
+    quote = _inverse_quote(1040)
+
+    def run_once():
+        return build_position_exit_orders(
+            [position], report_dir=tmp_path,
+            realtime_quotes={"114800": quote}, require_realtime_quotes=True,
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        list(pool.map(lambda _item: run_once(), range(2)))
+
+    assert max_active == 1
+    tracker = _json.loads((tmp_path / "live_position_tracker.json").read_text(encoding="utf-8"))
+    assert tracker["114800"]["peak_price"] == 1040
