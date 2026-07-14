@@ -444,3 +444,62 @@ def test_removed_sell_signal_is_not_auto_canceled(tmp_path, monkeypatch):
 
     assert audit["cancel_attempted_count"] == 0
     assert LiveOrderLedger(ledger_path).has_live_submission(key) is True
+
+
+def test_pending_submit_without_order_number_becomes_recovery_blocked_unknown(tmp_path):
+    ledger_path = tmp_path / "ledger.jsonl"
+    key = "2026-07-14:strategy@inverse_profit_1-life1:114800:SELL"
+    LiveOrderLedger(ledger_path).append({
+        "ledger_key": key, "status": "PENDING_SUBMIT",
+        "timestamp": "2026-07-14T01:00:00+00:00", "symbol": "114800",
+        "side": "SELL", "quantity": 10, "limit_price": 1100,
+    })
+
+    audit = manage_submitted_order_ledger(
+        ledger_path=ledger_path,
+        env={"BROKER_PROVIDER": "kis", "KIS_APP_KEY": "app", "KIS_APP_SECRET": "sec", "KIS_CANO": "12345678"},
+        now=datetime(2026, 7, 14, 1, 1, tzinfo=timezone.utc),
+    )
+
+    latest = LiveOrderLedger(ledger_path).records()[-1]
+    assert audit["status"] == "PARTIAL_ERROR"
+    assert latest["status"] == "UNKNOWN"
+    assert latest["recovery_required"] is True
+    assert latest["symbol"] == "114800"
+    assert LiveOrderLedger(ledger_path).has_live_submission(key) is True
+
+
+def test_new_sell_intent_supersedes_active_sell_but_waits_for_terminal(tmp_path, monkeypatch):
+    from toss_alpha.execution import order_management as om
+
+    ledger_path = tmp_path / "ledger.jsonl"
+    old_key = "2026-07-14:strategy@inverse_profit_1-life1:114800:SELL"
+    new_key = "2026-07-14:strategy:114800:SELL"
+    submitted_at = datetime(2026, 7, 14, 1, 0, tzinfo=timezone.utc)
+    LiveOrderLedger(ledger_path).append({
+        "ledger_key": old_key, "status": "SUBMITTED", "timestamp": submitted_at.isoformat(),
+        "result": {"json": {"output": {"ODNO": "0001", "KRX_FWDG_ORD_ORGNO": "03420"}}},
+    })
+
+    class FakeClient:
+        def __init__(self, config): self.config = config
+        def inquire_daily_fills(self, **kwargs):
+            return {"json": {"output1": [{"odno": "0001", "ord_qty": "10", "tot_ccld_qty": "0", "rmn_qty": "10"}]}}
+        def cancel_order(self, **kwargs):
+            return {"ok": True, "json": {"rt_cd": "0"}, "payload": {}}
+
+    monkeypatch.setattr(om, "KisOrderStatusClient", FakeClient)
+    audit = manage_submitted_order_ledger(
+        ledger_path=ledger_path,
+        env={
+            "BROKER_PROVIDER": "kis", "KIS_APP_KEY": "app", "KIS_APP_SECRET": "sec", "KIS_CANO": "12345678",
+            "TOSS_CANCEL_SUPERSEDED_SELL_ENABLED": "true",
+        },
+        desired_order_keys={new_key}, now=submitted_at + timedelta(seconds=5),
+    )
+
+    latest = LiveOrderLedger(ledger_path).records()[-1]
+    assert audit["superseded_sell_cancel_attempted_count"] == 1
+    assert latest["status"] == "CANCEL_REQUESTED"
+    assert latest["cancel_reason"] == "superseded_by_new_sell_intent"
+    assert LiveOrderLedger(ledger_path).has_live_submission(old_key) is True

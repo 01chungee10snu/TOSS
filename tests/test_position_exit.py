@@ -693,7 +693,7 @@ def test_inverse_second_profit_stage_waits_for_broker_quantity_reduction(tmp_pat
     )
     orders, _ = build_position_exit_orders(
         [position], report_dir=tmp_path,
-        realtime_quotes={"114800": _inverse_quote(1040)}, require_realtime_quotes=True,
+        realtime_quotes={"114800": _inverse_quote(1041)}, require_realtime_quotes=True,
     )
 
     assert len(orders) == 1
@@ -740,3 +740,91 @@ def test_inverse_restart_repairs_peak_from_official_session_high(tmp_path):
     assert orders[0]["quantity"] == 300
     assert "inverse_profit_lock" in orders[0]["reason"]
     assert audit["reviews"][0]["peak_price"] == 1040
+
+
+def test_corrupt_position_tracker_blocks_stateful_exit_and_buys(tmp_path):
+    (tmp_path / "live_position_tracker.json").write_text("{truncated", encoding="utf-8")
+    position = PositionSnapshot(
+        symbol="114800", quantity=100, sellable_quantity=100,
+        avg_price=1000, market_value=104_000, source="kis",
+    )
+
+    orders, audit = build_position_exit_orders(
+        [position], report_dir=tmp_path,
+        realtime_quotes={"114800": _inverse_quote(1040)}, require_realtime_quotes=True,
+    )
+
+    assert orders == []
+    assert audit["status"] == "BLOCKED_CORRUPT_POSITION_TRACKER"
+    assert audit["block_new_buys"] is True
+    assert audit["reviews"][0]["action"] == "BLOCKED_RECOVERY"
+    assert (tmp_path / "live_position_tracker.json").read_text(encoding="utf-8") == "{truncated"
+
+
+def test_inverse_small_position_preserves_runner_instead_of_partial_exit(tmp_path):
+    for quantity in (1, 2, 3):
+        path = tmp_path / str(quantity)
+        position = PositionSnapshot(
+            symbol="114800", quantity=quantity, sellable_quantity=quantity,
+            avg_price=1000, market_value=quantity * 1040, source="kis",
+        )
+        orders, _ = build_position_exit_orders(
+            [position], report_dir=path,
+            realtime_quotes={"114800": _inverse_quote(1040)}, require_realtime_quotes=True,
+        )
+        assert orders == []
+
+
+def test_inverse_profit_lock_uses_fresh_bid_not_last(tmp_path):
+    tracker = tmp_path / "live_position_tracker.json"
+    tracker.write_text(_json.dumps({"114800": {
+        "avg_price": 1000, "quantity": 100, "initial_quantity": 100,
+        "peak_price": 1040, "first_seen_date": "2026-07-14", "lifecycle_id": "life1",
+    }}), encoding="utf-8")
+    position = PositionSnapshot(
+        symbol="114800", quantity=100, sellable_quantity=100,
+        avg_price=1000, market_value=100 * 1026, source="kis",
+    )
+    quote = Quote(
+        symbol="114800", timestamp=datetime.now(timezone.utc), last=1026,
+        bid=1024, ask=1026, volume=1_000_000, source="kis",
+    )
+
+    orders, _ = build_position_exit_orders(
+        [position], report_dir=tmp_path,
+        realtime_quotes={"114800": quote}, require_realtime_quotes=True,
+    )
+
+    assert orders[0]["quantity"] == 100
+    assert "inverse_profit_lock" in orders[0]["reason"]
+
+
+def test_append_position_exit_propagates_tracker_recovery_block_to_buy_gate(tmp_path, monkeypatch):
+    from toss_alpha.execution import position_exit as module
+
+    config = SimpleNamespace(
+        provider="kis", app_key="app", app_secret="secret", cano="12345678",
+        account_product_code="01", kis_mock_trading=False,
+        base_url="https://example.invalid", timeout=1,
+    )
+    monkeypatch.setattr(module.LiveExecutionConfig, "from_env", staticmethod(lambda _env: config))
+
+    class FakeClient:
+        def __init__(self, **_kwargs): pass
+        def position_snapshots(self):
+            return [PositionSnapshot(symbol="114800", quantity=10, sellable_quantity=10, avg_price=1000, market_value=10400, source="kis")]
+        def account_snapshot(self):
+            return AccountSnapshot(account_id="demo", total_equity=100_000, cash=89_600, source="kis")
+        def quote_snapshot(self, _symbol):
+            return _inverse_quote(1040)
+
+    monkeypatch.setattr(module, "KisReadOnlyClient", FakeClient)
+    (tmp_path / "live_position_tracker.json").write_text("{broken", encoding="utf-8")
+    payload = {"status": "CANDIDATES", "orders": [{"symbol": "005930", "side": "BUY", "quantity": 1}]}
+
+    merged, audit = append_position_exit_orders(payload, report_dir=tmp_path, env={})
+
+    assert merged["orders"] == []
+    assert merged["buy_gate_blocked"] is True
+    assert audit["block_new_buys"] is True
+    assert "blocked_corrupt_position_tracker" in audit["buy_block_reasons"]

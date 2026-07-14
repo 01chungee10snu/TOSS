@@ -252,7 +252,16 @@ def run_live_submit_phase(
         if not settings.dry_run and not order_violations:
             reserved = ledger.reserve_if_absent(
                 duplicate_key,
-                {"ledger_key": duplicate_key, "status": "PENDING_SUBMIT", "timestamp": now.isoformat()},
+                {
+                    "ledger_key": duplicate_key,
+                    "status": "PENDING_SUBMIT",
+                    "timestamp": now.isoformat(),
+                    "intent_id": intent.intent_id,
+                    "symbol": intent.symbol,
+                    "side": intent.side,
+                    "quantity": intent.quantity,
+                    "limit_price": intent.limit_price,
+                },
             )
             if not reserved:
                 order_violations.append(

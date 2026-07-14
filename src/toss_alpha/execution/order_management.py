@@ -22,7 +22,7 @@ from toss_alpha.execution.live_ready import LiveExecutionConfig
 
 KST = ZoneInfo("Asia/Seoul")
 TERMINAL_STATUSES = {"FILLED", "CANCELED", "REJECTED", "EXPIRED", "SUPERSEDED", "PARTIALLY_FILLED_CANCELED"}
-ACTIVE_STATUSES = {"SUBMITTED", "PARTIALLY_FILLED", "UNKNOWN", "CANCEL_REQUESTED"}
+ACTIVE_STATUSES = {"PENDING_SUBMIT", "SUBMITTED", "PARTIALLY_FILLED", "UNKNOWN", "CANCEL_REQUESTED"}
 
 
 @dataclass(frozen=True)
@@ -269,16 +269,19 @@ def manage_submitted_order_ledger(
     enabled = _env_true(source.get("TOSS_ORDER_RECONCILE_ENABLED"), default=True)
     cancel_enabled = _env_true(source.get("TOSS_CANCEL_STALE_UNFILLED_ENABLED"), default=False)
     invalidated_cancel_enabled = _env_true(source.get("TOSS_CANCEL_INVALIDATED_ORDERS_ENABLED"), default=False)
+    superseded_sell_cancel_enabled = _env_true(source.get("TOSS_CANCEL_SUPERSEDED_SELL_ENABLED"), default=False)
     stale_minutes = _env_float(source, "TOSS_UNFILLED_CANCEL_AFTER_MINUTES", 60.0)
     audit: dict[str, Any] = {
         "enabled": enabled,
         "cancel_enabled": cancel_enabled,
         "invalidated_cancel_enabled": invalidated_cancel_enabled,
+        "superseded_sell_cancel_enabled": superseded_sell_cancel_enabled,
         "stale_minutes": stale_minutes,
         "checked_count": 0,
         "updated_count": 0,
         "cancel_attempted_count": 0,
         "invalidated_cancel_attempted_count": 0,
+        "superseded_sell_cancel_attempted_count": 0,
         "cancel_reasons": {},
         "reprice_remaining_by_key": {},
         "errors": [],
@@ -312,8 +315,19 @@ def manage_submitted_order_ledger(
         result = row.get("result") if isinstance(row.get("result"), Mapping) else row
         order_no, orgno = extract_kis_order_ids(result)
         if not order_no:
-            append_jsonl(ledger_path, {"ledger_key": key, "status": "UNKNOWN", "timestamp": now.isoformat(), "reason": "missing_kis_order_no"})
+            append_jsonl(
+                ledger_path,
+                {
+                    **{k: row.get(k) for k in ("symbol", "side", "quantity", "limit_price", "intent_id") if row.get(k) is not None},
+                    "ledger_key": key,
+                    "status": "UNKNOWN",
+                    "timestamp": now.isoformat(),
+                    "reason": "missing_kis_order_no",
+                    "recovery_required": True,
+                },
+            )
             audit["updated_count"] += 1
+            audit["errors"].append({"ledger_key": key, "error": "missing_kis_order_no_recovery_required"})
             continue
         try:
             first_submitted_at = first_submitted_by_key.get(key) or _parse_dt(str(row.get("first_submitted_at") or row.get("timestamp") or "")) or now
@@ -342,7 +356,7 @@ def manage_submitted_order_ledger(
             append_jsonl(ledger_path, ledger_row)
             audit["updated_count"] += 1
             if prior_status == "CANCEL_REQUESTED":
-                if status in {"CANCELED", "PARTIALLY_FILLED_CANCELED"} and prior_cancel_reason != "current_buy_signal_removed":
+                if status in {"CANCELED", "PARTIALLY_FILLED_CANCELED"} and prior_cancel_reason not in {"current_buy_signal_removed", "superseded_by_new_sell_intent"}:
                     confirmed_replacement = replacement_qty
                     parsed_order_qty = _to_float(parsed.get("order_qty"))
                     parsed_filled_qty = _to_float(parsed.get("filled_qty"))
@@ -354,15 +368,29 @@ def manage_submitted_order_ledger(
             age_minutes = max(0.0, (now - first_submitted_at).total_seconds() / 60.0)
             remaining_qty = parsed.get("remaining_qty")
             is_buy_key = key.rsplit(":", 1)[-1].upper() == "BUY"
+            is_sell_key = key.rsplit(":", 1)[-1].upper() == "SELL"
             current_buy_signal_removed = (
                 invalidated_cancel_enabled
                 and desired_order_keys is not None
                 and is_buy_key
                 and key not in desired_order_keys
             )
+            key_parts = key.rsplit(":", 2)
+            sell_suffix = f":{key_parts[-2]}:SELL" if len(key_parts) == 3 else ""
+            superseded_sell = (
+                superseded_sell_cancel_enabled
+                and desired_order_keys is not None
+                and is_sell_key
+                and key not in desired_order_keys
+                and bool(sell_suffix)
+                and any(desired_key.endswith(sell_suffix) for desired_key in desired_order_keys)
+            )
             stale_unfilled = cancel_enabled and age_minutes >= stale_minutes
-            if (current_buy_signal_removed or stale_unfilled) and status in {"SUBMITTED", "PARTIALLY_FILLED", "UNKNOWN"} and orgno:
-                cancel_reason = "current_buy_signal_removed" if current_buy_signal_removed else "stale_unfilled_timeout"
+            if (current_buy_signal_removed or superseded_sell or stale_unfilled) and status in {"SUBMITTED", "PARTIALLY_FILLED", "UNKNOWN"} and orgno:
+                cancel_reason = (
+                    "current_buy_signal_removed" if current_buy_signal_removed
+                    else ("superseded_by_new_sell_intent" if superseded_sell else "stale_unfilled_timeout")
+                )
                 cancel = client.cancel_order(order_no=order_no, order_orgno=orgno, quantity=str(int(remaining_qty or 0)))
                 cancel_ok = _kis_rt_cd_ok(cancel.get("json"))
                 # A successful cancel API response means accepted/requested, not
@@ -388,6 +416,8 @@ def manage_submitted_order_ledger(
                 audit["cancel_reasons"][key] = cancel_reason
                 if current_buy_signal_removed:
                     audit["invalidated_cancel_attempted_count"] += 1
+                if superseded_sell:
+                    audit["superseded_sell_cancel_attempted_count"] += 1
         except Exception as exc:
             audit["errors"].append({"ledger_key": key, "error": repr(exc)})
     audit["status"] = "OK" if not audit["errors"] else "PARTIAL_ERROR"

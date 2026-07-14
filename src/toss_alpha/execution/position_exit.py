@@ -10,6 +10,7 @@ from dataclasses import asdict
 from datetime import date, datetime, timezone
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any, Mapping
 from zoneinfo import ZoneInfo
@@ -98,16 +99,24 @@ def _load_position_tracker(path: Path) -> dict[str, Any]:
         return {}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-        return data if isinstance(data, dict) else {}
+        return data if isinstance(data, dict) else {"_state_corrupt": True}
     except Exception:
-        return {}
+        return {"_state_corrupt": True}
 
 
 def _save_position_tracker(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp_path = path.with_suffix(path.suffix + ".tmp")
-    temp_path.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    with temp_path.open("w", encoding="utf-8") as handle:
+        handle.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True))
+        handle.flush()
+        os.fsync(handle.fileno())
     temp_path.replace(path)
+    directory_fd = os.open(path.parent, os.O_RDONLY)
+    try:
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
 
 
 def _trading_days_between(start: date, end: date, *, env: Mapping[str, str] | None = None) -> int:
@@ -339,6 +348,31 @@ def build_position_exit_orders(
     if report_dir is not None:
         tracker_path = Path(report_dir) / "live_position_tracker.json"
         tracker_data = _load_position_tracker(tracker_path)
+    tracker_corrupt = tracker_data.get("_state_corrupt") is True
+    if tracker_corrupt and positions:
+        return [], {
+            "enabled": True,
+            "as_of": as_of,
+            "status": "BLOCKED_CORRUPT_POSITION_TRACKER",
+            "block_new_buys": True,
+            "stop_loss_pct": stop_loss_pct,
+            "take_profit_pct": take_profit_pct,
+            "trailing_stop_pct": trailing_stop_pct,
+            "positions_checked": len(positions),
+            "sell_order_count": 0,
+            "reviews": [
+                {
+                    "symbol": str(position.symbol).zfill(6),
+                    "quantity": float(position.quantity or 0),
+                    "action": "BLOCKED_RECOVERY",
+                    "blocked_reasons": ["corrupt_position_tracker"],
+                }
+                for position in positions
+            ],
+        }
+    if tracker_corrupt and not positions and tracker_path is not None:
+        tracker_data = {}
+        _save_position_tracker(tracker_path, tracker_data)
 
     today = datetime.now(KST).date()
     orders: list[dict[str, Any]] = []
@@ -436,30 +470,31 @@ def build_position_exit_orders(
         if avg_price is not None and current is not None:
             avg = float(avg_price)
             if is_inverse_hedge:
-                if current <= avg * (1.0 - inverse_stop_loss_pct):
+                decision_price = float(exit_limit_price) if exit_limit_price is not None and exit_limit_price > 0 else current
+                if decision_price <= avg * (1.0 - inverse_stop_loss_pct):
                     reasons.append(f"inverse_stop_loss_{inverse_stop_loss_pct:.2%}")
                 if prev_peak is not None and float(prev_peak) >= avg * (1.0 + inverse_profit_lock_activation_pct):
                     protected_price = max(
                         avg * (1.0 + inverse_profit_floor_pct),
                         float(prev_peak) * (1.0 - inverse_trailing_stop_pct),
                     )
-                    if current <= protected_price:
+                    if decision_price <= protected_price:
                         reasons.append(f"inverse_profit_lock_{inverse_trailing_stop_pct:.2%}")
                 # Stage completion is confirmed only by a broker position-size
                 # reduction. Merely constructing/submitting an order never moves
                 # the state machine forward.
-                stage_qty = int(math.floor(initial_quantity * inverse_partial_fraction))
+                stage_qty = int(math.floor(initial_quantity * inverse_partial_fraction)) if initial_quantity >= 4 else 0
                 sold_qty = max(0.0, initial_quantity - quantity)
                 stage1_done = stage_qty > 0 and sold_qty + 1e-9 >= stage_qty
                 stage2_done = stage_qty > 0 and sold_qty + 1e-9 >= stage_qty * 2
-                gain = current / avg - 1.0
+                gain = decision_price / avg - 1.0
                 if not reasons and stage_qty > 0:
                     if gain >= inverse_partial_1_pct and not stage1_done:
                         partial_stage = "inverse_profit_1"
-                        partial_quantity = min(stage_qty, int(quantity), int(float(sellable_quantity or 0)))
+                        partial_quantity = min(stage_qty, max(0, int(quantity) - 1), int(float(sellable_quantity or 0)))
                     elif gain >= inverse_partial_2_pct and stage1_done and not stage2_done:
                         partial_stage = "inverse_profit_2"
-                        partial_quantity = min(stage_qty, int(quantity), int(float(sellable_quantity or 0)))
+                        partial_quantity = min(stage_qty, max(0, int(quantity) - 1), int(float(sellable_quantity or 0)))
                 if partial_stage and partial_quantity and partial_quantity > 0:
                     reasons.append(f"{partial_stage}_{gain:.2%}")
             else:
@@ -723,6 +758,10 @@ def append_position_exit_orders(
         if equity_guard.get("block_new_buys"):
             base_payload = _without_buy_orders(base_payload, "equity_drawdown_guard_active")
             buy_block_reasons.append("equity_drawdown_guard_active")
+        if build_audit.get("block_new_buys"):
+            recovery_reason = str(build_audit.get("status") or "position_exit_recovery_blocked").lower()
+            base_payload = _without_buy_orders(base_payload, recovery_reason)
+            buy_block_reasons.append(recovery_reason)
         audit["block_new_buys"] = bool(buy_block_reasons)
         audit["buy_block_reasons"] = buy_block_reasons
         merged = merge_exit_orders(base_payload, sell_orders)

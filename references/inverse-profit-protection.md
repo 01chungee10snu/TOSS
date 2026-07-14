@@ -30,7 +30,12 @@ max(평균단가 × 1.002, 진입 후 고점 × 0.985)
 - 프로세스 재시작 후 기존 상태가 있으면 KIS 공식 현재가 응답의 당일 고가 `stck_hgpr`로 중단 구간 고점을 보완한다. 새 포지션에는 진입 전 당일 고가를 적용하지 않는다.
 - 부분익절 완료는 주문 생성/제출이 아니라 다음 KIS 잔고의 실제 수량 감소로만 확인한다.
 - 부분익절 키는 `inverse_profit_1/2 + lifecycle_id`로 분리하되 가격·수량은 중복키에 넣지 않는다.
-- 같은 종목의 활성 SELL이 있으면 다른 단계 SELL을 차단해 과매도를 막는다.
+- 같은 종목의 활성 SELL이 있으면 다른 단계 SELL을 차단해 과매도를 막는다. 상위 전량청산 intent가 생기면 기존 SELL을 즉시 `CANCEL_REQUESTED`로 supersede하되 broker-terminal 확인 전에는 대체 주문을 제출하지 않는다.
+- `PENDING_SUBMIT`도 reconciliation 대상으로 처리한다. 주문번호가 없으면 자동 해제하지 않고 `UNKNOWN + recovery_required`로 전환해 중복 주문을 계속 차단한다.
+- tracker JSON 손상은 빈 상태로 초기화하지 않는다. 보유 포지션이 있으면 `BLOCKED_CORRUPT_POSITION_TRACKER`로 상태형 SELL과 모든 신규 BUY를 차단한다.
+- tracker snapshot은 임시 파일 write/fsync → atomic rename → directory fsync 순서로 저장한다.
+- 이익 임계값과 보호선은 last가 아니라 fresh bid 기준으로 평가한다.
+- 1~3주 보유에는 부분익절을 적용하지 않고 runner를 보존한다.
 - 미체결 SELL은 30초 임계값 이후 다음 1분 watchdog tick에서 취소를 요청한다. 브로커 종결 확인 전에는 재주문하지 않고, 확인 후 잔량만 최신 bid로 재호가한다.
 
 ## 환경변수
@@ -47,7 +52,7 @@ max(평균단가 × 1.002, 진입 후 고점 × 0.985)
 
 ## 검증
 
-- 표적 회귀: 86 passed
-- 전체 회귀: 309 passed
+- 표적 장애주입 회귀: 98 passed
+- 전체 회귀: 315 passed
 - 오늘 경로 재생: 평균 1,120.4403원, 고점 +4%에서 116/352주 1차 익절; 이후 보호가격 1,147.779원에서 잔여 236주 전량청산 신호
 - `git diff --check`, watchdog shell syntax 검증 통과
