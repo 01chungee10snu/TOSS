@@ -161,7 +161,7 @@ def test_kis_quote_snapshot_parses_price_and_orderbook_payloads(monkeypatch):
     monkeypatch.setattr(
         KisReadOnlyClient,
         "quote",
-        lambda self, symbol: {"json": {"output": {"stck_prpr": "70100", "acml_vol": "12345"}}},
+        lambda self, symbol: {"json": {"output": {"stck_prpr": "70100", "stck_hgpr": "71000", "acml_vol": "12345"}}},
     )
     monkeypatch.setattr(
         KisReadOnlyClient,
@@ -177,6 +177,7 @@ def test_kis_quote_snapshot_parses_price_and_orderbook_payloads(monkeypatch):
     assert quote.bid == 70000.0
     assert quote.ask == 70200.0
     assert quote.volume == 12345.0
+    assert quote.session_high == 71000.0
     assert quote.source == "kis"
 
 

@@ -105,7 +105,9 @@ def _load_position_tracker(path: Path) -> dict[str, Any]:
 
 def _save_position_tracker(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+    temp_path.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    temp_path.replace(path)
 
 
 def _trading_days_between(start: date, end: date, *, env: Mapping[str, str] | None = None) -> int:
@@ -298,6 +300,17 @@ def build_position_exit_orders(
     stop_loss_pct = _env_float(source, "TOSS_POSITION_STOP_LOSS_PCT", 0.06)
     take_profit_pct = _env_float(source, "TOSS_POSITION_TAKE_PROFIT_PCT", 0.25)
     trailing_stop_pct = _env_float(source, "TOSS_POSITION_TRAILING_STOP_PCT", 0.0)
+    inverse_stop_loss_pct = _env_float(
+        source,
+        "TOSS_INVERSE_STOP_LOSS_PCT",
+        _env_float(source, "TOSS_POSITION_STOP_LOSS_PCT", 0.025) if "TOSS_POSITION_STOP_LOSS_PCT" in source else 0.025,
+    )
+    inverse_profit_lock_activation_pct = _env_float(source, "TOSS_INVERSE_PROFIT_LOCK_ACTIVATION_PCT", 0.015)
+    inverse_profit_floor_pct = _env_float(source, "TOSS_INVERSE_PROFIT_FLOOR_PCT", 0.002)
+    inverse_partial_1_pct = _env_float(source, "TOSS_INVERSE_PARTIAL_1_PCT", 0.025)
+    inverse_partial_2_pct = _env_float(source, "TOSS_INVERSE_PARTIAL_2_PCT", 0.04)
+    inverse_partial_fraction = min(0.49, max(0.01, _env_float(source, "TOSS_INVERSE_PARTIAL_FRACTION", 0.33)))
+    inverse_trailing_stop_pct = _env_float(source, "TOSS_INVERSE_TRAILING_STOP_PCT", 0.015)
     max_holding_days = _env_int(source, "TOSS_POSITION_MAX_HOLDING_DAYS", 0)
     risk_off_exit = _env_true(source.get("TOSS_POSITION_RISK_OFF_EXIT"), default=False)
     risk_off_regimes = {
@@ -354,6 +367,9 @@ def build_position_exit_orders(
             quote_source = "position_market_value_derived"
             quote_observed_at = position.as_of.isoformat() if position.as_of else None
         reasons: list[str] = []
+        partial_stage: str | None = None
+        partial_quantity: int | None = None
+        protected_price: float | None = None
 
         # Update / read tracker state for this symbol. A changed average cost or
         # increased quantity indicates a new/blended lifecycle; stale peaks and
@@ -374,13 +390,25 @@ def build_position_exit_orders(
             updated_tracker[symbol] = pos_state
         prev_peak = pos_state.get("peak_price")
         first_seen = pos_state.get("first_seen_date")
+        lifecycle_id = str(pos_state.get("lifecycle_id") or "")
+        if not lifecycle_id:
+            lifecycle_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+            updated_tracker.setdefault(symbol, {})["lifecycle_id"] = lifecycle_id
+        initial_quantity = float(pos_state.get("initial_quantity") or quantity)
+        updated_tracker.setdefault(symbol, {})["initial_quantity"] = initial_quantity
 
         if current is not None:
-            # Peak price update.
-            if prev_peak is None or float(current) > float(prev_peak):
-                updated_tracker[symbol] = dict(pos_state, peak_price=float(current))
+            # Persisted tracker state survives process restarts. When it already
+            # exists, the official KIS session high repairs peaks missed during
+            # watchdog downtime without applying a pre-entry high to a new trade.
+            session_high = getattr(quote, "session_high", None) if quote is not None else None
+            peak_candidate = float(current)
+            if pos_state and prev_peak is not None and session_high is not None and float(session_high) > 0:
+                peak_candidate = max(peak_candidate, float(session_high))
+            if prev_peak is None or peak_candidate > float(prev_peak):
+                updated_tracker[symbol] = dict(updated_tracker.get(symbol, pos_state), peak_price=peak_candidate)
                 pos_state = updated_tracker[symbol]
-                prev_peak = float(current)
+                prev_peak = peak_candidate
             # First-seen date init.
             if first_seen is None:
                 updated_tracker[symbol]["first_seen_date"] = today.isoformat()
@@ -406,18 +434,46 @@ def build_position_exit_orders(
             # hedge through the same guarded SELL path.
             reasons.append("inverse_regime_recovery")
         if avg_price is not None and current is not None:
-            if current <= float(avg_price) * (1.0 - stop_loss_pct):
-                reasons.append(f"stop_loss_{stop_loss_pct:.2%}")
-            if current >= float(avg_price) * (1.0 + take_profit_pct):
-                reasons.append(f"take_profit_{take_profit_pct:.2%}")
-            # Trailing stop: only active when position is in profit.
-            if (
-                trailing_stop_pct > 0
-                and prev_peak is not None
-                and float(prev_peak) > float(avg_price)
-                and current <= float(prev_peak) * (1.0 - trailing_stop_pct)
-            ):
-                reasons.append(f"trailing_stop_{trailing_stop_pct:.2%}")
+            avg = float(avg_price)
+            if is_inverse_hedge:
+                if current <= avg * (1.0 - inverse_stop_loss_pct):
+                    reasons.append(f"inverse_stop_loss_{inverse_stop_loss_pct:.2%}")
+                if prev_peak is not None and float(prev_peak) >= avg * (1.0 + inverse_profit_lock_activation_pct):
+                    protected_price = max(
+                        avg * (1.0 + inverse_profit_floor_pct),
+                        float(prev_peak) * (1.0 - inverse_trailing_stop_pct),
+                    )
+                    if current <= protected_price:
+                        reasons.append(f"inverse_profit_lock_{inverse_trailing_stop_pct:.2%}")
+                # Stage completion is confirmed only by a broker position-size
+                # reduction. Merely constructing/submitting an order never moves
+                # the state machine forward.
+                stage_qty = int(math.floor(initial_quantity * inverse_partial_fraction))
+                sold_qty = max(0.0, initial_quantity - quantity)
+                stage1_done = stage_qty > 0 and sold_qty + 1e-9 >= stage_qty
+                stage2_done = stage_qty > 0 and sold_qty + 1e-9 >= stage_qty * 2
+                gain = current / avg - 1.0
+                if not reasons and stage_qty > 0:
+                    if gain >= inverse_partial_1_pct and not stage1_done:
+                        partial_stage = "inverse_profit_1"
+                        partial_quantity = min(stage_qty, int(quantity), int(float(sellable_quantity or 0)))
+                    elif gain >= inverse_partial_2_pct and stage1_done and not stage2_done:
+                        partial_stage = "inverse_profit_2"
+                        partial_quantity = min(stage_qty, int(quantity), int(float(sellable_quantity or 0)))
+                if partial_stage and partial_quantity and partial_quantity > 0:
+                    reasons.append(f"{partial_stage}_{gain:.2%}")
+            else:
+                if current <= avg * (1.0 - stop_loss_pct):
+                    reasons.append(f"stop_loss_{stop_loss_pct:.2%}")
+                if current >= avg * (1.0 + take_profit_pct):
+                    reasons.append(f"take_profit_{take_profit_pct:.2%}")
+                if (
+                    trailing_stop_pct > 0
+                    and prev_peak is not None
+                    and float(prev_peak) > avg
+                    and current <= float(prev_peak) * (1.0 - trailing_stop_pct)
+                ):
+                    reasons.append(f"trailing_stop_{trailing_stop_pct:.2%}")
         # Time exit: max holding trading days.
         if max_holding_days > 0 and first_seen is not None:
             try:
@@ -446,6 +502,11 @@ def build_position_exit_orders(
             "quote_observed_at": quote_observed_at,
             "best_bid": exit_limit_price,
             "peak_price": peak_price,
+            "protected_price": protected_price,
+            "initial_quantity": initial_quantity,
+            "partial_stage": partial_stage,
+            "partial_quantity": partial_quantity,
+            "lifecycle_id": lifecycle_id,
             "first_seen_date": first_seen,
             "held_trading_days": held_trading_days,
             "market_value": position.market_value,
@@ -460,7 +521,11 @@ def build_position_exit_orders(
             review["action"] = "BLOCKED"
             review.setdefault("blocked_reasons", []).append("sellable_quantity_missing_or_zero")
             continue
-        sell_qty = min(quantity, float(sellable_quantity))
+        sell_qty = (
+            min(float(partial_quantity), quantity, float(sellable_quantity))
+            if partial_stage and partial_quantity
+            else min(quantity, float(sellable_quantity))
+        )
         if sell_qty <= 0 or current is None:
             review["action"] = "BLOCKED"
             review.setdefault("blocked_reasons", []).append("fresh_exit_quote_missing")
@@ -490,6 +555,8 @@ def build_position_exit_orders(
                 "notional_krw": float(int_qty * limit_price),
                 "mode": "live_auto_guarded",
                 "reason": ",".join(reasons),
+                "idempotency_scope": f"{partial_stage}-{lifecycle_id}" if partial_stage else None,
+                "exit_stage": partial_stage or "full_exit",
                 "position_snapshot": _position_snapshot_dict(position),
             }
         )
@@ -506,6 +573,15 @@ def build_position_exit_orders(
         "stop_loss_pct": stop_loss_pct,
         "take_profit_pct": take_profit_pct,
         "trailing_stop_pct": trailing_stop_pct,
+        "inverse_exit_policy": {
+            "stop_loss_pct": inverse_stop_loss_pct,
+            "profit_lock_activation_pct": inverse_profit_lock_activation_pct,
+            "profit_floor_pct": inverse_profit_floor_pct,
+            "partial_1_pct": inverse_partial_1_pct,
+            "partial_2_pct": inverse_partial_2_pct,
+            "partial_fraction": inverse_partial_fraction,
+            "trailing_stop_pct": inverse_trailing_stop_pct,
+        },
         "max_holding_trading_days": max_holding_days,
         "risk_off_exit": risk_off_exit,
         "risk_off_regimes": sorted(risk_off_regimes),

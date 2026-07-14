@@ -729,3 +729,15 @@ def test_current_issue_report_blocks_inverse_etf_without_explicit_global_overrid
     inverse = {"symbol": "252670", "side": "BUY", "reason": "inverse_sleeve:risk_off_bad_regime"}
     assert current_issue_buy_violation(inverse, root=tmp_path, now=now, env={}) == "current_issue_buy_block:critical"
     assert current_issue_buy_violation(inverse, root=tmp_path, now=now, env={"TOSS_ALLOW_CURRENT_ISSUE_BUY": "true"}) is None
+
+
+def test_live_order_ledger_blocks_overlapping_staged_sells_for_same_symbol(tmp_path):
+    ledger = LiveOrderLedger(tmp_path / "ledger.jsonl")
+    first = "2026-07-14:strategy@inverse_profit_1-life1:114800:SELL"
+    second = "2026-07-14:strategy@inverse_profit_2-life1:114800:SELL"
+
+    assert ledger.reserve_if_absent(first, {"ledger_key": first, "status": "PENDING_SUBMIT"}) is True
+    assert ledger.has_other_live_sell(symbol="114800", key=second) is True
+    assert ledger.reserve_if_absent(second, {"ledger_key": second, "status": "PENDING_SUBMIT"}) is False
+    ledger.append({"ledger_key": first, "status": "FILLED"})
+    assert ledger.reserve_if_absent(second, {"ledger_key": second, "status": "PENDING_SUBMIT"}) is True

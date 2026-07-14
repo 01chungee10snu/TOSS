@@ -655,3 +655,88 @@ def test_tracker_prunes_closed_symbols_when_tracking_rules_disabled(tmp_path):
     build_position_exit_orders([], env={}, report_dir=tmp_path)
 
     assert _json.loads(tracker.read_text(encoding="utf-8")) == {}
+
+
+def _inverse_quote(price: float, *, session_high: float | None = None) -> Quote:
+    return Quote(
+        symbol="114800", timestamp=datetime.now(timezone.utc), last=price,
+        bid=price - 1, ask=price, volume=1_000_000, session_high=session_high, source="kis",
+    )
+
+
+def test_inverse_first_profit_stage_sells_33_percent_at_four_percent_gain(tmp_path):
+    position = PositionSnapshot(
+        symbol="114800", quantity=300, sellable_quantity=300,
+        avg_price=1000, market_value=312_000, source="kis",
+    )
+    orders, audit = build_position_exit_orders(
+        [position], report_dir=tmp_path,
+        realtime_quotes={"114800": _inverse_quote(1040)}, require_realtime_quotes=True,
+    )
+
+    assert len(orders) == 1
+    assert orders[0]["quantity"] == 99
+    assert orders[0]["exit_stage"] == "inverse_profit_1"
+    assert orders[0]["idempotency_scope"].startswith("inverse_profit_1-")
+    assert audit["reviews"][0]["protected_price"] == 1024.4
+
+
+def test_inverse_second_profit_stage_waits_for_broker_quantity_reduction(tmp_path):
+    tracker = tmp_path / "live_position_tracker.json"
+    tracker.write_text(_json.dumps({"114800": {
+        "avg_price": 1000, "quantity": 300, "initial_quantity": 300,
+        "peak_price": 1040, "first_seen_date": "2026-07-14", "lifecycle_id": "life1",
+    }}), encoding="utf-8")
+    position = PositionSnapshot(
+        symbol="114800", quantity=201, sellable_quantity=201,
+        avg_price=1000, market_value=209_040, source="kis",
+    )
+    orders, _ = build_position_exit_orders(
+        [position], report_dir=tmp_path,
+        realtime_quotes={"114800": _inverse_quote(1040)}, require_realtime_quotes=True,
+    )
+
+    assert len(orders) == 1
+    assert orders[0]["quantity"] == 99
+    assert orders[0]["exit_stage"] == "inverse_profit_2"
+
+
+def test_inverse_profit_lock_exits_remainder_before_gain_turns_negative(tmp_path):
+    tracker = tmp_path / "live_position_tracker.json"
+    tracker.write_text(_json.dumps({"114800": {
+        "avg_price": 1000, "quantity": 201, "initial_quantity": 300,
+        "peak_price": 1040, "first_seen_date": "2026-07-14", "lifecycle_id": "life1",
+    }}), encoding="utf-8")
+    position = PositionSnapshot(
+        symbol="114800", quantity=201, sellable_quantity=201,
+        avg_price=1000, market_value=201 * 1024, source="kis",
+    )
+    orders, audit = build_position_exit_orders(
+        [position], report_dir=tmp_path,
+        realtime_quotes={"114800": _inverse_quote(1024)}, require_realtime_quotes=True,
+    )
+
+    assert orders[0]["quantity"] == 201
+    assert orders[0]["exit_stage"] == "full_exit"
+    assert "inverse_profit_lock" in orders[0]["reason"]
+    assert audit["reviews"][0]["protected_price"] == 1024.4
+
+
+def test_inverse_restart_repairs_peak_from_official_session_high(tmp_path):
+    tracker = tmp_path / "live_position_tracker.json"
+    tracker.write_text(_json.dumps({"114800": {
+        "avg_price": 1000, "quantity": 300, "initial_quantity": 300,
+        "peak_price": 1010, "first_seen_date": "2026-07-14", "lifecycle_id": "life1",
+    }}), encoding="utf-8")
+    position = PositionSnapshot(
+        symbol="114800", quantity=300, sellable_quantity=300,
+        avg_price=1000, market_value=300 * 1020, source="kis",
+    )
+    orders, audit = build_position_exit_orders(
+        [position], report_dir=tmp_path,
+        realtime_quotes={"114800": _inverse_quote(1020, session_high=1040)}, require_realtime_quotes=True,
+    )
+
+    assert orders[0]["quantity"] == 300
+    assert "inverse_profit_lock" in orders[0]["reason"]
+    assert audit["reviews"][0]["peak_price"] == 1040

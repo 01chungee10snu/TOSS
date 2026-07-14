@@ -218,6 +218,7 @@ class KisReadOnlyClient:
             bid=_to_float(orderbook_record.get("bidp1")),
             ask=_to_float(orderbook_record.get("askp1")),
             volume=_to_float(quote_record.get("acml_vol")),
+            session_high=_to_float(quote_record.get("stck_hgpr")),
             source="kis",
         )
 

@@ -115,7 +115,10 @@ def run_live_submit_phase(
         desired_order_keys: set[str] = set()
         for raw_order in orders:
             try:
-                desired_intent = order_to_intent(raw_order, strategy_id=settings.strategy_id)
+                desired_intent = order_to_intent(
+                    raw_order,
+                    strategy_id=_order_strategy_id(settings.strategy_id, raw_order),
+                )
                 desired_order_keys.add(ledger_key(desired_intent, candidate_payload or {}))
             except Exception:
                 # Invalid current candidates must not preserve an old BUY order.
@@ -191,7 +194,8 @@ def run_live_submit_phase(
 
     for raw_order in orders:
         raw_order = dict(raw_order)
-        pre_reprice_intent = order_to_intent(raw_order, strategy_id=settings.strategy_id)
+        order_strategy_id = _order_strategy_id(settings.strategy_id, raw_order)
+        pre_reprice_intent = order_to_intent(raw_order, strategy_id=order_strategy_id)
         pre_reprice_key = ledger_key(pre_reprice_intent, candidate_payload or {})
         reprice_remaining = (order_reconcile.get("reprice_remaining_by_key") or {}).get(pre_reprice_key)
         if reprice_remaining is not None:
@@ -203,7 +207,7 @@ def run_live_submit_phase(
         adaptive_audit: dict[str, Any] | None = None
         if not settings.dry_run and str(raw_order.get("side", "BUY")).upper() == "BUY":
             raw_order, adaptive_audit = adapt_buy_order_to_live_quote(raw_order, config=config, env=env)
-        intent = order_to_intent(raw_order, strategy_id=settings.strategy_id)
+        intent = order_to_intent(raw_order, strategy_id=order_strategy_id)
         order_violations = validate_live_order_intent(intent, raw_order=raw_order, policy=policy)
         if adaptive_audit and adaptive_audit.get("violation"):
             order_violations.append(str(adaptive_audit["violation"]))
@@ -215,6 +219,8 @@ def run_live_submit_phase(
             order_violations.append("live_order_ledger_corrupt")
         elif ledger.has_live_submission(duplicate_key):
             order_violations.append("duplicate_live_order_ledger_key")
+        elif intent.side == "SELL" and ledger.has_other_live_sell(symbol=intent.symbol, key=duplicate_key):
+            order_violations.append("active_sell_order_for_symbol")
         # Intraday cap throttles entries but must never trap risk-reducing exits.
         if not settings.dry_run and intent.side == "BUY" and intraday_remaining <= 0:
             order_violations.append("intraday_submit_cap_exceeded")
@@ -897,6 +903,14 @@ class LiveOrderLedger:
         # FILLED/CANCELED/REJECTED reconciliation row releases the key.
         return self.latest_status_by_key().get(key) in {"PENDING_SUBMIT", "SUBMITTED", "PARTIALLY_FILLED", "UNKNOWN", "CANCEL_REQUESTED"}
 
+    def has_other_live_sell(self, *, symbol: str, key: str) -> bool:
+        suffix = f":{str(symbol).zfill(6)}:SELL"
+        active = {"PENDING_SUBMIT", "SUBMITTED", "PARTIALLY_FILLED", "UNKNOWN", "CANCEL_REQUESTED"}
+        return any(
+            existing_key != key and existing_key.endswith(suffix) and status in active
+            for existing_key, status in self.latest_status_by_key().items()
+        )
+
     def reserve_if_absent(self, key: str, row: dict[str, Any]) -> bool:
         """Atomically reserve a key across cron and manual processes."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -919,8 +933,17 @@ class LiveOrderLedger:
                     record_key = record.get("ledger_key")
                     if record_key:
                         latest[str(record_key)] = str(record.get("status") or "")
-                if latest.get(key) in {"PENDING_SUBMIT", "SUBMITTED", "PARTIALLY_FILLED", "UNKNOWN", "CANCEL_REQUESTED"}:
+                active = {"PENDING_SUBMIT", "SUBMITTED", "PARTIALLY_FILLED", "UNKNOWN", "CANCEL_REQUESTED"}
+                if latest.get(key) in active:
                     return False
+                if key.endswith(":SELL"):
+                    parts = key.rsplit(":", 2)
+                    sell_suffix = f":{parts[-2]}:SELL" if len(parts) == 3 else ""
+                    if sell_suffix and any(
+                        other_key != key and other_key.endswith(sell_suffix) and status in active
+                        for other_key, status in latest.items()
+                    ):
+                        return False
                 handle.seek(0, os.SEEK_END)
                 handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
                 handle.flush()
@@ -944,6 +967,15 @@ class LiveOrderLedger:
 def ledger_key(intent: OrderIntent, candidate_payload: Mapping[str, Any]) -> str:
     as_of = candidate_payload.get("as_of") or candidate_payload.get("generated_for") or "unknown-date"
     return f"{as_of}:{intent.strategy_id}:{intent.symbol}:{intent.side}"
+
+
+def _order_strategy_id(base_strategy_id: str, raw_order: Mapping[str, Any]) -> str:
+    """Add an immutable semantic scope for intentional same-day staged exits."""
+    scope = str(raw_order.get("idempotency_scope") or "").strip()
+    if not scope:
+        return base_strategy_id
+    safe = "".join(ch for ch in scope if ch.isalnum() or ch in {"_", "-"})[:48]
+    return f"{base_strategy_id}@{safe}" if safe else base_strategy_id
 
 
 def _intraday_submit_attempt_count(rows: list[dict[str, Any]], today: str) -> int:

@@ -43,6 +43,7 @@ class Quote:
     bid: float | None = None
     ask: float | None = None
     volume: float | None = None
+    session_high: float | None = None
     source: str = "unknown"
     freshness_ms: int | None = None
 
