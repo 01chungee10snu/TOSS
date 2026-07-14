@@ -40,7 +40,7 @@ def test_kis_connector_builds_authorization_and_app_headers(monkeypatch):
 
 def test_kis_connector_exposes_only_readonly_methods():
     client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
-    for name in ["token", "balance", "account_snapshot", "position_snapshots", "quote", "quote_snapshot"]:
+    for name in ["token", "balance", "account_snapshot", "position_snapshots", "quote", "orderbook", "quote_snapshot"]:
         assert callable(getattr(client, name))
     for forbidden in ["orders", "place_order", "buy", "sell"]:
         assert not hasattr(client, forbidden)
@@ -103,11 +103,16 @@ def test_kis_quote_uses_readonly_current_price_endpoint(monkeypatch):
     assert calls[0]["params"] == {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": "005930"}
 
 
-def test_kis_quote_snapshot_parses_price_payload(monkeypatch):
+def test_kis_quote_snapshot_parses_price_and_orderbook_payloads(monkeypatch):
     monkeypatch.setattr(
         KisReadOnlyClient,
         "quote",
-        lambda self, symbol: {"json": {"output": {"stck_prpr": "70100", "bidp": "70000", "askp": "70200", "acml_vol": "12345"}}},
+        lambda self, symbol: {"json": {"output": {"stck_prpr": "70100", "acml_vol": "12345"}}},
+    )
+    monkeypatch.setattr(
+        KisReadOnlyClient,
+        "orderbook",
+        lambda self, symbol: {"json": {"output1": {"bidp1": "70000", "askp1": "70200"}}},
     )
     client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
 
@@ -119,6 +124,46 @@ def test_kis_quote_snapshot_parses_price_payload(monkeypatch):
     assert quote.ask == 70200.0
     assert quote.volume == 12345.0
     assert quote.source == "kis"
+
+
+def test_kis_orderbook_uses_readonly_orderbook_endpoint(monkeypatch):
+    calls = []
+    monkeypatch.setattr(KisReadOnlyClient, "token", lambda self: "token")
+
+    def fake_request(method, url, headers=None, params=None, timeout=None):
+        calls.append({"method": method, "url": url, "headers": headers, "params": params})
+        return FakeResponse(payload={"output1": {"bidp1": "70000", "askp1": "70200"}})
+
+    monkeypatch.setattr("requests.request", fake_request)
+    client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
+
+    result = client.orderbook("5930")
+
+    assert result["ok"] is True
+    assert calls[0]["method"] == "GET"
+    assert calls[0]["url"].endswith("/uapi/domestic-stock/v1/quotations/inquire-asking-price-exp-ccn")
+    assert calls[0]["headers"]["tr_id"] == "FHKST01010200"
+    assert calls[0]["params"] == {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": "005930"}
+
+
+def test_kis_quote_snapshot_keeps_missing_orderbook_fail_closed(monkeypatch):
+    monkeypatch.setattr(
+        KisReadOnlyClient,
+        "quote",
+        lambda self, symbol: {"json": {"output": {"stck_prpr": "70100", "acml_vol": "12345"}}},
+    )
+    monkeypatch.setattr(
+        KisReadOnlyClient,
+        "orderbook",
+        lambda self, symbol: {"json": {"output1": {}}},
+    )
+    client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
+
+    quote = client.quote_snapshot("5930")
+
+    assert quote.last == 70100.0
+    assert quote.bid is None
+    assert quote.ask is None
 
 
 def test_kis_business_error_under_http_200_raises(monkeypatch):

@@ -34,8 +34,10 @@ class KisReadOnlyClient:
     timeout: int = 20
     balance_path: str = "/uapi/domestic-stock/v1/trading/inquire-balance"
     quote_path: str = "/uapi/domestic-stock/v1/quotations/inquire-price"
+    orderbook_path: str = "/uapi/domestic-stock/v1/quotations/inquire-asking-price-exp-ccn"
     balance_tr_id: str | None = None
     quote_tr_id: str | None = None
+    orderbook_tr_id: str | None = None
 
     def token(self) -> str:
         def fetch_token() -> dict[str, Any]:
@@ -69,6 +71,9 @@ class KisReadOnlyClient:
 
     def _default_quote_tr_id(self) -> str:
         return "FHKST01010100"
+
+    def _default_orderbook_tr_id(self) -> str:
+        return "FHKST01010200"
 
     def _headers(self, *, tr_id: str | None = None) -> dict[str, str]:
         return {
@@ -131,16 +136,33 @@ class KisReadOnlyClient:
             tr_id=self.quote_tr_id or self._default_quote_tr_id(),
         )
 
+    def orderbook(self, symbol: str) -> dict[str, Any]:
+        """Return KIS domestic stock order-book payload (read-only)."""
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": str(symbol).strip().zfill(6),
+        }
+        return self._request(
+            "GET",
+            self.orderbook_path,
+            params=params,
+            tr_id=self.orderbook_tr_id or self._default_orderbook_tr_id(),
+        )
+
     def quote_snapshot(self, symbol: str) -> Quote:
-        payload = self.quote(symbol)["json"] or {}
-        record = _first_record(payload)
+        quote_payload = self.quote(symbol)["json"] or {}
+        quote_record = _first_record(quote_payload)
+        orderbook_payload = self.orderbook(symbol)["json"] or {}
+        orderbook_record = orderbook_payload.get("output1")
+        if not isinstance(orderbook_record, dict):
+            orderbook_record = _first_record(orderbook_payload)
         return Quote(
             symbol=str(symbol).strip().zfill(6),
             timestamp=datetime.now(timezone.utc),
-            last=_to_float(record.get("stck_prpr") or record.get("last") or record.get("price")) or 0.0,
-            bid=_to_float(record.get("bidp") or record.get("bid")),
-            ask=_to_float(record.get("askp") or record.get("ask")),
-            volume=_to_float(record.get("acml_vol") or record.get("volume")),
+            last=_to_float(quote_record.get("stck_prpr") or quote_record.get("last") or quote_record.get("price")) or 0.0,
+            bid=_to_float(orderbook_record.get("bidp1") or orderbook_record.get("bidp") or orderbook_record.get("bid")),
+            ask=_to_float(orderbook_record.get("askp1") or orderbook_record.get("askp") or orderbook_record.get("ask")),
+            volume=_to_float(quote_record.get("acml_vol") or quote_record.get("volume")),
             source="kis",
         )
 
