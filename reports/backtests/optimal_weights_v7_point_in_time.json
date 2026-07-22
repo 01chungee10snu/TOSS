@@ -1,0 +1,410 @@
+{
+  "strategy": "daily_multifactor_v1_practical400_v7",
+  "optimization_date": "2026-07-21 18:17",
+  "panel_period": "2022-01-04 ~ 2026-07-16",
+  "backtest_period": "2022-04-05 ~ 2026-07-14",
+  "n_stocks": 400,
+  "panel_days": 1107,
+  "backtest_days": 1045,
+  "n_weight_combos": 1771,
+  "factors": [
+    "momentum",
+    "low_vol",
+    "rsi",
+    "volume_ratio"
+  ],
+  "factor_processing": "cross-sectional rank normalization [-0.5, 0.5]",
+  "decision_time_contract": "eligibility uses data through t-1; factor score uses close[t]; enter open[t+1]; exit open[t+2]",
+  "entry_failure_policy": "rank fixed at t; failed t+1 open/limit-up slots remain cash; no future-informed replacement",
+  "forward_return": "next-open to following-open, 1-day non-overlapping",
+  "stop_loss": "none; overnight open-to-open path cannot guarantee a 5% fill",
+  "txn_cost": "0.03%/side",
+  "slippage": "0.10%/side",
+  "limit_up_filter": "open gap >= 29% excluded",
+  "point_in_time_eligibility": {
+    "minimum_valid_history_observations_through_t_minus_1": 60,
+    "minimum_previous_volume_shares": 10000,
+    "minimum_20d_median_turnover_krw": 500000000,
+    "rank_eligibility_rate": 0.8168659806251526,
+    "entry_execution_gate_rate": 0.9469808340072632,
+    "eligible_count_per_day_min": 1,
+    "eligible_count_per_day_median": 337.0
+  },
+  "data_quality": {
+    "duplicate_code_date_rows": 0,
+    "invalid_six_digit_code_rows": 0,
+    "extreme_positive_open_to_open_over_30pct": 242,
+    "extreme_negative_open_to_open_below_minus_30pct": 31,
+    "missing_exit_open_after_valid_entry": 394,
+    "positive_return_cap": 0.3,
+    "missing_exit_assumption": 0.0,
+    "missing_exit_note": "mark-to-last proxy; unresolved suspension/delisting remains a blocking data-quality issue"
+  },
+  "universe_validation": {
+    "full_coverage_stocks": 1,
+    "long_gap_stocks_60d": 40,
+    "verdict": "INCONCLUSIVE_REQUIRES_POINT_IN_TIME_MEMBERSHIP",
+    "panel_sha256": "ffd3dd8a49509b08504d9cbe6ed0ca35ce62f121fcb080821df38716147bc20f",
+    "note": "Missingness alone cannot prove absence of survivorship bias; point-in-time membership is required."
+  },
+  "promotion": {
+    "verdict": "BLOCKED",
+    "passing_candidates": [],
+    "checks_by_k": {
+      "k=3": {
+        "checks": {
+          "train_sharpe_positive": true,
+          "test_cumulative_positive": false,
+          "test_mdd_at_least_minus_25pct": false,
+          "all_test_years_positive": false,
+          "31bps_per_side_cumulative_positive": false
+        },
+        "passed": false
+      },
+      "k=5": {
+        "checks": {
+          "train_sharpe_positive": true,
+          "test_cumulative_positive": true,
+          "test_mdd_at_least_minus_25pct": false,
+          "all_test_years_positive": false,
+          "31bps_per_side_cumulative_positive": false
+        },
+        "passed": false
+      },
+      "k=10": {
+        "checks": {
+          "train_sharpe_positive": false,
+          "test_cumulative_positive": false,
+          "test_mdd_at_least_minus_25pct": false,
+          "all_test_years_positive": false,
+          "31bps_per_side_cumulative_positive": false
+        },
+        "passed": false
+      },
+      "k=20": {
+        "checks": {
+          "train_sharpe_positive": false,
+          "test_cumulative_positive": true,
+          "test_mdd_at_least_minus_25pct": false,
+          "all_test_years_positive": true,
+          "31bps_per_side_cumulative_positive": false
+        },
+        "passed": false
+      }
+    },
+    "blocking_data_issues": [
+      "point-in-time constituent membership unavailable",
+      "open-to-open returns beyond KRX price limits remain in source data",
+      "missing exit opens use mark-to-last proxy rather than suspension/delisting resolution"
+    ]
+  },
+  "results_by_k": {
+    "k=3": {
+      "k": 3,
+      "sel_weights": [
+        0.25,
+        0.0,
+        0.0,
+        0.75
+      ],
+      "sel_method": "Train Sharpe 최고 (Test 미사용 선택)",
+      "train_sharpe": 0.5407121181488037,
+      "test_sharpe": 0.1303316056728363,
+      "test_cumret": -0.2863563895225525,
+      "test_annual": -0.2043071985244751,
+      "test_mdd": -0.6327276229858398,
+      "test_winrate": 0.4704301059246063,
+      "train_sharpe_range": [
+        -3.837553024291992,
+        0.5407121181488037
+      ],
+      "test_sharpe_range": [
+        -2.3803420066833496,
+        2.254941701889038
+      ],
+      "n_positive_test": 731,
+      "test_years": {
+        "2025": {
+          "sharpe": 0.8763648271560669,
+          "cumulative_return": 0.419927716255188,
+          "annual_return": 0.440649151802063,
+          "max_drawdown": -0.48854169249534607,
+          "win_rate": 0.4917355477809906,
+          "days": 242
+        },
+        "2026": {
+          "sharpe": -0.7728590965270996,
+          "cumulative_return": -0.497408926486969,
+          "annual_return": -0.736478328704834,
+          "max_drawdown": -0.6327276229858398,
+          "win_rate": 0.4307692348957062,
+          "days": 130
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "sharpe": 0.13033170998096466,
+          "cumulative_return": -0.2863565683364868,
+          "annual_return": -0.20430731773376465,
+          "max_drawdown": -0.6327276229858398
+        },
+        "31bps_per_side": {
+          "sharpe": -0.29693931341171265,
+          "cumulative_return": -0.5752648115158081,
+          "annual_return": -0.44013911485671997,
+          "max_drawdown": -0.6834818720817566
+        },
+        "50bps_per_side": {
+          "sharpe": -0.7476897239685059,
+          "cumulative_return": -0.7546747326850891,
+          "annual_return": -0.6139890551567078,
+          "max_drawdown": -0.7844120860099792
+        },
+        "75bps_per_side": {
+          "sharpe": -1.3395946025848389,
+          "cumulative_return": -0.8810630440711975,
+          "annual_return": -0.763624906539917,
+          "max_drawdown": -0.8893570303916931
+        }
+      },
+      "test_selection_data_quality": {
+        "selected_slots": 1071,
+        "selected_missing_exit": 3,
+        "selected_extreme_positive_capped": 8,
+        "selected_extreme_negative_uncapped": 2
+      }
+    },
+    "k=5": {
+      "k": 5,
+      "sel_weights": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "sel_method": "Train Sharpe 최고 (Test 미사용 선택)",
+      "train_sharpe": 0.39952322840690613,
+      "test_sharpe": 0.5013951063156128,
+      "test_cumret": 0.19571411609649658,
+      "test_annual": 0.12872016429901123,
+      "test_mdd": -0.6531283259391785,
+      "test_winrate": 0.4811827838420868,
+      "train_sharpe_range": [
+        -3.8346288204193115,
+        0.39952322840690613
+      ],
+      "test_sharpe_range": [
+        -1.691006064414978,
+        2.4561052322387695
+      ],
+      "n_positive_test": 816,
+      "test_years": {
+        "2025": {
+          "sharpe": 1.8971271514892578,
+          "cumulative_return": 1.1826112270355225,
+          "annual_return": 1.2541546821594238,
+          "max_drawdown": -0.276263952255249,
+          "win_rate": 0.5041322112083435,
+          "days": 242
+        },
+        "2026": {
+          "sharpe": -1.1532361507415771,
+          "cumulative_return": -0.45216405391693115,
+          "annual_return": -0.688552975654602,
+          "max_drawdown": -0.6531283259391785,
+          "win_rate": 0.4384615421295166,
+          "days": 130
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "sharpe": 0.5013951659202576,
+          "cumulative_return": 0.19571316242218018,
+          "annual_return": 0.12871956825256348,
+          "max_drawdown": -0.6531283259391785
+        },
+        "31bps_per_side": {
+          "sharpe": 0.030383629724383354,
+          "cumulative_return": -0.21231788396835327,
+          "annual_return": -0.14928096532821655,
+          "max_drawdown": -0.6902974843978882
+        },
+        "50bps_per_side": {
+          "sharpe": -0.4677223563194275,
+          "cumulative_return": -0.4933667778968811,
+          "annual_return": -0.3691098093986511,
+          "max_drawdown": -0.7252743244171143
+        },
+        "75bps_per_side": {
+          "sharpe": -1.1235911846160889,
+          "cumulative_return": -0.7168435454368591,
+          "annual_return": -0.5746052265167236,
+          "max_drawdown": -0.7654249668121338
+        }
+      },
+      "test_selection_data_quality": {
+        "selected_slots": 1771,
+        "selected_missing_exit": 5,
+        "selected_extreme_positive_capped": 9,
+        "selected_extreme_negative_uncapped": 2
+      }
+    },
+    "k=10": {
+      "k": 10,
+      "sel_weights": [
+        0.6000000000000001,
+        0.0,
+        0.2,
+        0.2
+      ],
+      "sel_method": "Train Sharpe 최고 (Test 미사용 선택)",
+      "train_sharpe": -0.11565826088190079,
+      "test_sharpe": 0.09045547991991043,
+      "test_cumret": -0.0903773307800293,
+      "test_annual": -0.062153398990631104,
+      "test_mdd": -0.5929792523384094,
+      "test_winrate": 0.49462366104125977,
+      "train_sharpe_range": [
+        -3.4393882751464844,
+        -0.11565826088190079
+      ],
+      "test_sharpe_range": [
+        -1.22538423538208,
+        1.9862247705459595
+      ],
+      "n_positive_test": 1166,
+      "test_years": {
+        "2025": {
+          "sharpe": 1.1811102628707886,
+          "cumulative_return": 0.42375802993774414,
+          "annual_return": 0.44469618797302246,
+          "max_drawdown": -0.2693469822406769,
+          "win_rate": 0.5041322112083435,
+          "days": 242
+        },
+        "2026": {
+          "sharpe": -1.1683405637741089,
+          "cumulative_return": -0.3611120581626892,
+          "annual_return": -0.5804117918014526,
+          "max_drawdown": -0.5929793119430542,
+          "win_rate": 0.4769230782985687,
+          "days": 130
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "sharpe": 0.09045551717281342,
+          "cumulative_return": -0.09037816524505615,
+          "annual_return": -0.06215393543243408,
+          "max_drawdown": -0.5929792523384094
+        },
+        "31bps_per_side": {
+          "sharpe": -0.8119687438011169,
+          "cumulative_return": -0.5080622434616089,
+          "annual_return": -0.3815650939941406,
+          "max_drawdown": -0.6293581128120422
+        },
+        "50bps_per_side": {
+          "sharpe": -1.7617830038070679,
+          "cumulative_return": -0.7432154417037964,
+          "annual_return": -0.6018648147583008,
+          "max_drawdown": -0.780012309551239
+        },
+        "75bps_per_side": {
+          "sharpe": -3.004506826400757,
+          "cumulative_return": -0.8910596966743469,
+          "annual_return": -0.7772729396820068,
+          "max_drawdown": -0.8999438881874084
+        }
+      },
+      "test_selection_data_quality": {
+        "selected_slots": 3518,
+        "selected_missing_exit": 10,
+        "selected_extreme_positive_capped": 16,
+        "selected_extreme_negative_uncapped": 1
+      }
+    },
+    "k=20": {
+      "k": 20,
+      "sel_weights": [
+        0.0,
+        0.0,
+        0.9,
+        0.1
+      ],
+      "sel_method": "Train Sharpe 최고 (Test 미사용 선택)",
+      "train_sharpe": -0.26239436864852905,
+      "test_sharpe": 0.781371533870697,
+      "test_cumret": 0.34604430198669434,
+      "test_annual": 0.22300243377685547,
+      "test_mdd": -0.3197582960128784,
+      "test_winrate": 0.48924732208251953,
+      "train_sharpe_range": [
+        -2.8245089054107666,
+        -0.26239436864852905
+      ],
+      "test_sharpe_range": [
+        -0.657225489616394,
+        1.5945571660995483
+      ],
+      "n_positive_test": 1592,
+      "test_years": {
+        "2025": {
+          "sharpe": 1.2999671697616577,
+          "cumulative_return": 0.28311991691589355,
+          "annual_return": 0.29640626907348633,
+          "max_drawdown": -0.18856263160705566,
+          "win_rate": 0.4917355477809906,
+          "days": 242
+        },
+        "2026": {
+          "sharpe": 0.42977261543273926,
+          "cumulative_return": 0.049039602279663086,
+          "annual_return": 0.09724664688110352,
+          "max_drawdown": -0.3197581470012665,
+          "win_rate": 0.48461538553237915,
+          "days": 130
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "sharpe": 0.7813716530799866,
+          "cumulative_return": 0.34604454040527344,
+          "annual_return": 0.22300255298614502,
+          "max_drawdown": -0.31975820660591125
+        },
+        "31bps_per_side": {
+          "sharpe": -0.09875437617301941,
+          "cumulative_return": -0.11752992868423462,
+          "annual_return": -0.08121031522750854,
+          "max_drawdown": -0.3609115183353424
+        },
+        "50bps_per_side": {
+          "sharpe": -1.0282152891159058,
+          "cumulative_return": -0.4352037310600281,
+          "annual_return": -0.3209109902381897,
+          "max_drawdown": -0.4903210997581482
+        },
+        "75bps_per_side": {
+          "sharpe": -2.249326467514038,
+          "cumulative_return": -0.6863317489624023,
+          "annual_return": -0.5440686941146851,
+          "max_drawdown": -0.7124245166778564
+        }
+      },
+      "test_selection_data_quality": {
+        "selected_slots": 7022,
+        "selected_missing_exit": 19,
+        "selected_extreme_positive_capped": 3,
+        "selected_extreme_negative_uncapped": 1
+      }
+    },
+    "monte_carlo_k10": {
+      "actual_cumulative": -0.30212128162384033,
+      "prob_positive": 0.3257,
+      "p5": -0.8073224425315857,
+      "p50": -0.3028036653995514,
+      "p95": 1.5665991306304932
+    }
+  }
+}

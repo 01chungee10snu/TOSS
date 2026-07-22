@@ -1,0 +1,4641 @@
+{
+  "generated_at": "2026-07-21 20:02:07",
+  "research_only": true,
+  "panel": "/Users/01chungee10/Github/TOSS/reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv",
+  "panel_sha256": "ffd3dd8a49509b08504d9cbe6ed0ca35ce62f121fcb080821df38716147bc20f",
+  "panel_period": "2022-01-04 ~ 2026-07-16",
+  "panel_shape": [
+    1107,
+    400
+  ],
+  "data_contract": {
+    "duplicate_code_date_rows": 0,
+    "invalid_code_rows": 0,
+    "eligibility": "60 valid observations, previous-session volume>=10000, previous 20-session median turnover>=KRW500m",
+    "signal": "factor score at close[t] against highs/bands ending t-1",
+    "entry": "open[t+1]; failed/missing/limit-up slot remains cash without replacement",
+    "exit": "open[t+1+hold_days] on non-overlapping episodes",
+    "corporate_action_proxy": "each positive open-to-open transition capped at +30%; negative transitions uncapped; missing transition marked flat",
+    "position_accounting": "net repeated names at episode boundary; charge actual valid entry/exit sides"
+  },
+  "models": [
+    "momentum20_baseline",
+    "donchian20",
+    "donchian55",
+    "bollinger_breakout",
+    "volume_breakout",
+    "ensemble_mean",
+    "ensemble_median",
+    "ensemble_consensus"
+  ],
+  "holds": [
+    5,
+    10
+  ],
+  "topks": [
+    5,
+    10,
+    20
+  ],
+  "base_cost_per_side": 0.0013,
+  "selection": "highest Train Sharpe among Train cumulative>0 and Train MDD>=-35%; Test unused",
+  "best_overall_train_selected": "momentum20_baseline|h5|k10",
+  "best_ensemble_train_selected": "ensemble_median|h5|k5",
+  "promotion": {
+    "best_overall": {
+      "checks": {
+        "train_cumulative_positive": true,
+        "train_sharpe_positive": true,
+        "test_cumulative_positive": true,
+        "test_mdd_at_least_minus_25pct": false,
+        "all_test_years_positive": true,
+        "31bps_test_positive": true,
+        "bootstrap_positive_rate_at_least_90pct": true
+      },
+      "metrics_passed": false
+    },
+    "best_ensemble": {
+      "checks": {
+        "train_cumulative_positive": true,
+        "train_sharpe_positive": true,
+        "test_cumulative_positive": true,
+        "test_mdd_at_least_minus_25pct": false,
+        "all_test_years_positive": false,
+        "31bps_test_positive": true,
+        "bootstrap_positive_rate_at_least_90pct": false
+      },
+      "metrics_passed": false
+    },
+    "verdict": "BLOCKED_RESEARCH_ONLY",
+    "blocking_reasons": [
+      "current-400 panel is not a point-in-time universe",
+      "corporate actions are capped proxies rather than ledger-adjusted prices",
+      "missing/suspended exits use mark-flat instead of carry-to-next-tradable-session"
+    ]
+  },
+  "leaderboard_train_order": [
+    {
+      "config": "momentum20_baseline|h10|k5",
+      "model": "momentum20_baseline",
+      "hold_days": 10,
+      "top_k": 5,
+      "train_sharpe": 1.4840949747488288,
+      "train_cumulative": 6.338673265467625,
+      "train_mdd": -0.45596943153270514,
+      "test_sharpe": 1.464878013918333,
+      "test_cumulative": 2.249715363762002,
+      "test_mdd": -0.4763289235746557
+    },
+    {
+      "config": "momentum20_baseline|h5|k5",
+      "model": "momentum20_baseline",
+      "hold_days": 5,
+      "top_k": 5,
+      "train_sharpe": 1.3879742318950876,
+      "train_cumulative": 4.356692830035879,
+      "train_mdd": -0.41146809361993675,
+      "test_sharpe": 1.6997788431213052,
+      "test_cumulative": 3.0536990816347256,
+      "test_mdd": -0.49718573496860846
+    },
+    {
+      "config": "momentum20_baseline|h5|k10",
+      "model": "momentum20_baseline",
+      "hold_days": 5,
+      "top_k": 10,
+      "train_sharpe": 1.0017932056761956,
+      "train_cumulative": 1.324058497076904,
+      "train_mdd": -0.33328549215259523,
+      "test_sharpe": 2.017474770656185,
+      "test_cumulative": 3.2883668984105405,
+      "test_mdd": -0.4502147864908388
+    },
+    {
+      "config": "momentum20_baseline|h10|k10",
+      "model": "momentum20_baseline",
+      "hold_days": 10,
+      "top_k": 10,
+      "train_sharpe": 0.98569793101022,
+      "train_cumulative": 1.3507540552529949,
+      "train_mdd": -0.3368708032067005,
+      "test_sharpe": 1.9176101640673169,
+      "test_cumulative": 2.998211516566663,
+      "test_mdd": -0.386991477823243
+    },
+    {
+      "config": "momentum20_baseline|h5|k20",
+      "model": "momentum20_baseline",
+      "hold_days": 5,
+      "top_k": 20,
+      "train_sharpe": 0.6003959663417554,
+      "train_cumulative": 0.4252241241834991,
+      "train_mdd": -0.33356596754854695,
+      "test_sharpe": 1.8642328069712901,
+      "test_cumulative": 2.1189787636038533,
+      "test_mdd": -0.37365388055952536
+    },
+    {
+      "config": "momentum20_baseline|h10|k20",
+      "model": "momentum20_baseline",
+      "hold_days": 10,
+      "top_k": 20,
+      "train_sharpe": 0.5942192666164361,
+      "train_cumulative": 0.442657970694037,
+      "train_mdd": -0.308550276988965,
+      "test_sharpe": 1.9079473813529548,
+      "test_cumulative": 2.1100381613705648,
+      "test_mdd": -0.33310823235930753
+    },
+    {
+      "config": "volume_breakout|h5|k5",
+      "model": "volume_breakout",
+      "hold_days": 5,
+      "top_k": 5,
+      "train_sharpe": 0.47333583110163063,
+      "train_cumulative": 0.31171929461786574,
+      "train_mdd": -0.25160372183430324,
+      "test_sharpe": 0.2877480207049635,
+      "test_cumulative": 0.00640974449658871,
+      "test_mdd": -0.4996688399789382
+    },
+    {
+      "config": "ensemble_median|h5|k5",
+      "model": "ensemble_median",
+      "hold_days": 5,
+      "top_k": 5,
+      "train_sharpe": 0.3947269974779198,
+      "train_cumulative": 0.22548107258169625,
+      "train_mdd": -0.29084676242003804,
+      "test_sharpe": 0.6103533267598497,
+      "test_cumulative": 0.31444206513476347,
+      "test_mdd": -0.42776732003924595
+    },
+    {
+      "config": "ensemble_mean|h5|k5",
+      "model": "ensemble_mean",
+      "hold_days": 5,
+      "top_k": 5,
+      "train_sharpe": 0.3678499601124914,
+      "train_cumulative": 0.19620443198995274,
+      "train_mdd": -0.47331205397679255,
+      "test_sharpe": 0.6119137240688773,
+      "test_cumulative": 0.3138039235238077,
+      "test_mdd": -0.4420859475413723
+    },
+    {
+      "config": "bollinger_breakout|h5|k5",
+      "model": "bollinger_breakout",
+      "hold_days": 5,
+      "top_k": 5,
+      "train_sharpe": 0.36742863336116915,
+      "train_cumulative": 0.19859176143751522,
+      "train_mdd": -0.38230060298881724,
+      "test_sharpe": 0.05811553536050664,
+      "test_cumulative": -0.1848100308468742,
+      "test_mdd": -0.4810525925247582
+    },
+    {
+      "config": "donchian20|h5|k5",
+      "model": "donchian20",
+      "hold_days": 5,
+      "top_k": 5,
+      "train_sharpe": 0.32227452783120214,
+      "train_cumulative": 0.14675745777560567,
+      "train_mdd": -0.29938676358435573,
+      "test_sharpe": 0.5778002517576302,
+      "test_cumulative": 0.279093284748664,
+      "test_mdd": -0.4208149926882569
+    },
+    {
+      "config": "donchian55|h10|k20",
+      "model": "donchian55",
+      "hold_days": 10,
+      "top_k": 20,
+      "train_sharpe": 0.1715484320960025,
+      "train_cumulative": 0.03544094000010478,
+      "train_mdd": -0.14497958637489058,
+      "test_sharpe": 1.0529007279918063,
+      "test_cumulative": 0.608516804427996,
+      "test_mdd": -0.19067954669634254
+    },
+    {
+      "config": "ensemble_mean|h10|k5",
+      "model": "ensemble_mean",
+      "hold_days": 10,
+      "top_k": 5,
+      "train_sharpe": 0.15252594629569893,
+      "train_cumulative": -0.00017661571014804256,
+      "train_mdd": -0.26745513425349926,
+      "test_sharpe": 0.7516249878302018,
+      "test_cumulative": 0.4373936753557617,
+      "test_mdd": -0.2608828658709208
+    },
+    {
+      "config": "donchian55|h5|k5",
+      "model": "donchian55",
+      "hold_days": 5,
+      "top_k": 5,
+      "train_sharpe": 0.09543080134564746,
+      "train_cumulative": -0.058268646116535594,
+      "train_mdd": -0.5522719290621446,
+      "test_sharpe": 0.10831210075188889,
+      "test_cumulative": -0.1172946660120111,
+      "test_mdd": -0.4667608444599513
+    },
+    {
+      "config": "ensemble_consensus|h5|k5",
+      "model": "ensemble_consensus",
+      "hold_days": 5,
+      "top_k": 5,
+      "train_sharpe": 0.09049937959160738,
+      "train_cumulative": -0.07281588872521083,
+      "train_mdd": -0.580082137447419,
+      "test_sharpe": 0.17825035188513627,
+      "test_cumulative": -0.07961832631127608,
+      "test_mdd": -0.4814440892522025
+    },
+    {
+      "config": "donchian55|h10|k10",
+      "model": "donchian55",
+      "hold_days": 10,
+      "top_k": 10,
+      "train_sharpe": 0.08273162457386447,
+      "train_cumulative": -0.009616280731871152,
+      "train_mdd": -0.19734437063367666,
+      "test_sharpe": 1.0628498376239104,
+      "test_cumulative": 0.7770997820416694,
+      "test_mdd": -0.20297205826260478
+    },
+    {
+      "config": "bollinger_breakout|h5|k10",
+      "model": "bollinger_breakout",
+      "hold_days": 5,
+      "top_k": 10,
+      "train_sharpe": 0.08007185870289313,
+      "train_cumulative": -0.03769957122512546,
+      "train_mdd": -0.30254776250303855,
+      "test_sharpe": 0.361481274721265,
+      "test_cumulative": 0.07678766439952556,
+      "test_mdd": -0.48667369788335846
+    },
+    {
+      "config": "donchian55|h10|k5",
+      "model": "donchian55",
+      "hold_days": 10,
+      "top_k": 5,
+      "train_sharpe": 0.061246984105355576,
+      "train_cumulative": -0.06538349674966393,
+      "train_mdd": -0.3213152659806036,
+      "test_sharpe": 1.045330007832747,
+      "test_cumulative": 0.8458005710934462,
+      "test_mdd": -0.24345867824823558
+    },
+    {
+      "config": "ensemble_consensus|h5|k10",
+      "model": "ensemble_consensus",
+      "hold_days": 5,
+      "top_k": 10,
+      "train_sharpe": 0.018903514059673495,
+      "train_cumulative": -0.054942913055569975,
+      "train_mdd": -0.30457960465701406,
+      "test_sharpe": 0.4807514409705614,
+      "test_cumulative": 0.18534971332730366,
+      "test_mdd": -0.39950627856240595
+    },
+    {
+      "config": "ensemble_mean|h10|k10",
+      "model": "ensemble_mean",
+      "hold_days": 10,
+      "top_k": 10,
+      "train_sharpe": 0.0027433847390823302,
+      "train_cumulative": -0.05745118431713525,
+      "train_mdd": -0.2044076435853033,
+      "test_sharpe": 1.143653698691951,
+      "test_cumulative": 0.8447875628590464,
+      "test_mdd": -0.22929469240320063
+    },
+    {
+      "config": "ensemble_consensus|h10|k10",
+      "model": "ensemble_consensus",
+      "hold_days": 10,
+      "top_k": 10,
+      "train_sharpe": 0.0008540512657254332,
+      "train_cumulative": -0.058343263925803246,
+      "train_mdd": -0.22570653716147238,
+      "test_sharpe": 1.2086643665564314,
+      "test_cumulative": 0.9264078311693136,
+      "test_mdd": -0.2028998638098543
+    },
+    {
+      "config": "ensemble_mean|h5|k20",
+      "model": "ensemble_mean",
+      "hold_days": 5,
+      "top_k": 20,
+      "train_sharpe": -0.014142384293486193,
+      "train_cumulative": -0.03829172319913787,
+      "train_mdd": -0.22981142117763087,
+      "test_sharpe": 0.5617856824443104,
+      "test_cumulative": 0.2177963237847682,
+      "test_mdd": -0.30624392203085793
+    },
+    {
+      "config": "ensemble_consensus|h10|k5",
+      "model": "ensemble_consensus",
+      "hold_days": 10,
+      "top_k": 5,
+      "train_sharpe": -0.0758222636310661,
+      "train_cumulative": -0.16961370544603083,
+      "train_mdd": -0.3431539117578415,
+      "test_sharpe": 0.5460078791992179,
+      "test_cumulative": 0.2417436998976299,
+      "test_mdd": -0.2938367948169838
+    },
+    {
+      "config": "ensemble_consensus|h5|k20",
+      "model": "ensemble_consensus",
+      "hold_days": 5,
+      "top_k": 20,
+      "train_sharpe": -0.08629612550790393,
+      "train_cumulative": -0.06422673107205701,
+      "train_mdd": -0.23200702403063142,
+      "test_sharpe": 0.4686582898099917,
+      "test_cumulative": 0.15939741846057554,
+      "test_mdd": -0.30716773050972873
+    },
+    {
+      "config": "ensemble_mean|h5|k10",
+      "model": "ensemble_mean",
+      "hold_days": 5,
+      "top_k": 10,
+      "train_sharpe": -0.11377327726782095,
+      "train_cumulative": -0.1260524486566581,
+      "train_mdd": -0.3417534955543317,
+      "test_sharpe": 0.39836570145570327,
+      "test_cumulative": 0.11434002014939604,
+      "test_mdd": -0.4332419541090427
+    },
+    {
+      "config": "ensemble_median|h5|k20",
+      "model": "ensemble_median",
+      "hold_days": 5,
+      "top_k": 20,
+      "train_sharpe": -0.13720933618192646,
+      "train_cumulative": -0.0865722108717687,
+      "train_mdd": -0.24090578491295797,
+      "test_sharpe": 0.515312314808043,
+      "test_cumulative": 0.1856423113644876,
+      "test_mdd": -0.29815300240809256
+    },
+    {
+      "config": "donchian20|h5|k10",
+      "model": "donchian20",
+      "hold_days": 5,
+      "top_k": 10,
+      "train_sharpe": -0.16975167588535844,
+      "train_cumulative": -0.17018614146638578,
+      "train_mdd": -0.31018671623742766,
+      "test_sharpe": 0.014260143555420506,
+      "test_cumulative": -0.13963695295724377,
+      "test_mdd": -0.4802441243408974
+    },
+    {
+      "config": "ensemble_median|h5|k10",
+      "model": "ensemble_median",
+      "hold_days": 5,
+      "top_k": 10,
+      "train_sharpe": -0.1757110069669748,
+      "train_cumulative": -0.16544718844628714,
+      "train_mdd": -0.2874148944053248,
+      "test_sharpe": 0.08588144261733272,
+      "test_cumulative": -0.10124120649718749,
+      "test_mdd": -0.4548590407499045
+    },
+    {
+      "config": "ensemble_mean|h10|k20",
+      "model": "ensemble_mean",
+      "hold_days": 10,
+      "top_k": 20,
+      "train_sharpe": -0.17753220356943208,
+      "train_cumulative": -0.09376907592270689,
+      "train_mdd": -0.18633307873035468,
+      "test_sharpe": 1.2214801198235372,
+      "test_cumulative": 0.7686388350912234,
+      "test_mdd": -0.18322414192378383
+    },
+    {
+      "config": "bollinger_breakout|h10|k10",
+      "model": "bollinger_breakout",
+      "hold_days": 10,
+      "top_k": 10,
+      "train_sharpe": -0.18813495367459143,
+      "train_cumulative": -0.17322153399353957,
+      "train_mdd": -0.2977327527377975,
+      "test_sharpe": 0.9534662849263139,
+      "test_cumulative": 0.6505525477057883,
+      "test_mdd": -0.2364407013434059
+    },
+    {
+      "config": "bollinger_breakout|h5|k20",
+      "model": "bollinger_breakout",
+      "hold_days": 5,
+      "top_k": 20,
+      "train_sharpe": -0.20182932054238284,
+      "train_cumulative": -0.15676103786439488,
+      "train_mdd": -0.24407827513107022,
+      "test_sharpe": 0.10437095272766211,
+      "test_cumulative": -0.05793777434696945,
+      "test_mdd": -0.48582171058160745
+    },
+    {
+      "config": "donchian55|h5|k20",
+      "model": "donchian55",
+      "hold_days": 5,
+      "top_k": 20,
+      "train_sharpe": -0.21383293992071475,
+      "train_cumulative": -0.08189514317814872,
+      "train_mdd": -0.20098875105890365,
+      "test_sharpe": 0.7953459640151158,
+      "test_cumulative": 0.3541145905799086,
+      "test_mdd": -0.2582529302751364
+    },
+    {
+      "config": "volume_breakout|h5|k20",
+      "model": "volume_breakout",
+      "hold_days": 5,
+      "top_k": 20,
+      "train_sharpe": -0.2156578966253295,
+      "train_cumulative": -0.10892748511079953,
+      "train_mdd": -0.25978434803718226,
+      "test_sharpe": 0.5885306966762359,
+      "test_cumulative": 0.2152516352619751,
+      "test_mdd": -0.2571331353820705
+    },
+    {
+      "config": "donchian20|h5|k20",
+      "model": "donchian20",
+      "hold_days": 5,
+      "top_k": 20,
+      "train_sharpe": -0.22613383264035397,
+      "train_cumulative": -0.12388627451609624,
+      "train_mdd": -0.2630446913860708,
+      "test_sharpe": 0.471603084302006,
+      "test_cumulative": 0.15926091926360786,
+      "test_mdd": -0.2960902099454573
+    },
+    {
+      "config": "donchian55|h5|k10",
+      "model": "donchian55",
+      "hold_days": 5,
+      "top_k": 10,
+      "train_sharpe": -0.22867791539468185,
+      "train_cumulative": -0.15681350408363592,
+      "train_mdd": -0.28103611367400283,
+      "test_sharpe": 0.1907975719043807,
+      "test_cumulative": -0.02521365443798218,
+      "test_mdd": -0.4036952664609395
+    },
+    {
+      "config": "bollinger_breakout|h10|k5",
+      "model": "bollinger_breakout",
+      "hold_days": 10,
+      "top_k": 5,
+      "train_sharpe": -0.24185713433764863,
+      "train_cumulative": -0.25777884268550855,
+      "train_mdd": -0.3727477348337914,
+      "test_sharpe": 1.1466904010097223,
+      "test_cumulative": 1.2176667671578536,
+      "test_mdd": -0.26168689884906293
+    },
+    {
+      "config": "bollinger_breakout|h10|k20",
+      "model": "bollinger_breakout",
+      "hold_days": 10,
+      "top_k": 20,
+      "train_sharpe": -0.27224165833448366,
+      "train_cumulative": -0.16719147125926326,
+      "train_mdd": -0.25014969132192605,
+      "test_sharpe": 1.3636104474377366,
+      "test_cumulative": 0.877016488300838,
+      "test_mdd": -0.17560750945060002
+    },
+    {
+      "config": "volume_breakout|h5|k10",
+      "model": "volume_breakout",
+      "hold_days": 5,
+      "top_k": 10,
+      "train_sharpe": -0.2880253696659878,
+      "train_cumulative": -0.21501831851344966,
+      "train_mdd": -0.32447903314481874,
+      "test_sharpe": 0.19243079422528192,
+      "test_cumulative": -0.012096027277852861,
+      "test_mdd": -0.3901206496342239
+    },
+    {
+      "config": "ensemble_consensus|h10|k20",
+      "model": "ensemble_consensus",
+      "hold_days": 10,
+      "top_k": 20,
+      "train_sharpe": -0.2954118111181865,
+      "train_cumulative": -0.12266533862184403,
+      "train_mdd": -0.1825684756663,
+      "test_sharpe": 1.1008769512734364,
+      "test_cumulative": 0.6376790178190619,
+      "test_mdd": -0.1760708332473652
+    },
+    {
+      "config": "ensemble_median|h10|k20",
+      "model": "ensemble_median",
+      "hold_days": 10,
+      "top_k": 20,
+      "train_sharpe": -0.3439883561826008,
+      "train_cumulative": -0.15335691415773234,
+      "train_mdd": -0.19129931630086602,
+      "test_sharpe": 1.1350115624572974,
+      "test_cumulative": 0.6535360763498266,
+      "test_mdd": -0.1905495466963425
+    },
+    {
+      "config": "ensemble_median|h10|k10",
+      "model": "ensemble_median",
+      "hold_days": 10,
+      "top_k": 10,
+      "train_sharpe": -0.41645640266793427,
+      "train_cumulative": -0.2514647019517523,
+      "train_mdd": -0.27565797716060897,
+      "test_sharpe": 0.6523780914761661,
+      "test_cumulative": 0.326532247540511,
+      "test_mdd": -0.21938517297135385
+    },
+    {
+      "config": "donchian20|h10|k10",
+      "model": "donchian20",
+      "hold_days": 10,
+      "top_k": 10,
+      "train_sharpe": -0.43278487247370184,
+      "train_cumulative": -0.27677261417987575,
+      "train_mdd": -0.3034761651034809,
+      "test_sharpe": 0.627825609648164,
+      "test_cumulative": 0.3048765286106878,
+      "test_mdd": -0.23493331478217555
+    },
+    {
+      "config": "volume_breakout|h10|k10",
+      "model": "volume_breakout",
+      "hold_days": 10,
+      "top_k": 10,
+      "train_sharpe": -0.519613288644597,
+      "train_cumulative": -0.28854768825136523,
+      "train_mdd": -0.30033083755060186,
+      "test_sharpe": 0.6301441623118585,
+      "test_cumulative": 0.3043107265986622,
+      "test_mdd": -0.19690034875928725
+    },
+    {
+      "config": "donchian20|h10|k20",
+      "model": "donchian20",
+      "hold_days": 10,
+      "top_k": 20,
+      "train_sharpe": -0.5657890828590386,
+      "train_cumulative": -0.23423552128115466,
+      "train_mdd": -0.2327491998600562,
+      "test_sharpe": 1.0896456322346881,
+      "test_cumulative": 0.6087883722604563,
+      "test_mdd": -0.18285119272072178
+    },
+    {
+      "config": "volume_breakout|h10|k5",
+      "model": "volume_breakout",
+      "hold_days": 10,
+      "top_k": 5,
+      "train_sharpe": -0.6062724779658182,
+      "train_cumulative": -0.4317078098339121,
+      "train_mdd": -0.43598904083607165,
+      "test_sharpe": 0.39700462487320687,
+      "test_cumulative": 0.11988175173249727,
+      "test_mdd": -0.257491374359342
+    },
+    {
+      "config": "volume_breakout|h10|k20",
+      "model": "volume_breakout",
+      "hold_days": 10,
+      "top_k": 20,
+      "train_sharpe": -0.6120973389894903,
+      "train_cumulative": -0.2193653256979773,
+      "train_mdd": -0.215982189128835,
+      "test_sharpe": 1.0906308578796917,
+      "test_cumulative": 0.5528488108382705,
+      "test_mdd": -0.15706667259426046
+    },
+    {
+      "config": "ensemble_median|h10|k5",
+      "model": "ensemble_median",
+      "hold_days": 10,
+      "top_k": 5,
+      "train_sharpe": -0.6928501794623136,
+      "train_cumulative": -0.47318023585911473,
+      "train_mdd": -0.4676306868616018,
+      "test_sharpe": 0.6299722377914577,
+      "test_cumulative": 0.32078673502926547,
+      "test_mdd": -0.24861168537627096
+    },
+    {
+      "config": "donchian20|h10|k5",
+      "model": "donchian20",
+      "hold_days": 10,
+      "top_k": 5,
+      "train_sharpe": -0.8207144481653198,
+      "train_cumulative": -0.5289502929941008,
+      "train_mdd": -0.5239882289121726,
+      "test_sharpe": 0.4997767508294842,
+      "test_cumulative": 0.20295399495696298,
+      "test_mdd": -0.2492069726234279
+    }
+  ],
+  "details": {
+    "momentum20_baseline|h5|k5": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": 4.356692830035879,
+        "annual_return": 0.8799755795190585,
+        "sharpe": 1.3879742318950876,
+        "max_drawdown": -0.41146809361993675,
+        "win_rate": 0.5746268656716418
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 3.0536990816347256,
+        "annual_return": 1.5941564319843549,
+        "sharpe": 1.6997788431213052,
+        "max_drawdown": -0.49718573496860846,
+        "win_rate": 0.581081081081081
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 1.2226857860566431,
+          "annual_return": 1.3132468307362135,
+          "sharpe": 1.7273410525105168,
+          "max_drawdown": -0.31247189087122695,
+          "win_rate": 0.5208333333333334
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": 0.8214074058703251,
+          "annual_return": 2.1973423786194948,
+          "sharpe": 1.7323912807078314,
+          "max_drawdown": -0.4971857349686084,
+          "win_rate": 0.6923076923076923
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 3.0536990816347256,
+          "annual_return": 1.5941564319843549,
+          "sharpe": 1.6997788431213052,
+          "max_drawdown": -0.49718573496860846,
+          "win_rate": 0.581081081081081
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 2.5467463630486895,
+          "annual_return": 1.3685300591741996,
+          "sharpe": 1.569456535579591,
+          "max_drawdown": -0.5063155217274135,
+          "win_rate": 0.5675675675675675
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 2.0792593016236696,
+          "annual_return": 1.1511540284626793,
+          "sharpe": 1.4320441049769381,
+          "max_drawdown": -0.5157962313339465,
+          "win_rate": 0.5675675675675675
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 1.5554012783649314,
+          "annual_return": 0.8945788709432139,
+          "sharpe": 1.2515221279556419,
+          "max_drawdown": -0.5280300690060877,
+          "win_rate": 0.5675675675675675
+        }
+      },
+      "train_quality": {
+        "executed_slots": 670,
+        "cash_slots": 0,
+        "selected_extreme_open_transitions": 14,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 350,
+        "cash_slots": 20,
+        "selected_extreme_open_transitions": 12,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.9515
+    },
+    "momentum20_baseline|h5|k10": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": 1.324058497076904,
+        "annual_return": 0.37325953680529467,
+        "sharpe": 1.0017932056761956,
+        "max_drawdown": -0.33328549215259523,
+        "win_rate": 0.5671641791044776
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 3.2883668984105405,
+        "annual_return": 1.6955169970565445,
+        "sharpe": 2.017474770656185,
+        "max_drawdown": -0.4502147864908388,
+        "win_rate": 0.5675675675675675
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 1.3324590091363824,
+          "annual_return": 1.4333507908572294,
+          "sharpe": 2.422646718160877,
+          "max_drawdown": -0.1792690414810183,
+          "win_rate": 0.5208333333333334
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": 0.8364837365659508,
+          "annual_return": 2.2488436702400696,
+          "sharpe": 1.861326623943938,
+          "max_drawdown": -0.4502147864908388,
+          "win_rate": 0.6538461538461539
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 3.2883668984105405,
+          "annual_return": 1.6955169970565445,
+          "sharpe": 2.017474770656185,
+          "max_drawdown": -0.4502147864908388,
+          "win_rate": 0.5675675675675675
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 2.812308167124656,
+          "annual_return": 1.4879185086105777,
+          "sharpe": 1.8772182448632462,
+          "max_drawdown": -0.45658783565043637,
+          "win_rate": 0.5675675675675675
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 2.3661955629475093,
+          "annual_return": 1.2857284491955028,
+          "sharpe": 1.728995778100504,
+          "max_drawdown": -0.4632488339984037,
+          "win_rate": 0.5675675675675675
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 1.8566470518359282,
+          "annual_return": 1.0439736645253372,
+          "sharpe": 1.5337558547801031,
+          "max_drawdown": -0.4719107630764259,
+          "win_rate": 0.5540540540540541
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1337,
+        "cash_slots": 3,
+        "selected_extreme_open_transitions": 19,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 700,
+        "cash_slots": 40,
+        "selected_extreme_open_transitions": 17,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.9795
+    },
+    "momentum20_baseline|h5|k20": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": 0.4252241241834991,
+        "annual_return": 0.14255849612770755,
+        "sharpe": 0.6003959663417554,
+        "max_drawdown": -0.33356596754854695,
+        "win_rate": 0.5746268656716418
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 2.1189787636038533,
+        "annual_return": 1.1700138791540375,
+        "sharpe": 1.8642328069712901,
+        "max_drawdown": -0.37365388055952536,
+        "win_rate": 0.6216216216216216
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 1.009917645120586,
+          "annual_return": 1.081311941712444,
+          "sharpe": 2.3186861292723187,
+          "max_drawdown": -0.17635218660888569,
+          "win_rate": 0.6041666666666666
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": 0.5492567397557682,
+          "annual_return": 1.3363983298112978,
+          "sharpe": 1.6042152646377896,
+          "max_drawdown": -0.37365388055952525,
+          "win_rate": 0.6538461538461539
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 2.1189787636038533,
+          "annual_return": 1.1700138791540375,
+          "sharpe": 1.8642328069712901,
+          "max_drawdown": -0.37365388055952536,
+          "win_rate": 0.6216216216216216
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 1.8023025665621542,
+          "annual_return": 1.017409291582081,
+          "sharpe": 1.7104246638958411,
+          "max_drawdown": -0.3821175991197301,
+          "win_rate": 0.6216216216216216
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 1.5023587099998355,
+          "annual_return": 0.8677053062719677,
+          "sharpe": 1.5479762775508605,
+          "max_drawdown": -0.3909504324531226,
+          "win_rate": 0.6081081081081081
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 1.1553845471774613,
+          "annual_return": 0.6871644172665117,
+          "sharpe": 1.334143449361118,
+          "max_drawdown": -0.40241599904816355,
+          "win_rate": 0.6081081081081081
+        }
+      },
+      "train_quality": {
+        "executed_slots": 2654,
+        "cash_slots": 26,
+        "selected_extreme_open_transitions": 23,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 1400,
+        "cash_slots": 80,
+        "selected_extreme_open_transitions": 22,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.974
+    },
+    "donchian20|h5|k5": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": 0.14675745777560567,
+        "annual_return": 0.052854633126592,
+        "sharpe": 0.32227452783120214,
+        "max_drawdown": -0.29938676358435573,
+        "win_rate": 0.48507462686567165
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.279093284748664,
+        "annual_return": 0.18252159042967708,
+        "sharpe": 0.5778002517576302,
+        "max_drawdown": -0.4208149926882569,
+        "win_rate": 0.5405405405405406
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.35823274873193367,
+          "annual_return": 0.3791862144211684,
+          "sharpe": 1.0116740787334788,
+          "max_drawdown": -0.2768105347867044,
+          "win_rate": 0.4791666666666667
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.05837684059124415,
+          "annual_return": -0.11005775245461114,
+          "sharpe": 0.26633201826033637,
+          "max_drawdown": -0.420814992688257,
+          "win_rate": 0.6538461538461539
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.279093284748664,
+          "annual_return": 0.18252159042967708,
+          "sharpe": 0.5778002517576302,
+          "max_drawdown": -0.4208149926882569,
+          "win_rate": 0.5405405405405406
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.016589111768086973,
+          "annual_return": 0.011268858185111252,
+          "sharpe": 0.3087007502041888,
+          "max_drawdown": -0.43592009901042716,
+          "win_rate": 0.5135135135135135
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.2029583673792983,
+          "annual_return": -0.14315833259216937,
+          "sharpe": 0.02404247098333368,
+          "max_drawdown": -0.4708580335572604,
+          "win_rate": 0.4864864864864865
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.42207415640530344,
+          "annual_return": -0.3116400362169841,
+          "sharpe": -0.3512851510872972,
+          "max_drawdown": -0.5170080340115463,
+          "win_rate": 0.43243243243243246
+        }
+      },
+      "train_quality": {
+        "executed_slots": 595,
+        "cash_slots": 75,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 328,
+        "cash_slots": 42,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.6485
+    },
+    "donchian20|h5|k10": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.17018614146638578,
+        "annual_return": -0.06776143896332743,
+        "sharpe": -0.16975167588535844,
+        "max_drawdown": -0.31018671623742766,
+        "win_rate": 0.5
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": -0.13963695295724377,
+        "annual_return": -0.09736332575483209,
+        "sharpe": 0.014260143555420506,
+        "max_drawdown": -0.4802441243408974,
+        "win_rate": 0.5540540540540541
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.1806282483197965,
+          "annual_return": 0.19047102264511273,
+          "sharpe": 0.7108132543732224,
+          "max_drawdown": -0.19818579018748914,
+          "win_rate": 0.5208333333333334
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.27147734850276006,
+          "annual_return": -0.458808257378268,
+          "sharpe": -0.6011761561815746,
+          "max_drawdown": -0.48024412434089747,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.13963695295724377,
+          "annual_return": -0.09736332575483209,
+          "sharpe": 0.014260143555420506,
+          "max_drawdown": -0.4802441243408974,
+          "win_rate": 0.5540540540540541
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.30380018694989364,
+          "annual_return": -0.21857187864839223,
+          "sharpe": -0.2970950595533287,
+          "max_drawdown": -0.508801020499527,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.44363296861073753,
+          "annual_return": -0.32923489979472953,
+          "sharpe": -0.6260329375139174,
+          "max_drawdown": -0.5381805246086279,
+          "win_rate": 0.47297297297297297
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.586247415527672,
+          "annual_return": -0.45176172168412687,
+          "sharpe": -1.0589388412729022,
+          "max_drawdown": -0.5743172934876941,
+          "win_rate": 0.4594594594594595
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1036,
+        "cash_slots": 304,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 610,
+        "cash_slots": 130,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.407
+    },
+    "donchian20|h5|k20": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.12388627451609624,
+        "annual_return": -0.04852828207364268,
+        "sharpe": -0.22613383264035397,
+        "max_drawdown": -0.2630446913860708,
+        "win_rate": 0.4925373134328358
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.15926091926360786,
+        "annual_return": 0.1058916981702902,
+        "sharpe": 0.471603084302006,
+        "max_drawdown": -0.2960902099454573,
+        "win_rate": 0.5540540540540541
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.23655208548251228,
+          "annual_return": 0.24974968208735104,
+          "sharpe": 1.1329161561325216,
+          "max_drawdown": -0.1443583698503721,
+          "win_rate": 0.5208333333333334
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.06288067453010582,
+          "annual_return": -0.11829056728649379,
+          "sharpe": -0.019349847244711046,
+          "max_drawdown": -0.29609020994545715,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.15926091926360786,
+          "annual_return": 0.1058916981702902,
+          "sharpe": 0.471603084302006,
+          "max_drawdown": -0.2960902099454573,
+          "win_rate": 0.5540540540540541
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.03019288300584022,
+          "annual_return": -0.020664144328710332,
+          "sharpe": 0.1060146443191696,
+          "max_drawdown": -0.3248070273973657,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.1971243783585942,
+          "annual_return": -0.13889176697999828,
+          "sharpe": -0.28190304248167175,
+          "max_drawdown": -0.3544711528880644,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.3743477761675451,
+          "annual_return": -0.2734152901323115,
+          "sharpe": -0.7945765505390346,
+          "max_drawdown": -0.3916437424954057,
+          "win_rate": 0.4864864864864865
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1575,
+        "cash_slots": 1105,
+        "selected_extreme_open_transitions": 10,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 1069,
+        "cash_slots": 411,
+        "selected_extreme_open_transitions": 15,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.6525
+    },
+    "donchian55|h5|k5": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.058268646116535594,
+        "annual_return": -0.022327386129790572,
+        "sharpe": 0.09543080134564746,
+        "max_drawdown": -0.5522719290621446,
+        "win_rate": 0.4253731343283582
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": -0.1172946660120111,
+        "annual_return": -0.08146410389289871,
+        "sharpe": 0.10831210075188889,
+        "max_drawdown": -0.4667608444599513,
+        "win_rate": 0.47297297297297297
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.10854408307963959,
+          "annual_return": 0.11427045842118,
+          "sharpe": 0.4769667841812377,
+          "max_drawdown": -0.22757936367562198,
+          "win_rate": 0.3958333333333333
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.2037370040135934,
+          "annual_return": -0.35701343890298065,
+          "sharpe": -0.2040197458257077,
+          "max_drawdown": -0.4667608444599515,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.1172946660120111,
+          "annual_return": -0.08146410389289871,
+          "sharpe": 0.10831210075188889,
+          "max_drawdown": -0.4667608444599513,
+          "win_rate": 0.47297297297297297
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.27922277539617446,
+          "annual_return": -0.19988762237440694,
+          "sharpe": -0.15365820415267312,
+          "max_drawdown": -0.49947376238846086,
+          "win_rate": 0.4594594594594595
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.418459731381863,
+          "annual_return": -0.3087108338079926,
+          "sharpe": -0.4306173243540067,
+          "max_drawdown": -0.531942777745441,
+          "win_rate": 0.44594594594594594
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.5620540824010183,
+          "annual_return": -0.43012674619570357,
+          "sharpe": -0.795296816167596,
+          "max_drawdown": -0.5777877786629962,
+          "win_rate": 0.40540540540540543
+        }
+      },
+      "train_quality": {
+        "executed_slots": 526,
+        "cash_slots": 144,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 286,
+        "cash_slots": 84,
+        "selected_extreme_open_transitions": 5,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.4405
+    },
+    "donchian55|h5|k10": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.15681350408363592,
+        "annual_return": -0.06213906890976695,
+        "sharpe": -0.22867791539468185,
+        "max_drawdown": -0.28103611367400283,
+        "win_rate": 0.417910447761194
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": -0.02521365443798218,
+        "annual_return": -0.017242362904318354,
+        "sharpe": 0.1907975719043807,
+        "max_drawdown": -0.4036952664609395,
+        "win_rate": 0.5135135135135135
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.16944839200281492,
+          "annual_return": 0.17863711856400477,
+          "sharpe": 0.7225168194036873,
+          "max_drawdown": -0.21545021529145847,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.16647605114343167,
+          "annual_return": -0.29740873747809826,
+          "sharpe": -0.2041777819471919,
+          "max_drawdown": -0.4036952664609394,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.02521365443798218,
+          "annual_return": -0.017242362904318354,
+          "sharpe": 0.1907975719043807,
+          "max_drawdown": -0.4036952664609395,
+          "win_rate": 0.5135135135135135
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.18226129578649142,
+          "annual_return": -0.12806637541557453,
+          "sharpe": -0.07533464725587202,
+          "max_drawdown": -0.4341770646215258,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.32106144454632635,
+          "annual_return": -0.23182014114284677,
+          "sharpe": -0.356440728806241,
+          "max_drawdown": -0.46475962942496596,
+          "win_rate": 0.47297297297297297
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.4689436551633278,
+          "annual_return": -0.3501719347430329,
+          "sharpe": -0.7260353184426253,
+          "max_drawdown": -0.5026368006397622,
+          "win_rate": 0.44594594594594594
+        }
+      },
+      "train_quality": {
+        "executed_slots": 808,
+        "cash_slots": 532,
+        "selected_extreme_open_transitions": 5,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 511,
+        "cash_slots": 229,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.5035
+    },
+    "donchian55|h5|k20": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.08189514317814872,
+        "annual_return": -0.03162611632640111,
+        "sharpe": -0.21383293992071475,
+        "max_drawdown": -0.20098875105890365,
+        "win_rate": 0.44029850746268656
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.3541145905799086,
+        "annual_return": 0.22932868121155425,
+        "sharpe": 0.7953459640151158,
+        "max_drawdown": -0.2582529302751364,
+        "win_rate": 0.527027027027027
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.3260885548267072,
+          "annual_return": 0.3449345586762167,
+          "sharpe": 1.7178286847564683,
+          "max_drawdown": -0.10446118242502787,
+          "win_rate": 0.4791666666666667
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": 0.021127555644746998,
+          "annual_return": 0.041360794130356204,
+          "sharpe": 0.3280297937373701,
+          "max_drawdown": -0.25825293027513646,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.3541145905799086,
+          "annual_return": 0.22932868121155425,
+          "sharpe": 0.7953459640151158,
+          "max_drawdown": -0.2582529302751364,
+          "win_rate": 0.527027027027027
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.19326176361390357,
+          "annual_return": 0.12788092077337,
+          "sharpe": 0.5332294227428902,
+          "max_drawdown": -0.26900253246958533,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.043810201119423464,
+          "annual_return": 0.02963376602206358,
+          "sharpe": 0.25514010693916256,
+          "max_drawdown": -0.2826300503462105,
+          "win_rate": 0.4864864864864865
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.12515780316946223,
+          "annual_return": -0.08704487148905138,
+          "sharpe": -0.11213084231147133,
+          "max_drawdown": -0.3183131127710803,
+          "win_rate": 0.47297297297297297
+        }
+      },
+      "train_quality": {
+        "executed_slots": 975,
+        "cash_slots": 1705,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 769,
+        "cash_slots": 711,
+        "selected_extreme_open_transitions": 12,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.78
+    },
+    "bollinger_breakout|h5|k5": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": 0.19859176143751522,
+        "annual_return": 0.07050770617664792,
+        "sharpe": 0.36742863336116915,
+        "max_drawdown": -0.38230060298881724,
+        "win_rate": 0.48507462686567165
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": -0.1848100308468742,
+        "annual_return": -0.12991823677896497,
+        "sharpe": 0.05811553536050664,
+        "max_drawdown": -0.4810525925247582,
+        "win_rate": 0.5
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": -0.09332866574260612,
+          "annual_return": -0.09775937238986743,
+          "sharpe": -0.05134165322451008,
+          "max_drawdown": -0.2724633983985289,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.10104469056197707,
+          "annual_return": -0.1865645605688685,
+          "sharpe": 0.16233119490981496,
+          "max_drawdown": -0.4810525925247581,
+          "win_rate": 0.5769230769230769
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.1848100308468742,
+          "annual_return": -0.12991823677896497,
+          "sharpe": 0.05811553536050664,
+          "max_drawdown": -0.4810525925247582,
+          "win_rate": 0.5
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.3601552969411468,
+          "annual_return": -0.2622298757880368,
+          "sharpe": -0.21884569213419378,
+          "max_drawdown": -0.5158237969442833,
+          "win_rate": 0.47297297297297297
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.5049563246502549,
+          "annual_return": -0.38051973421941965,
+          "sharpe": -0.5114682101597195,
+          "max_drawdown": -0.5501309266092219,
+          "win_rate": 0.4594594594594595
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.6473146304685722,
+          "annual_return": -0.5082615690125454,
+          "sharpe": -0.8967547064514519,
+          "max_drawdown": -0.6559202173178145,
+          "win_rate": 0.4189189189189189
+        }
+      },
+      "train_quality": {
+        "executed_slots": 639,
+        "cash_slots": 31,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 342,
+        "cash_slots": 28,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.406
+    },
+    "bollinger_breakout|h5|k10": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.03769957122512546,
+        "annual_return": -0.014349781176583254,
+        "sharpe": 0.08007185870289313,
+        "max_drawdown": -0.30254776250303855,
+        "win_rate": 0.5149253731343284
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.07678766439952556,
+        "annual_return": 0.05167895631518116,
+        "sharpe": 0.361481274721265,
+        "max_drawdown": -0.48667369788335846,
+        "win_rate": 0.5
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.3374344451675211,
+          "annual_return": 0.3570196278668296,
+          "sharpe": 0.9979423510625193,
+          "max_drawdown": -0.21780031208487943,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.19513239347115763,
+          "annual_return": -0.34347620717103655,
+          "sharpe": -0.20847187976639606,
+          "max_drawdown": -0.48667369788335846,
+          "win_rate": 0.5769230769230769
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.07678766439952556,
+          "annual_return": 0.05167895631518116,
+          "sharpe": 0.361481274721265,
+          "max_drawdown": -0.48667369788335846,
+          "win_rate": 0.5
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.14346676817926463,
+          "annual_return": -0.10010185024007967,
+          "sharpe": 0.0642004980233813,
+          "max_drawdown": -0.5103050448885887,
+          "win_rate": 0.4864864864864865
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.327836580380649,
+          "annual_return": -0.23704943241905163,
+          "sharpe": -0.2500003437286022,
+          "max_drawdown": -0.5426591981846235,
+          "win_rate": 0.4594594594594595
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.5120317605000949,
+          "annual_return": -0.38656382387465327,
+          "sharpe": -0.6638217870918314,
+          "max_drawdown": -0.5821600607577958,
+          "win_rate": 0.43243243243243246
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1209,
+        "cash_slots": 131,
+        "selected_extreme_open_transitions": 10,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 668,
+        "cash_slots": 72,
+        "selected_extreme_open_transitions": 12,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.5635
+    },
+    "bollinger_breakout|h5|k20": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.15676103786439488,
+        "annual_return": -0.06211712005421044,
+        "sharpe": -0.20182932054238284,
+        "max_drawdown": -0.24407827513107022,
+        "win_rate": 0.5074626865671642
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": -0.05793777434696945,
+        "annual_return": -0.03983449557598684,
+        "sharpe": 0.10437095272766211,
+        "max_drawdown": -0.48582171058160745,
+        "win_rate": 0.5540540540540541
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.3950108110259376,
+          "annual_return": 0.4184252442822629,
+          "sharpe": 1.475785570777599,
+          "max_drawdown": -0.15488535535280062,
+          "win_rate": 0.5416666666666666
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.32495964650583364,
+          "annual_return": -0.5331662388529621,
+          "sharpe": -1.0350087170160465,
+          "max_drawdown": -0.4858217105816074,
+          "win_rate": 0.5769230769230769
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.05793777434696945,
+          "annual_return": -0.03983449557598684,
+          "sharpe": 0.10437095272766211,
+          "max_drawdown": -0.48582171058160745,
+          "win_rate": 0.5540540540540541
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.2338109461641178,
+          "annual_return": -0.1658898632432928,
+          "sharpe": -0.24730132483212774,
+          "max_drawdown": -0.5133426907665513,
+          "win_rate": 0.527027027027027
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.38438844732429867,
+          "annual_return": -0.281377482792565,
+          "sharpe": -0.6188477568024924,
+          "max_drawdown": -0.5408813160426168,
+          "win_rate": 0.4864864864864865
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.5388992316985424,
+          "annual_return": -0.4097748499824242,
+          "sharpe": -1.107765272985227,
+          "max_drawdown": -0.5748807617104941,
+          "win_rate": 0.4864864864864865
+        }
+      },
+      "train_quality": {
+        "executed_slots": 2112,
+        "cash_slots": 568,
+        "selected_extreme_open_transitions": 16,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 1252,
+        "cash_slots": 228,
+        "selected_extreme_open_transitions": 21,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.47
+    },
+    "volume_breakout|h5|k5": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": 0.31171929461786574,
+        "annual_return": 0.1074452163091737,
+        "sharpe": 0.47333583110163063,
+        "max_drawdown": -0.25160372183430324,
+        "win_rate": 0.5
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.00640974449658871,
+        "annual_return": 0.004361106228496281,
+        "sharpe": 0.2877480207049635,
+        "max_drawdown": -0.4996688399789382,
+        "win_rate": 0.47297297297297297
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.18625309103019272,
+          "annual_return": 0.19642705415609307,
+          "sharpe": 0.6518123568219485,
+          "max_drawdown": -0.28363598744425517,
+          "win_rate": 0.4166666666666667
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.15172642576422668,
+          "annual_return": -0.2731083764510488,
+          "sharpe": -0.004417934846206608,
+          "max_drawdown": -0.4996688399789382,
+          "win_rate": 0.5769230769230769
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.00640974449658871,
+          "annual_return": 0.004361106228496281,
+          "sharpe": 0.2877480207049635,
+          "max_drawdown": -0.4996688399789382,
+          "win_rate": 0.47297297297297297
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.19440034925410843,
+          "annual_return": -0.13690299334225198,
+          "sharpe": 0.020595430023461498,
+          "max_drawdown": -0.5108229536187652,
+          "win_rate": 0.4594594594594595
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.363580402107052,
+          "annual_return": -0.2649219723852114,
+          "sharpe": -0.26187697253510706,
+          "max_drawdown": -0.5239884815462394,
+          "win_rate": 0.44594594594594594
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.5338926457162689,
+          "annual_return": -0.4054175912657616,
+          "sharpe": -0.6340782601389119,
+          "max_drawdown": -0.5445392052967105,
+          "win_rate": 0.43243243243243246
+        }
+      },
+      "train_quality": {
+        "executed_slots": 563,
+        "cash_slots": 107,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 315,
+        "cash_slots": 55,
+        "selected_extreme_open_transitions": 5,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.518
+    },
+    "volume_breakout|h5|k10": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.21501831851344966,
+        "annual_return": -0.08703395365384581,
+        "sharpe": -0.2880253696659878,
+        "max_drawdown": -0.32447903314481874,
+        "win_rate": 0.47761194029850745
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": -0.012096027277852861,
+        "annual_return": -0.008254350828275192,
+        "sharpe": 0.19243079422528192,
+        "max_drawdown": -0.3901206496342239,
+        "win_rate": 0.5
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.03842477769585595,
+          "annual_return": 0.040384310795885225,
+          "sharpe": 0.280654083149208,
+          "max_drawdown": -0.22066296193002832,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.04872167573912267,
+          "annual_return": -0.09228373180760308,
+          "sharpe": 0.12921141240195672,
+          "max_drawdown": -0.39012064963422405,
+          "win_rate": 0.5769230769230769
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.012096027277852861,
+          "annual_return": -0.008254350828275192,
+          "sharpe": 0.19243079422528192,
+          "max_drawdown": -0.3901206496342239,
+          "win_rate": 0.5
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.19183834029670288,
+          "annual_return": -0.1350344644676167,
+          "sharpe": -0.13015634844884735,
+          "max_drawdown": -0.4012278623801724,
+          "win_rate": 0.4864864864864865
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.3466525300466141,
+          "annual_return": -0.25166127234629276,
+          "sharpe": -0.47180379793400556,
+          "max_drawdown": -0.4140795229944317,
+          "win_rate": 0.47297297297297297
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.506638601043397,
+          "annual_return": -0.38195428442289303,
+          "sharpe": -0.9226083720722705,
+          "max_drawdown": -0.49962393239191155,
+          "win_rate": 0.47297297297297297
+        }
+      },
+      "train_quality": {
+        "executed_slots": 940,
+        "cash_slots": 400,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 580,
+        "cash_slots": 160,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.5115
+    },
+    "volume_breakout|h5|k20": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.10892748511079953,
+        "annual_return": -0.04245029780399101,
+        "sharpe": -0.2156578966253295,
+        "max_drawdown": -0.25978434803718226,
+        "win_rate": 0.47761194029850745
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.2152516352619751,
+        "annual_return": 0.14199593142754163,
+        "sharpe": 0.5885306966762359,
+        "max_drawdown": -0.2571331353820705,
+        "win_rate": 0.5405405405405406
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.14256842491641364,
+          "annual_return": 0.15020785455687813,
+          "sharpe": 0.7725839593024834,
+          "max_drawdown": -0.16477310985758986,
+          "win_rate": 0.5208333333333334
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": 0.06345620411713915,
+          "annual_return": 0.12666534169791266,
+          "sharpe": 0.4894186244719023,
+          "max_drawdown": -0.25713313538207067,
+          "win_rate": 0.5769230769230769
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.2152516352619751,
+          "annual_return": 0.14199593142754163,
+          "sharpe": 0.5885306966762359,
+          "max_drawdown": -0.2571331353820705,
+          "win_rate": 0.5405405405405406
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.03556994072632724,
+          "annual_return": 0.024090710124790027,
+          "sharpe": 0.23186702967295253,
+          "max_drawdown": -0.2661083794149761,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.1257560937335115,
+          "annual_return": -0.08747015451809359,
+          "sharpe": -0.14771177258000281,
+          "max_drawdown": -0.2762955805330626,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.3008892526298409,
+          "annual_return": -0.21634807091868802,
+          "sharpe": -0.6508680939117764,
+          "max_drawdown": -0.3116162173141797,
+          "win_rate": 0.44594594594594594
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1310,
+        "cash_slots": 1370,
+        "selected_extreme_open_transitions": 11,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 953,
+        "cash_slots": 527,
+        "selected_extreme_open_transitions": 13,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.7095
+    },
+    "ensemble_mean|h5|k5": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": 0.19620443198995274,
+        "annual_return": 0.06970524016989543,
+        "sharpe": 0.3678499601124914,
+        "max_drawdown": -0.47331205397679255,
+        "win_rate": 0.48507462686567165
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.3138039235238077,
+        "annual_return": 0.20428400500654842,
+        "sharpe": 0.6119137240688773,
+        "max_drawdown": -0.4420859475413723,
+        "win_rate": 0.581081081081081
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.614043562880888,
+          "annual_return": 0.6531452543063216,
+          "sharpe": 1.5227488207305526,
+          "max_drawdown": -0.23699524932441868,
+          "win_rate": 0.5416666666666666
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.18602902758080908,
+          "annual_return": -0.32900570964499176,
+          "sharpe": -0.06202248021865493,
+          "max_drawdown": -0.4420859475413723,
+          "win_rate": 0.6538461538461539
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.3138039235238077,
+          "annual_return": 0.20428400500654842,
+          "sharpe": 0.6119137240688773,
+          "max_drawdown": -0.4420859475413723,
+          "win_rate": 0.581081081081081
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.04493499896950359,
+          "annual_return": 0.030389310328577723,
+          "sharpe": 0.34246068435139326,
+          "max_drawdown": -0.457067781387782,
+          "win_rate": 0.5675675675675675
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.1801019762851439,
+          "annual_return": -0.12649889580031626,
+          "sharpe": 0.05752504542694535,
+          "max_drawdown": -0.4834822093376216,
+          "win_rate": 0.527027027027027
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.404893204920056,
+          "annual_return": -0.29776761011788155,
+          "sharpe": -0.3180152713439397,
+          "max_drawdown": -0.529039485584385,
+          "win_rate": 0.4864864864864865
+        }
+      },
+      "train_quality": {
+        "executed_slots": 592,
+        "cash_slots": 78,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 328,
+        "cash_slots": 42,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.66
+    },
+    "ensemble_mean|h5|k10": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.1260524486566581,
+        "annual_return": -0.049413784551433526,
+        "sharpe": -0.11377327726782095,
+        "max_drawdown": -0.3417534955543317,
+        "win_rate": 0.48507462686567165
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.11434002014939604,
+        "annual_return": 0.07652193904849058,
+        "sharpe": 0.39836570145570327,
+        "max_drawdown": -0.4332419541090427,
+        "win_rate": 0.5675675675675675
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.43313835517668964,
+          "annual_return": 0.45915868748623545,
+          "sharpe": 1.3917826373349176,
+          "max_drawdown": -0.18956381223048221,
+          "win_rate": 0.5208333333333334
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.22248555995500352,
+          "annual_return": -0.3860364903093978,
+          "sharpe": -0.3854895879635815,
+          "max_drawdown": -0.43324195410904287,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.11434002014939604,
+          "annual_return": 0.07652193904849058,
+          "sharpe": 0.39836570145570327,
+          "max_drawdown": -0.4332419541090427,
+          "win_rate": 0.5675675675675675
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.09435342615393061,
+          "annual_return": -0.06527164357424897,
+          "sharpe": 0.09488327722609115,
+          "max_drawdown": -0.4638773693279611,
+          "win_rate": 0.527027027027027
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.272904574935966,
+          "annual_return": -0.19511741780524106,
+          "sharpe": -0.22581369511474222,
+          "max_drawdown": -0.49544004251604895,
+          "win_rate": 0.5135135135135135
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.4559646600374966,
+          "annual_return": -0.33939686924882473,
+          "sharpe": -0.6479951493063358,
+          "max_drawdown": -0.534304777717021,
+          "win_rate": 0.5
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1028,
+        "cash_slots": 312,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 609,
+        "cash_slots": 131,
+        "selected_extreme_open_transitions": 12,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.5895
+    },
+    "ensemble_mean|h5|k20": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.03829172319913787,
+        "annual_return": -0.014577949024716652,
+        "sharpe": -0.014142384293486193,
+        "max_drawdown": -0.22981142117763087,
+        "win_rate": 0.5
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.2177963237847682,
+        "annual_return": 0.14362405321382288,
+        "sharpe": 0.5617856824443104,
+        "max_drawdown": -0.30624392203085793,
+        "win_rate": 0.581081081081081
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.33922656647197424,
+          "annual_return": 0.35892897489282416,
+          "sharpe": 1.5098714844745709,
+          "max_drawdown": -0.13723488477489973,
+          "win_rate": 0.5625
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.09081070059359009,
+          "annual_return": -0.16851775262746482,
+          "sharpe": -0.1075111500024496,
+          "max_drawdown": -0.30624392203085793,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.2177963237847682,
+          "annual_return": 0.14362405321382288,
+          "sharpe": 0.5617856824443104,
+          "max_drawdown": -0.30624392203085793,
+          "win_rate": 0.581081081081081
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.02204074610850726,
+          "annual_return": 0.014959280365492766,
+          "sharpe": 0.21859382903370592,
+          "max_drawdown": -0.32452134783524966,
+          "win_rate": 0.5405405405405406
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.15100212454053175,
+          "annual_return": -0.10550146704444319,
+          "sharpe": -0.14562999054654083,
+          "max_drawdown": -0.35555216242841975,
+          "win_rate": 0.5135135135135135
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.33542062043933973,
+          "annual_return": -0.24292304815518528,
+          "sharpe": -0.6272197537122572,
+          "max_drawdown": -0.39490831341766164,
+          "win_rate": 0.47297297297297297
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1539,
+        "cash_slots": 1141,
+        "selected_extreme_open_transitions": 12,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 1063,
+        "cash_slots": 417,
+        "selected_extreme_open_transitions": 13,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.676
+    },
+    "ensemble_median|h5|k5": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": 0.22548107258169625,
+        "annual_return": 0.07947808187882055,
+        "sharpe": 0.3947269974779198,
+        "max_drawdown": -0.29084676242003804,
+        "win_rate": 0.5074626865671642
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.31444206513476347,
+        "annual_return": 0.20468236949163998,
+        "sharpe": 0.6103533267598497,
+        "max_drawdown": -0.42776732003924595,
+        "win_rate": 0.5405405405405406
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.5063769146319255,
+          "annual_return": 0.5375538462757756,
+          "sharpe": 1.301201473173961,
+          "max_drawdown": -0.229940380542066,
+          "win_rate": 0.4791666666666667
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.12751420853581918,
+          "annual_return": -0.23235157095860814,
+          "sharpe": 0.07896070660147778,
+          "max_drawdown": -0.42776732003924606,
+          "win_rate": 0.6538461538461539
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.31444206513476347,
+          "annual_return": 0.20468236949163998,
+          "sharpe": 0.6103533267598497,
+          "max_drawdown": -0.42776732003924595,
+          "win_rate": 0.5405405405405406
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.04476907201711522,
+          "annual_return": 0.03027787091465961,
+          "sharpe": 0.33775388916724125,
+          "max_drawdown": -0.4431142690735838,
+          "win_rate": 0.527027027027027
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.18079288332994048,
+          "annual_return": -0.1270002912996666,
+          "sharpe": 0.049406828021563404,
+          "max_drawdown": -0.477749253966322,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.40593353743422544,
+          "annual_return": -0.29860394088873765,
+          "sharpe": -0.3307584226945373,
+          "max_drawdown": -0.5237965606881033,
+          "win_rate": 0.47297297297297297
+        }
+      },
+      "train_quality": {
+        "executed_slots": 592,
+        "cash_slots": 78,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 328,
+        "cash_slots": 42,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.665
+    },
+    "ensemble_median|h5|k10": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.16544718844628714,
+        "annual_return": -0.06576257819236087,
+        "sharpe": -0.1757110069669748,
+        "max_drawdown": -0.2874148944053248,
+        "win_rate": 0.48507462686567165
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": -0.10124120649718749,
+        "annual_return": -0.07011931206113553,
+        "sharpe": 0.08588144261733272,
+        "max_drawdown": -0.4548590407499045,
+        "win_rate": 0.5405405405405406
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.1548029882525077,
+          "annual_return": 0.1631434890572132,
+          "sharpe": 0.644062420933325,
+          "max_drawdown": -0.1981857901874892,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.22179551818329035,
+          "annual_return": -0.38497980058642556,
+          "sharpe": -0.36917167608523555,
+          "max_drawdown": -0.4548590407499045,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.10124120649718749,
+          "annual_return": -0.07011931206113553,
+          "sharpe": 0.08588144261733272,
+          "max_drawdown": -0.4548590407499045,
+          "win_rate": 0.5405405405405406
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.27137271083676107,
+          "annual_return": -0.19396286346060876,
+          "sharpe": -0.2173066638096691,
+          "max_drawdown": -0.48459056369260384,
+          "win_rate": 0.5135135135135135
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.41656472448925297,
+          "annual_return": -0.30717740306087904,
+          "sharpe": -0.5375233746199166,
+          "max_drawdown": -0.5151983908607964,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.5649786198535944,
+          "annual_return": -0.43272138774696534,
+          "sharpe": -0.9588166713189058,
+          "max_drawdown": -0.5708022251129439,
+          "win_rate": 0.4864864864864865
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1028,
+        "cash_slots": 312,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 609,
+        "cash_slots": 131,
+        "selected_extreme_open_transitions": 11,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.4395
+    },
+    "ensemble_median|h5|k20": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.0865722108717687,
+        "annual_return": -0.0334845269347156,
+        "sharpe": -0.13720933618192646,
+        "max_drawdown": -0.24090578491295797,
+        "win_rate": 0.5
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.1856423113644876,
+        "annual_return": 0.12297078707363962,
+        "sharpe": 0.515312314808043,
+        "max_drawdown": -0.29815300240809256,
+        "win_rate": 0.5675675675675675
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.25609320359865917,
+          "annual_return": 0.2704949965274621,
+          "sharpe": 1.2133858428215014,
+          "max_drawdown": -0.13971917928496552,
+          "win_rate": 0.5416666666666666
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.05623325543798108,
+          "annual_return": -0.10612636123809016,
+          "sharpe": 0.014823632384878683,
+          "max_drawdown": -0.2981530024080926,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.1856423113644876,
+          "annual_return": 0.12297078707363962,
+          "sharpe": 0.515312314808043,
+          "max_drawdown": -0.29815300240809256,
+          "win_rate": 0.5675675675675675
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.00673451211077114,
+          "annual_return": -0.004591689055145398,
+          "sharpe": 0.15608657440697735,
+          "max_drawdown": -0.32678374486970957,
+          "win_rate": 0.5135135135135135
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.17648168883539417,
+          "annual_return": -0.12387383003097563,
+          "sharpe": -0.22548872823049265,
+          "max_drawdown": -0.35635900538071263,
+          "win_rate": 0.4864864864864865
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.3569975183145079,
+          "annual_return": -0.25975196416625124,
+          "sharpe": -0.730459407031334,
+          "max_drawdown": -0.39342025785101437,
+          "win_rate": 0.4864864864864865
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1539,
+        "cash_slots": 1141,
+        "selected_extreme_open_transitions": 10,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 1063,
+        "cash_slots": 417,
+        "selected_extreme_open_transitions": 15,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.6585
+    },
+    "ensemble_consensus|h5|k5": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.07281588872521083,
+        "annual_return": -0.028035309295431188,
+        "sharpe": 0.09049937959160738,
+        "max_drawdown": -0.580082137447419,
+        "win_rate": 0.44029850746268656
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": -0.07961832631127608,
+        "annual_return": -0.05494026307908184,
+        "sharpe": 0.17825035188513627,
+        "max_drawdown": -0.4814440892522025,
+        "win_rate": 0.527027027027027
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.18405973186635127,
+          "annual_return": 0.19410438243095762,
+          "sharpe": 0.6693578699208952,
+          "max_drawdown": -0.265362894992916,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.22268207296376585,
+          "annual_return": -0.3863372579308094,
+          "sharpe": -0.19247049205958,
+          "max_drawdown": -0.4814440892522025,
+          "win_rate": 0.5769230769230769
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.07961832631127608,
+          "annual_return": -0.05494026307908184,
+          "sharpe": 0.17825035188513627,
+          "max_drawdown": -0.4814440892522025,
+          "win_rate": 0.527027027027027
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.26784453116629436,
+          "annual_return": -0.19130664142138243,
+          "sharpe": -0.09813368765105777,
+          "max_drawdown": -0.49517673033191606,
+          "win_rate": 0.5135135135135135
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.42541429397449004,
+          "annual_return": -0.3143521489614055,
+          "sharpe": -0.39009998939030416,
+          "max_drawdown": -0.5109946080935208,
+          "win_rate": 0.47297297297297297
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.5828459366496954,
+          "annual_return": -0.4486960363173742,
+          "sharpe": -0.7744271683837257,
+          "max_drawdown": -0.5819370923318435,
+          "win_rate": 0.44594594594594594
+        }
+      },
+      "train_quality": {
+        "executed_slots": 569,
+        "cash_slots": 101,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 326,
+        "cash_slots": 44,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.47
+    },
+    "ensemble_consensus|h5|k10": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.054942913055569975,
+        "annual_return": -0.021030201577615815,
+        "sharpe": 0.018903514059673495,
+        "max_drawdown": -0.30457960465701406,
+        "win_rate": 0.4626865671641791
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.18534971332730366,
+        "annual_return": 0.12278203049951286,
+        "sharpe": 0.4807514409705614,
+        "max_drawdown": -0.39950627856240595,
+        "win_rate": 0.5405405405405406
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.20522163873512733,
+          "annual_return": 0.2165228381496307,
+          "sharpe": 0.8235659656352521,
+          "max_drawdown": -0.20433871020589997,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.016542744981954183,
+          "annual_return": -0.03181847060359455,
+          "sharpe": 0.3141025091624891,
+          "max_drawdown": -0.399506278562406,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.18534971332730366,
+          "annual_return": 0.12278203049951286,
+          "sharpe": 0.4807514409705614,
+          "max_drawdown": -0.39950627856240595,
+          "win_rate": 0.5405405405405406
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.033665676182253024,
+          "annual_return": -0.02305400361905441,
+          "sharpe": 0.19696878081099373,
+          "max_drawdown": -0.40918361713476425,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.22163784854021729,
+          "annual_return": -0.15688673689918287,
+          "sharpe": -0.10299920405412946,
+          "max_drawdown": -0.4237760145771657,
+          "win_rate": 0.4864864864864865
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.4150758519254938,
+          "annual_return": -0.30597372833776226,
+          "sharpe": -0.49805235843977286,
+          "max_drawdown": -0.44301079666877236,
+          "win_rate": 0.4864864864864865
+        }
+      },
+      "train_quality": {
+        "executed_slots": 968,
+        "cash_slots": 372,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 600,
+        "cash_slots": 140,
+        "selected_extreme_open_transitions": 12,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.619
+    },
+    "ensemble_consensus|h5|k20": {
+      "train": {
+        "episodes": 134,
+        "cumulative_return": -0.06422673107205701,
+        "annual_return": -0.02465847083286843,
+        "sharpe": -0.08629612550790393,
+        "max_drawdown": -0.23200702403063142,
+        "win_rate": 0.47761194029850745
+      },
+      "test": {
+        "episodes": 74,
+        "cumulative_return": 0.15939741846057554,
+        "annual_return": 0.10598038357695527,
+        "sharpe": 0.4686582898099917,
+        "max_drawdown": -0.30716773050972873,
+        "win_rate": 0.5675675675675675
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 48,
+          "cumulative_return": 0.23741508305815584,
+          "annual_return": 0.2506655167381966,
+          "sharpe": 1.173265595651956,
+          "max_drawdown": -0.14550796863135676,
+          "win_rate": 0.5416666666666666
+        },
+        "2026": {
+          "episodes": 26,
+          "cumulative_return": -0.0631849124526137,
+          "annual_return": -0.1188453653846987,
+          "sharpe": -0.00600125957457736,
+          "max_drawdown": -0.30716773050972856,
+          "win_rate": 0.6153846153846154
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": 0.15939741846057554,
+          "annual_return": 0.10598038357695527,
+          "sharpe": 0.4686582898099917,
+          "max_drawdown": -0.30716773050972873,
+          "win_rate": 0.5675675675675675
+        },
+        "31bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.01908063313210373,
+          "annual_return": -0.013035333459314291,
+          "sharpe": 0.13155323620216924,
+          "max_drawdown": -0.3181032663855649,
+          "win_rate": 0.527027027027027
+        },
+        "50bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.17815364888802354,
+          "annual_return": -0.12508570777471384,
+          "sharpe": -0.22585967275506105,
+          "max_drawdown": -0.34173298662103624,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 74,
+          "cumulative_return": -0.3493454396059923,
+          "annual_return": -0.2537634066284351,
+          "sharpe": -0.6978235549123306,
+          "max_drawdown": -0.3830196341924375,
+          "win_rate": 0.4864864864864865
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1352,
+        "cash_slots": 1328,
+        "selected_extreme_open_transitions": 13,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 1009,
+        "cash_slots": 471,
+        "selected_extreme_open_transitions": 12,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.6425
+    },
+    "momentum20_baseline|h10|k5": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": 6.338673265467625,
+        "annual_return": 1.1162918381046159,
+        "sharpe": 1.4840949747488288,
+        "max_drawdown": -0.45596943153270514,
+        "win_rate": 0.582089552238806
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 2.249715363762002,
+        "annual_return": 1.281874349802567,
+        "sharpe": 1.464878013918333,
+        "max_drawdown": -0.4763289235746557,
+        "win_rate": 0.5555555555555556
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.9115961803317376,
+          "annual_return": 0.9745401169187564,
+          "sharpe": 1.3664538451075372,
+          "max_drawdown": -0.26029949676905245,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.6979088315415607,
+          "annual_return": 2.039626144369359,
+          "sharpe": 1.6171057896261563,
+          "max_drawdown": -0.47632892357465567,
+          "win_rate": 0.75
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 2.249715363762002,
+          "annual_return": 1.281874349802567,
+          "sharpe": 1.464878013918333,
+          "max_drawdown": -0.4763289235746557,
+          "win_rate": 0.5555555555555556
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 1.9662935393543592,
+          "annual_return": 1.1406708149332347,
+          "sharpe": 1.3782388914164223,
+          "max_drawdown": -0.4845512114598144,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 1.6930766432936357,
+          "annual_return": 1.0006637320520992,
+          "sharpe": 1.2870642852334822,
+          "max_drawdown": -0.49313474262740115,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 1.3704018216944611,
+          "annual_return": 0.8296810097664564,
+          "sharpe": 1.1675458137894794,
+          "max_drawdown": -0.5042804549163009,
+          "win_rate": 0.5277777777777778
+        }
+      },
+      "train_quality": {
+        "executed_slots": 335,
+        "cash_slots": 0,
+        "selected_extreme_open_transitions": 14,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 170,
+        "cash_slots": 10,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.9085
+    },
+    "momentum20_baseline|h10|k10": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": 1.3507540552529949,
+        "annual_return": 0.3791713543070705,
+        "sharpe": 0.98569793101022,
+        "max_drawdown": -0.3368708032067005,
+        "win_rate": 0.5970149253731343
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 2.998211516566663,
+        "annual_return": 1.6381897948252009,
+        "sharpe": 1.9176101640673169,
+        "max_drawdown": -0.386991477823243,
+        "win_rate": 0.6666666666666666
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.9513915418535426,
+          "annual_return": 1.017723439573146,
+          "sharpe": 1.731934860635885,
+          "max_drawdown": -0.21500331602281733,
+          "win_rate": 0.5833333333333334
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 1.0467953453428298,
+          "annual_return": 3.500453547572876,
+          "sharpe": 2.2648917689483925,
+          "max_drawdown": -0.38699147782324295,
+          "win_rate": 0.8333333333333334
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 2.998211516566663,
+          "annual_return": 1.6381897948252009,
+          "sharpe": 1.9176101640673169,
+          "max_drawdown": -0.386991477823243,
+          "win_rate": 0.6666666666666666
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 2.695252312325326,
+          "annual_return": 1.4966109340618239,
+          "sharpe": 1.8224696623875185,
+          "max_drawdown": -0.39297837665573226,
+          "win_rate": 0.6666666666666666
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 2.39960161448284,
+          "annual_return": 1.3550472166073497,
+          "sharpe": 1.722315214477977,
+          "max_drawdown": -0.39925994309521906,
+          "win_rate": 0.6388888888888888
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 2.0452890466474547,
+          "annual_return": 1.1804190327007142,
+          "sharpe": 1.5909716224934274,
+          "max_drawdown": -0.40746596787466965,
+          "win_rate": 0.6111111111111112
+        }
+      },
+      "train_quality": {
+        "executed_slots": 667,
+        "cash_slots": 3,
+        "selected_extreme_open_transitions": 20,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 340,
+        "cash_slots": 20,
+        "selected_extreme_open_transitions": 16,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.9755
+    },
+    "momentum20_baseline|h10|k20": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": 0.442657970694037,
+        "annual_return": 0.147795282130587,
+        "sharpe": 0.5942192666164361,
+        "max_drawdown": -0.308550276988965,
+        "win_rate": 0.5970149253731343
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 2.1100381613705648,
+        "annual_return": 1.2127686132671927,
+        "sharpe": 1.9079473813529548,
+        "max_drawdown": -0.33310823235930753,
+        "win_rate": 0.6111111111111112
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.9515456327701679,
+          "annual_return": 1.0178907351335007,
+          "sharpe": 2.0739467139780543,
+          "max_drawdown": -0.1220529873662457,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.5916687752128844,
+          "annual_return": 1.653937326795504,
+          "sharpe": 1.8139278956603107,
+          "max_drawdown": -0.3331082323593075,
+          "win_rate": 0.8333333333333334
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 2.1100381613705648,
+          "annual_return": 1.2127686132671927,
+          "sharpe": 1.9079473813529548,
+          "max_drawdown": -0.33310823235930753,
+          "win_rate": 0.6111111111111112
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 1.8797893478052803,
+          "annual_return": 1.0967782580111929,
+          "sharpe": 1.7918096839289557,
+          "max_drawdown": -0.33947901817361736,
+          "win_rate": 0.6111111111111112
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 1.6546871537906855,
+          "annual_return": 0.9806573220230113,
+          "sharpe": 1.6694580178948326,
+          "max_drawdown": -0.34616317010734504,
+          "win_rate": 0.6111111111111112
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 1.384335683806737,
+          "annual_return": 0.837203139612412,
+          "sharpe": 1.5088671593963567,
+          "max_drawdown": -0.3548948355762617,
+          "win_rate": 0.6111111111111112
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1327,
+        "cash_slots": 13,
+        "selected_extreme_open_transitions": 24,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 680,
+        "cash_slots": 40,
+        "selected_extreme_open_transitions": 19,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.977
+    },
+    "donchian20|h10|k5": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.5289502929941008,
+        "annual_return": -0.24658535700943252,
+        "sharpe": -0.8207144481653198,
+        "max_drawdown": -0.5239882289121726,
+        "win_rate": 0.44776119402985076
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.20295399495696298,
+        "annual_return": 0.13808398787130582,
+        "sharpe": 0.4997767508294842,
+        "max_drawdown": -0.2492069726234279,
+        "win_rate": 0.5555555555555556
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": -0.06635504435109352,
+          "annual_return": -0.06955470766829763,
+          "sharpe": -0.090044881517097,
+          "max_drawdown": -0.2492069726234279,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.2882944305187325,
+          "annual_return": 0.7022830369932178,
+          "sharpe": 1.070869551793093,
+          "max_drawdown": -0.24861168537627093,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.20295399495696298,
+          "annual_return": 0.13808398787130582,
+          "sharpe": 0.4997767508294842,
+          "max_drawdown": -0.2492069726234279,
+          "win_rate": 0.5555555555555556
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.07300893344723214,
+          "annual_return": 0.05056356893677649,
+          "sharpe": 0.33322183686097967,
+          "max_drawdown": -0.2765006466432147,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.04936113531809294,
+          "annual_return": -0.03481426232345719,
+          "sharpe": 0.15698848748532687,
+          "max_drawdown": -0.3160149948064068,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.1899144579695632,
+          "annual_return": -0.1370778500606058,
+          "sharpe": -0.07549479711353764,
+          "max_drawdown": -0.39718943697557035,
+          "win_rate": 0.5
+        }
+      },
+      "train_quality": {
+        "executed_slots": 296,
+        "cash_slots": 39,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 160,
+        "cash_slots": 20,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.6265
+    },
+    "donchian20|h10|k10": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.27677261417987575,
+        "annual_return": -0.11474060311091383,
+        "sharpe": -0.43278487247370184,
+        "max_drawdown": -0.3034761651034809,
+        "win_rate": 0.40298507462686567
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.3048765286106878,
+        "annual_return": 0.2047546009570096,
+        "sharpe": 0.627825609648164,
+        "max_drawdown": -0.23493331478217555,
+        "win_rate": 0.5833333333333334
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.11590736902598442,
+          "annual_return": 0.12204313459463667,
+          "sharpe": 0.5744681789816624,
+          "max_drawdown": -0.17546992088631763,
+          "win_rate": 0.5833333333333334
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.16936394829795365,
+          "annual_return": 0.3889748135479534,
+          "sharpe": 0.7818188946859104,
+          "max_drawdown": -0.23493331478217547,
+          "win_rate": 0.5833333333333334
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.3048765286106878,
+          "annual_return": 0.2047546009570096,
+          "sharpe": 0.627825609648164,
+          "max_drawdown": -0.23493331478217555,
+          "win_rate": 0.5833333333333334
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.17265840653330322,
+          "annual_return": 0.11794403977727974,
+          "sharpe": 0.4620439316907581,
+          "max_drawdown": -0.24398663696571482,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.04720419253276065,
+          "annual_return": 0.03281362981597247,
+          "sharpe": 0.28658807771926725,
+          "max_drawdown": -0.2534655835552276,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.09819276605158811,
+          "annual_return": -0.06979300650036602,
+          "sharpe": 0.05509473679052174,
+          "max_drawdown": -0.26581741487924937,
+          "win_rate": 0.4722222222222222
+        }
+      },
+      "train_quality": {
+        "executed_slots": 525,
+        "cash_slots": 145,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 304,
+        "cash_slots": 56,
+        "selected_extreme_open_transitions": 5,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.6975
+    },
+    "donchian20|h10|k20": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.23423552128115466,
+        "annual_return": -0.09550543368181974,
+        "sharpe": -0.5657890828590386,
+        "max_drawdown": -0.2327491998600562,
+        "win_rate": 0.40298507462686567
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.6087883722604563,
+        "annual_return": 0.39491981356427663,
+        "sharpe": 1.0896456322346881,
+        "max_drawdown": -0.18285119272072178,
+        "win_rate": 0.6388888888888888
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.3121741168484933,
+          "annual_return": 0.3301206632486846,
+          "sharpe": 1.348225904653869,
+          "max_drawdown": -0.13791122887380092,
+          "win_rate": 0.625
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.22559368396455737,
+          "annual_return": 0.5329489058121306,
+          "sharpe": 1.0283108583959206,
+          "max_drawdown": -0.18285119272072178,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6087883722604563,
+          "annual_return": 0.39491981356427663,
+          "sharpe": 1.0896456322346881,
+          "max_drawdown": -0.18285119272072178,
+          "win_rate": 0.6388888888888888
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.4663214818732113,
+          "annual_return": 0.30725538041080225,
+          "sharpe": 0.913885393625943,
+          "max_drawdown": -0.19031897763604738,
+          "win_rate": 0.6111111111111112
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.32921693731641,
+          "annual_return": 0.22044189225960742,
+          "sharpe": 0.7272718326804011,
+          "max_drawdown": -0.19815397545588898,
+          "win_rate": 0.6111111111111112
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.16761644888380856,
+          "annual_return": 0.11457717012370816,
+          "sharpe": 0.4801616511572329,
+          "max_drawdown": -0.2083888468212241,
+          "win_rate": 0.5277777777777778
+        }
+      },
+      "train_quality": {
+        "executed_slots": 833,
+        "cash_slots": 507,
+        "selected_extreme_open_transitions": 8,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 553,
+        "cash_slots": 167,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.8555
+    },
+    "donchian55|h10|k5": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.06538349674966393,
+        "annual_return": -0.025112124850069084,
+        "sharpe": 0.061246984105355576,
+        "max_drawdown": -0.3213152659806036,
+        "win_rate": 0.44776119402985076
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.8458005710934462,
+        "annual_return": 0.5357811868129656,
+        "sharpe": 1.045330007832747,
+        "max_drawdown": -0.24345867824823558,
+        "win_rate": 0.5
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.08028497530436707,
+          "annual_return": 0.08446428223906377,
+          "sharpe": 0.42188600485668676,
+          "max_drawdown": -0.23784030677453885,
+          "win_rate": 0.4166666666666667
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.7085575839375724,
+          "annual_return": 2.079797790558876,
+          "sharpe": 1.7283858103554985,
+          "max_drawdown": -0.24345867824823572,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.8458005710934462,
+          "annual_return": 0.5357811868129656,
+          "sharpe": 1.045330007832747,
+          "max_drawdown": -0.24345867824823558,
+          "win_rate": 0.5
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6759931055627213,
+          "annual_return": 0.4354582294508409,
+          "sharpe": 0.9206164534476217,
+          "max_drawdown": -0.25246947365709144,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.5131457104987149,
+          "annual_return": 0.33633863872668757,
+          "sharpe": 0.7884037362894426,
+          "max_drawdown": -0.261903583417346,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.3220065882098433,
+          "annual_return": 0.2158039040878661,
+          "sharpe": 0.6136428750382518,
+          "max_drawdown": -0.27419650113021093,
+          "win_rate": 0.4722222222222222
+        }
+      },
+      "train_quality": {
+        "executed_slots": 266,
+        "cash_slots": 69,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 138,
+        "cash_slots": 42,
+        "selected_extreme_open_transitions": 5,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.833
+    },
+    "donchian55|h10|k10": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.009616280731871152,
+        "annual_return": -0.003627776144998318,
+        "sharpe": 0.08273162457386447,
+        "max_drawdown": -0.19734437063367666,
+        "win_rate": 0.43283582089552236
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.7770997820416694,
+        "annual_return": 0.4955408136564161,
+        "sharpe": 1.0628498376239104,
+        "max_drawdown": -0.20297205826260478,
+        "win_rate": 0.5277777777777778
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.24268804499296115,
+          "annual_return": 0.2562620089915437,
+          "sharpe": 0.9464327271041036,
+          "max_drawdown": -0.16065842271792283,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.4300221452319479,
+          "annual_return": 1.1194335375034328,
+          "sharpe": 1.3460582901571432,
+          "max_drawdown": -0.20297205826260487,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.7770997820416694,
+          "annual_return": 0.4955408136564161,
+          "sharpe": 1.0628498376239104,
+          "max_drawdown": -0.20297205826260478,
+          "win_rate": 0.5277777777777778
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6319345610080684,
+          "annual_return": 0.40893811512718714,
+          "sharpe": 0.9397743888653558,
+          "max_drawdown": -0.21211816215937732,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.49112729024608726,
+          "annual_return": 0.3226968005593085,
+          "sharpe": 0.8092506612618797,
+          "max_drawdown": -0.22169663051486035,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.3236031863769475,
+          "annual_return": 0.21683155340838,
+          "sharpe": 0.6366709481348847,
+          "max_drawdown": -0.23418186513917655,
+          "win_rate": 0.5
+        }
+      },
+      "train_quality": {
+        "executed_slots": 419,
+        "cash_slots": 251,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 254,
+        "cash_slots": 106,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.839
+    },
+    "donchian55|h10|k20": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": 0.03544094000010478,
+        "annual_return": 0.013185418715970787,
+        "sharpe": 0.1715484320960025,
+        "max_drawdown": -0.14497958637489058,
+        "win_rate": 0.47761194029850745
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.608516804427996,
+        "annual_return": 0.3947549830219552,
+        "sharpe": 1.0529007279918063,
+        "max_drawdown": -0.19067954669634254,
+        "win_rate": 0.5555555555555556
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.24459068940296014,
+          "annual_return": 0.25828168473507596,
+          "sharpe": 1.1986327797319776,
+          "max_drawdown": -0.10883768316484656,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.2924009641120442,
+          "annual_return": 0.7136979372516656,
+          "sharpe": 1.1682267471987589,
+          "max_drawdown": -0.1906795466963426,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.608516804427996,
+          "annual_return": 0.3947549830219552,
+          "sharpe": 1.0529007279918063,
+          "max_drawdown": -0.19067954669634254,
+          "win_rate": 0.5555555555555556
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.5098321791738898,
+          "annual_return": 0.33428951745355473,
+          "sharpe": 0.9384862005018466,
+          "max_drawdown": -0.19373954669634258,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.41198534505159556,
+          "annual_return": 0.2731545675409912,
+          "sharpe": 0.8170813635420129,
+          "max_drawdown": -0.19696954669634265,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.292487180183042,
+          "annual_return": 0.19673604217201124,
+          "sharpe": 0.6564821674299925,
+          "max_drawdown": -0.2012195466963426,
+          "win_rate": 0.5277777777777778
+        }
+      },
+      "train_quality": {
+        "executed_slots": 518,
+        "cash_slots": 822,
+        "selected_extreme_open_transitions": 8,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 384,
+        "cash_slots": 336,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 30
+      },
+      "bootstrap_test_positive_rate": 0.849
+    },
+    "bollinger_breakout|h10|k5": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.25777884268550855,
+        "annual_return": -0.10606678682209458,
+        "sharpe": -0.24185713433764863,
+        "max_drawdown": -0.3727477348337914,
+        "win_rate": 0.4925373134328358
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 1.2176667671578536,
+        "annual_return": 0.7463343713994475,
+        "sharpe": 1.1466904010097223,
+        "max_drawdown": -0.26168689884906293,
+        "win_rate": 0.5555555555555556
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.06371299147907061,
+          "annual_return": 0.06700311334592146,
+          "sharpe": 0.3512532326516328,
+          "max_drawdown": -0.26168689884906293,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 1.0845046411807702,
+          "annual_return": 3.6763393523833185,
+          "sharpe": 2.0381975166446327,
+          "max_drawdown": -0.18336357020729827,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 1.2176667671578536,
+          "annual_return": 0.7463343713994475,
+          "sharpe": 1.1466904010097223,
+          "max_drawdown": -0.26168689884906293,
+          "win_rate": 0.5555555555555556
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.9729434659285399,
+          "annual_return": 0.6090896767780158,
+          "sharpe": 1.0210380700193207,
+          "max_drawdown": -0.27572191093386395,
+          "win_rate": 0.5277777777777778
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.7430921372685653,
+          "annual_return": 0.47544913023574,
+          "sharpe": 0.8881806293150372,
+          "max_drawdown": -0.3123271281279845,
+          "win_rate": 0.5277777777777778
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.47991354301255007,
+          "annual_return": 0.3157259524920575,
+          "sharpe": 0.7130410919582659,
+          "max_drawdown": -0.35902205229647494,
+          "win_rate": 0.5
+        }
+      },
+      "train_quality": {
+        "executed_slots": 323,
+        "cash_slots": 12,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 165,
+        "cash_slots": 15,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.8685
+    },
+    "bollinger_breakout|h10|k10": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.17322153399353957,
+        "annual_return": -0.06904549279439176,
+        "sharpe": -0.18813495367459143,
+        "max_drawdown": -0.2977327527377975,
+        "win_rate": 0.4925373134328358
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.6505525477057883,
+        "annual_return": 0.42017070116415867,
+        "sharpe": 0.9534662849263139,
+        "max_drawdown": -0.2364407013434059,
+        "win_rate": 0.5833333333333334
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.24185412701300701,
+          "annual_return": 0.2553768455774188,
+          "sharpe": 0.8381915383613785,
+          "max_drawdown": -0.20057088813008495,
+          "win_rate": 0.5833333333333334
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.32875354368691134,
+          "annual_return": 0.8164912704445138,
+          "sharpe": 1.162122065997998,
+          "max_drawdown": -0.23644070134340592,
+          "win_rate": 0.5833333333333334
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6505525477057883,
+          "annual_return": 0.42017070116415867,
+          "sharpe": 0.9534662849263139,
+          "max_drawdown": -0.2364407013434059,
+          "win_rate": 0.5833333333333334
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.4741307853837433,
+          "annual_return": 0.3121250029600786,
+          "sharpe": 0.7922947417187418,
+          "max_drawdown": -0.24248174077761733,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.30778293222837694,
+          "annual_return": 0.2066323526278664,
+          "sharpe": 0.6217793954527063,
+          "max_drawdown": -0.2488330855137293,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.11642836838527892,
+          "annual_return": 0.08014386766432935,
+          "sharpe": 0.396865728170116,
+          "max_drawdown": -0.2707563705168693,
+          "win_rate": 0.5555555555555556
+        }
+      },
+      "train_quality": {
+        "executed_slots": 602,
+        "cash_slots": 68,
+        "selected_extreme_open_transitions": 11,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 321,
+        "cash_slots": 39,
+        "selected_extreme_open_transitions": 5,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.8025
+    },
+    "bollinger_breakout|h10|k20": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.16719147125926326,
+        "annual_return": -0.06649748023461188,
+        "sharpe": -0.27224165833448366,
+        "max_drawdown": -0.25014969132192605,
+        "win_rate": 0.4925373134328358
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.877016488300838,
+        "annual_return": 0.5539164396633851,
+        "sharpe": 1.3636104474377366,
+        "max_drawdown": -0.17560750945060002,
+        "win_rate": 0.5833333333333334
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.600145733857194,
+          "annual_return": 0.6382022379419343,
+          "sharpe": 1.8500197461806336,
+          "max_drawdown": -0.13503403806072334,
+          "win_rate": 0.5833333333333334
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.17275093601308966,
+          "annual_return": 0.397436734247683,
+          "sharpe": 0.8853660824690043,
+          "max_drawdown": -0.17560750945060002,
+          "win_rate": 0.5833333333333334
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.877016488300838,
+          "annual_return": 0.5539164396633851,
+          "sharpe": 1.3636104474377366,
+          "max_drawdown": -0.17560750945060002,
+          "win_rate": 0.5833333333333334
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6913871944484447,
+          "annual_return": 0.44467489797566406,
+          "sharpe": 1.168739554807942,
+          "max_drawdown": -0.1790275094506,
+          "win_rate": 0.5833333333333334
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.5147816729988712,
+          "annual_return": 0.33734983801375296,
+          "sharpe": 0.9624139403298771,
+          "max_drawdown": -0.18300263561428978,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.3094467962022147,
+          "annual_return": 0.2077067682518976,
+          "sharpe": 0.6900967858447772,
+          "max_drawdown": -0.19474745429361454,
+          "win_rate": 0.5277777777777778
+        }
+      },
+      "train_quality": {
+        "executed_slots": 1070,
+        "cash_slots": 270,
+        "selected_extreme_open_transitions": 13,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 605,
+        "cash_slots": 115,
+        "selected_extreme_open_transitions": 8,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.922
+    },
+    "volume_breakout|h10|k5": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.4317078098339121,
+        "annual_return": -0.19148208063652938,
+        "sharpe": -0.6062724779658182,
+        "max_drawdown": -0.43598904083607165,
+        "win_rate": 0.44776119402985076
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.11988175173249727,
+        "annual_return": 0.08248158656263027,
+        "sharpe": 0.39700462487320687,
+        "max_drawdown": -0.257491374359342,
+        "win_rate": 0.4722222222222222
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": -0.07600139556633345,
+          "annual_return": -0.07964604899900851,
+          "sharpe": -0.11162352433596213,
+          "max_drawdown": -0.257491374359342,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.21186895935844063,
+          "annual_return": 0.4971209560937182,
+          "sharpe": 0.8754125477581971,
+          "max_drawdown": -0.21213902534194912,
+          "win_rate": 0.5
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.11988175173249727,
+          "annual_return": 0.08248158656263027,
+          "sharpe": 0.39700462487320687,
+          "max_drawdown": -0.257491374359342,
+          "win_rate": 0.4722222222222222
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.0044914342483022285,
+          "annual_return": 0.003141889922683161,
+          "sharpe": 0.2457405484881106,
+          "max_drawdown": -0.28115394807668576,
+          "win_rate": 0.4722222222222222
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.1047920966337339,
+          "annual_return": -0.07456326356003062,
+          "sharpe": 0.08562333899824232,
+          "max_drawdown": -0.3076958413466182,
+          "win_rate": 0.4722222222222222
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.23116599772139124,
+          "annual_return": -0.16807762034924023,
+          "sharpe": -0.12567832803522297,
+          "max_drawdown": -0.3770593160561371,
+          "win_rate": 0.4444444444444444
+        }
+      },
+      "train_quality": {
+        "executed_slots": 284,
+        "cash_slots": 51,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 152,
+        "cash_slots": 28,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.5855
+    },
+    "volume_breakout|h10|k10": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.28854768825136523,
+        "annual_return": -0.1201894515208094,
+        "sharpe": -0.519613288644597,
+        "max_drawdown": -0.30033083755060186,
+        "win_rate": 0.3880597014925373
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.3043107265986622,
+        "annual_return": 0.20438890517345043,
+        "sharpe": 0.6301441623118585,
+        "max_drawdown": -0.19690034875928725,
+        "win_rate": 0.5
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.04519727360634462,
+          "annual_return": 0.047510009607332204,
+          "sharpe": 0.3059793189540008,
+          "max_drawdown": -0.17171925250812323,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.24786588560341927,
+          "annual_return": 0.5920350149553941,
+          "sharpe": 0.9847803629238835,
+          "max_drawdown": -0.19690034875928727,
+          "win_rate": 0.5833333333333334
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.3043107265986622,
+          "annual_return": 0.20438890517345043,
+          "sharpe": 0.6301441623118585,
+          "max_drawdown": -0.19690034875928725,
+          "win_rate": 0.5
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.17689701775332511,
+          "annual_return": 0.12077109964661448,
+          "sharpe": 0.46760384660851534,
+          "max_drawdown": -0.2032527700926492,
+          "win_rate": 0.4722222222222222
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.05550287053353764,
+          "annual_return": 0.038536089743003155,
+          "sharpe": 0.29543843499310446,
+          "max_drawdown": -0.21118234927972682,
+          "win_rate": 0.4444444444444444
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.08587898748214873,
+          "annual_return": -0.06092001488282639,
+          "sharpe": 0.06809307142905544,
+          "max_drawdown": -0.2298880953532991,
+          "win_rate": 0.4444444444444444
+        }
+      },
+      "train_quality": {
+        "executed_slots": 488,
+        "cash_slots": 182,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 292,
+        "cash_slots": 68,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.709
+    },
+    "volume_breakout|h10|k20": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.2193653256979773,
+        "annual_return": -0.08893881348022536,
+        "sharpe": -0.6120973389894903,
+        "max_drawdown": -0.215982189128835,
+        "win_rate": 0.3582089552238806
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.5528488108382705,
+        "annual_return": 0.36078784596157587,
+        "sharpe": 1.0906308578796917,
+        "max_drawdown": -0.15706667259426046,
+        "win_rate": 0.5
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.2513461582926244,
+          "annual_return": 0.2654539270205467,
+          "sharpe": 1.202595513690348,
+          "max_drawdown": -0.11387956198834802,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.2404773861904823,
+          "annual_return": 0.5723042495035486,
+          "sharpe": 1.1374258476255052,
+          "max_drawdown": -0.15706667259426044,
+          "win_rate": 0.5833333333333334
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.5528488108382705,
+          "annual_return": 0.36078784596157587,
+          "sharpe": 1.0906308578796917,
+          "max_drawdown": -0.15706667259426046,
+          "win_rate": 0.5
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.42890059099659594,
+          "annual_return": 0.283811941797649,
+          "sharpe": 0.9172847958599386,
+          "max_drawdown": -0.16098925643007939,
+          "win_rate": 0.5
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.3084649833041686,
+          "annual_return": 0.20707282661979098,
+          "sharpe": 0.7326850015507839,
+          "max_drawdown": -0.16512158921511053,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.16487672923801555,
+          "annual_return": 0.11274583811203853,
+          "sharpe": 0.48742349785765426,
+          "max_drawdown": -0.17054608169541452,
+          "win_rate": 0.5
+        }
+      },
+      "train_quality": {
+        "executed_slots": 713,
+        "cash_slots": 627,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 492,
+        "cash_slots": 228,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.861
+    },
+    "ensemble_mean|h10|k5": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.00017661571014804256,
+        "annual_return": -6.643225559621602e-05,
+        "sharpe": 0.15252594629569893,
+        "max_drawdown": -0.26745513425349926,
+        "win_rate": 0.5522388059701493
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.4373936753557617,
+        "annual_return": 0.2891486872895992,
+        "sharpe": 0.7516249878302018,
+        "max_drawdown": -0.2608828658709208,
+        "win_rate": 0.5833333333333334
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.11277550964841998,
+          "annual_return": 0.11873683304953841,
+          "sharpe": 0.5252738598352766,
+          "max_drawdown": -0.23942202258715178,
+          "win_rate": 0.5416666666666666
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.2917385708157194,
+          "annual_return": 0.711853984515747,
+          "sharpe": 1.0541438704722,
+          "max_drawdown": -0.2608828658709208,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.4373936753557617,
+          "annual_return": 0.2891486872895992,
+          "sharpe": 0.7516249878302018,
+          "max_drawdown": -0.2608828658709208,
+          "win_rate": 0.5833333333333334
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.2837876153487169,
+          "annual_return": 0.19109177927154253,
+          "sharpe": 0.5912399436815349,
+          "max_drawdown": -0.26976070664989615,
+          "win_rate": 0.5833333333333334
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.13894768330652085,
+          "annual_return": 0.09534931978601402,
+          "sharpe": 0.4214835378277431,
+          "max_drawdown": -0.27905501599001115,
+          "win_rate": 0.5833333333333334
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.027672293439873208,
+          "annual_return": -0.019451989551540594,
+          "sharpe": 0.19745913374247906,
+          "max_drawdown": -0.30585348203240986,
+          "win_rate": 0.4722222222222222
+        }
+      },
+      "train_quality": {
+        "executed_slots": 295,
+        "cash_slots": 40,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 160,
+        "cash_slots": 20,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.733
+    },
+    "ensemble_mean|h10|k10": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.05745118431713525,
+        "annual_return": -0.022008274914888437,
+        "sharpe": 0.0027433847390823302,
+        "max_drawdown": -0.2044076435853033,
+        "win_rate": 0.417910447761194
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.8447875628590464,
+        "annual_return": 0.5351911333790873,
+        "sharpe": 1.143653698691951,
+        "max_drawdown": -0.22929469240320063,
+        "win_rate": 0.5555555555555556
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.339208000957713,
+          "annual_return": 0.3589091943213294,
+          "sharpe": 1.2788068111890356,
+          "max_drawdown": -0.15173221547164475,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.37744920914311675,
+          "annual_return": 0.9591096663164258,
+          "sharpe": 1.2585857037146375,
+          "max_drawdown": -0.22929469240320052,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.8447875628590464,
+          "annual_return": 0.5351911333790873,
+          "sharpe": 1.143653698691951,
+          "max_drawdown": -0.22929469240320063,
+          "win_rate": 0.5555555555555556
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6607062060836999,
+          "annual_return": 0.4262805704025514,
+          "sharpe": 0.9863737185305335,
+          "max_drawdown": -0.2384063598614599,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.48574020840399745,
+          "annual_return": 0.3193499767234973,
+          "sharpe": 0.819831694129454,
+          "max_drawdown": -0.2479465796143322,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.28254354545053606,
+          "annual_return": 0.19028369246147658,
+          "sharpe": 0.5999598363784976,
+          "max_drawdown": -0.26037854295690976,
+          "win_rate": 0.5
+        }
+      },
+      "train_quality": {
+        "executed_slots": 523,
+        "cash_slots": 147,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 303,
+        "cash_slots": 57,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.8605
+    },
+    "ensemble_mean|h10|k20": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.09376907592270689,
+        "annual_return": -0.036355798949253115,
+        "sharpe": -0.17753220356943208,
+        "max_drawdown": -0.18633307873035468,
+        "win_rate": 0.40298507462686567
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.7686388350912234,
+        "annual_return": 0.4905529547914338,
+        "sharpe": 1.2214801198235372,
+        "max_drawdown": -0.18322414192378383,
+        "win_rate": 0.6111111111111112
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.3695811652540619,
+          "annual_return": 0.39128839821396455,
+          "sharpe": 1.5047713091361525,
+          "max_drawdown": -0.12436656913364222,
+          "win_rate": 0.5833333333333334
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.29088924368759805,
+          "annual_return": 0.7094911717817602,
+          "sharpe": 1.179218933217152,
+          "max_drawdown": -0.18322414192378397,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.7686388350912234,
+          "annual_return": 0.4905529547914338,
+          "sharpe": 1.2214801198235372,
+          "max_drawdown": -0.18322414192378383,
+          "win_rate": 0.6111111111111112
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6134610807684595,
+          "annual_return": 0.3977546502234537,
+          "sharpe": 1.0564220916245766,
+          "max_drawdown": -0.19069007269810698,
+          "win_rate": 0.5833333333333334
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.4639876391005897,
+          "annual_return": 0.305798564686224,
+          "sharpe": 0.8812649106710041,
+          "max_drawdown": -0.19852311831692196,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.2876168545205988,
+          "annual_return": 0.19357759239181305,
+          "sharpe": 0.6494620007226714,
+          "max_drawdown": -0.2087554287386462,
+          "win_rate": 0.5277777777777778
+        }
+      },
+      "train_quality": {
+        "executed_slots": 820,
+        "cash_slots": 520,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 549,
+        "cash_slots": 171,
+        "selected_extreme_open_transitions": 8,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.8875
+    },
+    "ensemble_median|h10|k5": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.47318023585911473,
+        "annual_return": -0.21420058707035294,
+        "sharpe": -0.6928501794623136,
+        "max_drawdown": -0.4676306868616018,
+        "win_rate": 0.4925373134328358
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.32078673502926547,
+        "annual_return": 0.21501849549695806,
+        "sharpe": 0.6299722377914577,
+        "max_drawdown": -0.24861168537627096,
+        "win_rate": 0.5555555555555556
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": -0.003985282249809763,
+          "annual_return": -0.004184128920167951,
+          "sharpe": 0.12356049200517452,
+          "max_drawdown": -0.22310446051271607,
+          "win_rate": 0.5416666666666666
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.3259431763809557,
+          "annual_return": 0.8084325554357936,
+          "sharpe": 1.1291684098036223,
+          "max_drawdown": -0.248611685376271,
+          "win_rate": 0.5833333333333334
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.32078673502926547,
+          "annual_return": 0.21501849549695806,
+          "sharpe": 0.6299722377914577,
+          "max_drawdown": -0.24861168537627096,
+          "win_rate": 0.5555555555555556
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.17849428078017482,
+          "annual_return": 0.12183564598529517,
+          "sharpe": 0.4675620624308094,
+          "max_drawdown": -0.2575834965530127,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.04445326951358819,
+          "annual_return": 0.030913696511509547,
+          "sharpe": 0.29567331604118985,
+          "max_drawdown": -0.2874183456957256,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.109564564052829,
+          "annual_return": -0.07801956647114427,
+          "sharpe": 0.06885339030825534,
+          "max_drawdown": -0.3718544698304288,
+          "win_rate": 0.4722222222222222
+        }
+      },
+      "train_quality": {
+        "executed_slots": 295,
+        "cash_slots": 40,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 160,
+        "cash_slots": 20,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.681
+    },
+    "ensemble_median|h10|k10": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.2514647019517523,
+        "annual_return": -0.1032140414474938,
+        "sharpe": -0.41645640266793427,
+        "max_drawdown": -0.27565797716060897,
+        "win_rate": 0.40298507462686567
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.326532247540511,
+        "annual_return": 0.2187158752973406,
+        "sharpe": 0.6523780914761661,
+        "max_drawdown": -0.21938517297135385,
+        "win_rate": 0.5833333333333334
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.04327206647679027,
+          "annual_return": 0.045484162512833715,
+          "sharpe": 0.29891210596579604,
+          "max_drawdown": -0.17431774059056282,
+          "win_rate": 0.5416666666666666
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.2714189664744151,
+          "annual_return": 0.6557937543157417,
+          "sharpe": 1.0320515433100497,
+          "max_drawdown": -0.21938517297135393,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.326532247540511,
+          "annual_return": 0.2187158752973406,
+          "sharpe": 0.6523780914761661,
+          "max_drawdown": -0.21938517297135385,
+          "win_rate": 0.5833333333333334
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.19252666753866876,
+          "annual_return": 0.13116945598996455,
+          "sharpe": 0.4885453497076256,
+          "max_drawdown": -0.22857412622391315,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.06533307613127404,
+          "annual_return": 0.04529720163999729,
+          "sharpe": 0.31521820610270607,
+          "max_drawdown": -0.23819560497011807,
+          "win_rate": 0.5
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.08213969480526906,
+          "annual_return": -0.05823268919714475,
+          "sharpe": 0.08663415139399841,
+          "max_drawdown": -0.2507339866156908,
+          "win_rate": 0.4722222222222222
+        }
+      },
+      "train_quality": {
+        "executed_slots": 523,
+        "cash_slots": 147,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 303,
+        "cash_slots": 57,
+        "selected_extreme_open_transitions": 5,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.7075
+    },
+    "ensemble_median|h10|k20": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.15335691415773234,
+        "annual_return": -0.060694847069199476,
+        "sharpe": -0.3439883561826008,
+        "max_drawdown": -0.19129931630086602,
+        "win_rate": 0.40298507462686567
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.6535360763498266,
+        "annual_return": 0.4219671786017698,
+        "sharpe": 1.1350115624572974,
+        "max_drawdown": -0.1905495466963425,
+        "win_rate": 0.6111111111111112
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.3335852054716686,
+          "annual_return": 0.3529190354693723,
+          "sharpe": 1.413672691049377,
+          "max_drawdown": -0.13064741329420246,
+          "win_rate": 0.5833333333333334
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.23960954666669854,
+          "annual_return": 0.5699951676928772,
+          "sharpe": 1.0652793686992408,
+          "max_drawdown": -0.19054954669634255,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6535360763498266,
+          "annual_return": 0.4219671786017698,
+          "sharpe": 1.1350115624572974,
+          "max_drawdown": -0.1905495466963425,
+          "win_rate": 0.6111111111111112
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.5083746474519832,
+          "annual_return": 0.3333877379464709,
+          "sharpe": 0.9625393844492329,
+          "max_drawdown": -0.19342954669634246,
+          "win_rate": 0.5833333333333334
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.36855917042014474,
+          "annual_return": 0.24561693860187073,
+          "sharpe": 0.7793047927257535,
+          "max_drawdown": -0.19646954669634248,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.20359779704019165,
+          "annual_return": 0.13851031292417093,
+          "sharpe": 0.5364882996524035,
+          "max_drawdown": -0.2004695466963426,
+          "win_rate": 0.5277777777777778
+        }
+      },
+      "train_quality": {
+        "executed_slots": 820,
+        "cash_slots": 520,
+        "selected_extreme_open_transitions": 8,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 549,
+        "cash_slots": 171,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.8665
+    },
+    "ensemble_consensus|h10|k5": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.16961370544603083,
+        "annual_return": -0.06751961148832708,
+        "sharpe": -0.0758222636310661,
+        "max_drawdown": -0.3431539117578415,
+        "win_rate": 0.5223880597014925
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.2417436998976299,
+        "annual_return": 0.163650004874496,
+        "sharpe": 0.5460078791992179,
+        "max_drawdown": -0.2938367948169838,
+        "win_rate": 0.5277777777777778
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": -0.05279383813606853,
+          "annual_return": -0.05535911067162813,
+          "sharpe": -0.03948550299179892,
+          "max_drawdown": -0.2938367948169838,
+          "win_rate": 0.4583333333333333
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.3109019708749572,
+          "annual_return": 0.765620873313932,
+          "sharpe": 1.1165151261515065,
+          "max_drawdown": -0.20728128879235072,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.2417436998976299,
+          "annual_return": 0.163650004874496,
+          "sharpe": 0.5460078791992179,
+          "max_drawdown": -0.2938367948169838,
+          "win_rate": 0.5277777777777778
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.10996045324954662,
+          "annual_return": 0.0757596582924609,
+          "sharpe": 0.38514704106698733,
+          "max_drawdown": -0.3032577529895217,
+          "win_rate": 0.5277777777777778
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.014406625298888809,
+          "annual_return": -0.010106567736459127,
+          "sharpe": 0.2150519885810247,
+          "max_drawdown": -0.3131008318534978,
+          "win_rate": 0.5277777777777778
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": -0.15761833633909228,
+          "annual_return": -0.1131376188649682,
+          "sharpe": -0.009156300363706946,
+          "max_drawdown": -0.3258949875402262,
+          "win_rate": 0.4444444444444444
+        }
+      },
+      "train_quality": {
+        "executed_slots": 286,
+        "cash_slots": 49,
+        "selected_extreme_open_transitions": 4,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 158,
+        "cash_slots": 22,
+        "selected_extreme_open_transitions": 3,
+        "selected_missing_open_transitions_marked_flat": 10
+      },
+      "bootstrap_test_positive_rate": 0.6565
+    },
+    "ensemble_consensus|h10|k10": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.058343263925803246,
+        "annual_return": -0.022356523166894737,
+        "sharpe": 0.0008540512657254332,
+        "max_drawdown": -0.22570653716147238,
+        "win_rate": 0.43283582089552236
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.9264078311693136,
+        "annual_return": 0.5824272919339544,
+        "sharpe": 1.2086643665564314,
+        "max_drawdown": -0.2028998638098543,
+        "win_rate": 0.5555555555555556
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.3336578887611281,
+          "annual_return": 0.35299645945129954,
+          "sharpe": 1.2391214132657609,
+          "max_drawdown": -0.15940196543320348,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.44408929496609084,
+          "annual_return": 1.1634531853753924,
+          "sharpe": 1.4050332334493216,
+          "max_drawdown": -0.20289986380985447,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.9264078311693136,
+          "annual_return": 0.5824272919339544,
+          "sharpe": 1.2086643665564314,
+          "max_drawdown": -0.2028998638098543,
+          "win_rate": 0.5555555555555556
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.7381065809458984,
+          "annual_return": 0.4724938267975505,
+          "sharpe": 1.0551344684589465,
+          "max_drawdown": -0.21206054499482074,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.558719792868309,
+          "annual_return": 0.3643871959340146,
+          "sharpe": 0.8925299040763495,
+          "max_drawdown": -0.221654288715705,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.34982102717656915,
+          "annual_return": 0.2336538897756053,
+          "sharpe": 0.6778085480888033,
+          "max_drawdown": -0.2341594476126323,
+          "win_rate": 0.5555555555555556
+        }
+      },
+      "train_quality": {
+        "executed_slots": 498,
+        "cash_slots": 172,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 298,
+        "cash_slots": 62,
+        "selected_extreme_open_transitions": 6,
+        "selected_missing_open_transitions_marked_flat": 20
+      },
+      "bootstrap_test_positive_rate": 0.872
+    },
+    "ensemble_consensus|h10|k20": {
+      "train": {
+        "episodes": 67,
+        "cumulative_return": -0.12266533862184403,
+        "annual_return": -0.048029781908483726,
+        "sharpe": -0.2954118111181865,
+        "max_drawdown": -0.1825684756663,
+        "win_rate": 0.3880597014925373
+      },
+      "test": {
+        "episodes": 36,
+        "cumulative_return": 0.6376790178190619,
+        "annual_return": 0.4124079368847253,
+        "sharpe": 1.1008769512734364,
+        "max_drawdown": -0.1760708332473652,
+        "win_rate": 0.5555555555555556
+      },
+      "test_years": {
+        "2025": {
+          "episodes": 24,
+          "cumulative_return": 0.252638321458855,
+          "annual_return": 0.26682603009388783,
+          "sharpe": 1.1458310442758557,
+          "max_drawdown": -0.11343627789357363,
+          "win_rate": 0.5
+        },
+        "2026": {
+          "episodes": 12,
+          "cumulative_return": 0.30689856482854094,
+          "annual_return": 0.754316508454286,
+          "sharpe": 1.2407789757261956,
+          "max_drawdown": -0.1760708332473652,
+          "win_rate": 0.6666666666666666
+        }
+      },
+      "cost_stress_test": {
+        "13bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.6376790178190619,
+          "annual_return": 0.4124079368847253,
+          "sharpe": 1.1008769512734364,
+          "max_drawdown": -0.1760708332473652,
+          "win_rate": 0.5555555555555556
+        },
+        "31bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.5003198127368682,
+          "annual_return": 0.3283994622520223,
+          "sharpe": 0.9387446914361168,
+          "max_drawdown": -0.17949083324736514,
+          "win_rate": 0.5555555555555556
+        },
+        "50bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.3674435737354771,
+          "annual_return": 0.24490608642162792,
+          "sharpe": 0.7667201688438443,
+          "max_drawdown": -0.1831008332473651,
+          "win_rate": 0.5555555555555556
+        },
+        "75bps_per_side": {
+          "episodes": 36,
+          "cumulative_return": 0.20985734146756707,
+          "annual_return": 0.14265181788252135,
+          "sharpe": 0.5391257645113814,
+          "max_drawdown": -0.18785083324736518,
+          "win_rate": 0.5277777777777778
+        }
+      },
+      "train_quality": {
+        "executed_slots": 733,
+        "cash_slots": 607,
+        "selected_extreme_open_transitions": 9,
+        "selected_missing_open_transitions_marked_flat": 0
+      },
+      "test_quality": {
+        "executed_slots": 520,
+        "cash_slots": 200,
+        "selected_extreme_open_transitions": 7,
+        "selected_missing_open_transitions_marked_flat": 40
+      },
+      "bootstrap_test_positive_rate": 0.8645
+    }
+  },
+  "elapsed_seconds": 0.923
+}

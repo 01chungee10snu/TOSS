@@ -1,0 +1,106 @@
+{
+  "policy_id": "daily_multifactor_v1_practical400",
+  "created_at_utc": "2026-07-20T07:00:00+00:00",
+  "mode": "daily_multifactor",
+  "live_trading_enabled": true,
+  "universe_source": "/Users/01chungee10/Github/TOSS/reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv",
+  "entry_exit_cycle": {
+    "buy": "daily_open",
+    "sell": "hold_3d_close_or_stop_loss"
+  },
+  "selection": {
+    "scoring_mode": "multi",
+    "top_n": 3,
+    "factors": ["mom_5d", "vol_20d", "vol_ratio", "rsi_14"]
+  },
+  "cost_assumption_round_trip_bps": 24.5,
+  "risk_gates": {
+    "max_positions": 4,
+    "max_notional_krw_per_position": 80000,
+    "max_total_notional_krw": 240000,
+    "daily_loss_stop_krw": 6000,
+    "weekly_loss_stop_krw": 15000,
+    "require_manual_confirmation": false,
+    "limit_orders_only": true,
+    "block_if_live_trading_enabled": false,
+    "block_margin_credit": true,
+    "buy_limit_aggressiveness_pct": 0.005,
+    "sizing_model": "whole_share_limit_order_budget_to_quantity"
+  },
+  "situations": {
+    "up_low_vol": {
+      "situation": "up_low_vol",
+      "scoring_mode": "multi",
+      "momentum_col": "mom_5d",
+      "vol_col": "vol_20d",
+      "mode": "momentum",
+      "return_col": "daily_3d_close",
+      "top_n": 3,
+      "min_dollar_volume": 500000000,
+      "min_abs_momentum": 0.0,
+      "min_mom_5d": -0.10,
+      "max_mom_5d": 0.15,
+      "min_rsi": 35,
+      "max_rsi": 70,
+      "min_vol_ratio": 0.8,
+      "max_vol_ratio": 3.0,
+      "max_vol_20d": 0.08,
+      "min_price": 2000,
+      "weights": {
+        "momentum": 0.40,
+        "low_vol": 0.25,
+        "vol_norm": 0.15,
+        "rsi_mid": 0.20
+      },
+      "backtest_total_return_pct": 35.5,
+      "backtest_sharpe": 0.69,
+      "backtest_mdd_pct": -31.9,
+      "disclaimer": "Research-only. Backtested 2025-01 to 2026-07. Not investment advice."
+    },
+    "flat_low_vol": {
+      "situation": "flat_low_vol",
+      "scoring_mode": "multi",
+      "momentum_col": "mom_5d",
+      "vol_col": "vol_20d",
+      "mode": "reversal",
+      "return_col": "daily_3d_close",
+      "top_n": 3,
+      "min_dollar_volume": 500000000,
+      "min_abs_momentum": 0.0,
+      "min_mom_5d": -0.15,
+      "max_mom_5d": 0.10,
+      "min_rsi": 30,
+      "max_rsi": 65,
+      "min_vol_ratio": 0.8,
+      "max_vol_ratio": 3.0,
+      "max_vol_20d": 0.08,
+      "min_price": 2000,
+      "weights": {
+        "momentum": 0.40,
+        "low_vol": 0.25,
+        "vol_norm": 0.15,
+        "rsi_mid": 0.20
+      },
+      "backtest_total_return_pct": 35.5,
+      "backtest_sharpe": 0.69,
+      "backtest_mdd_pct": -31.9,
+      "disclaimer": "Research-only. Backtested 2025-01 to 2026-07. Not investment advice."
+    }
+  },
+  "rejected_situations": {
+    "down_high_vol": "inverse_sleeve_hedge",
+    "flat_high_vol": "no_trade",
+    "down_low_vol": "no_trade",
+    "up_high_vol": "no_trade"
+  },
+  "validation": {
+    "backtest_period": "2025-01-01 to 2026-07-16",
+    "backtest_return_pct": 35.5,
+    "backtest_sharpe": 0.69,
+    "backtest_mdd_pct": -31.9,
+    "backtest_win_rate_pct": 46,
+    "backtest_profit_factor": 1.19,
+    "note": "Multi-factor daily with 3-day hold, 5% stop loss, practical universe 400."
+  },
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+}

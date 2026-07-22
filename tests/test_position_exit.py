@@ -190,6 +190,54 @@ def test_append_position_exit_quote_failure_blocks_existing_buys_and_preserves_s
     assert "307930" in audit["position_quote_errors"]
 
 
+def test_live_performance_gate_blocks_buys_and_preserves_existing_sells(tmp_path, monkeypatch):
+    from toss_alpha.execution import position_exit as module
+
+    config = SimpleNamespace(
+        provider="kis", app_key="app", app_secret="secret", cano="12345678",
+        account_product_code="01", kis_mock_trading=False,
+        base_url="https://example.invalid", timeout=1,
+    )
+    monkeypatch.setattr(module.LiveExecutionConfig, "from_env", staticmethod(lambda _env: config))
+    monkeypatch.setattr(
+        module,
+        "read_live_performance_gate",
+        lambda *_args, **_kwargs: {
+            "enabled": True,
+            "status": "BLOCK_NEW_BUYS",
+            "block_new_buys": True,
+            "preserve_sell_exits": True,
+            "reasons": ["cumulative_realized_loss_limit"],
+        },
+    )
+
+    class FakeClient:
+        def __init__(self, **_kwargs):
+            pass
+
+        def position_snapshots(self):
+            return []
+
+        def account_snapshot(self):
+            return AccountSnapshot(account_id="demo", total_equity=100_000, cash=100_000, source="kis")
+
+    monkeypatch.setattr(module, "KisReadOnlyClient", FakeClient)
+    payload = {
+        "status": "CANDIDATES",
+        "orders": [
+            {"symbol": "005930", "side": "BUY", "quantity": 1},
+            {"symbol": "000660", "side": "SELL", "quantity": 1},
+        ],
+    }
+
+    merged, audit = append_position_exit_orders(payload, report_dir=tmp_path, env={"TOSS_POSITION_EXIT_ENABLED": "true"})
+
+    assert [(order["symbol"], order["side"]) for order in merged["orders"]] == [("000660", "SELL")]
+    assert audit["block_new_buys"] is True
+    assert audit["buy_block_reasons"] == ["live_performance_gate_active"]
+    assert audit["live_performance_gate"]["status"] == "BLOCK_NEW_BUYS"
+
+
 def test_build_position_exit_orders_blocks_when_sellable_missing():
     positions = [PositionSnapshot(symbol="307930", quantity=9, avg_price=6000, market_value=9 * 5500)]
 

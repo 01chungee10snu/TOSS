@@ -21,6 +21,31 @@ def _load_loop_module():
     return module
 
 
+def test_symbol_issue_phase_authorizes_fresh_company_event(monkeypatch):
+    module = _load_loop_module()
+    monkeypatch.delenv("OPENDART_API_KEY", raising=False)
+    monkeypatch.setenv("TOSS_REQUIRE_POSITIVE_SYMBOL_ISSUE", "true")
+    from toss_alpha.execution import symbol_issue
+
+    monkeypatch.setattr(
+        symbol_issue,
+        "collect_google_news_events",
+        lambda orders, **kwargs: ([{
+            "symbol": "111111",
+            "name": "호재기업",
+            "title": "호재기업 대규모 공급계약 체결",
+            "reported_at": datetime(2026, 7, 16, 5, 0, tzinfo=timezone.utc).isoformat(),
+            "source": "google_news_rss_symbol",
+        }], {}),
+    )
+    effective, audit = module.symbol_issue_phase(
+        {"status": "CANDIDATES", "orders": [{"symbol": "111111", "name": "호재기업", "side": "BUY", "quantity": 10, "limit_price": 1000}]},
+        now=datetime(2026, 7, 16, 5, 0, tzinfo=timezone.utc),
+    )
+    assert audit["verdicts_by_symbol"] == {"111111": "BUY"}
+    assert effective["orders"][0]["symbol_issue_authorized"] is True
+
+
 def test_resolve_policy_json_prefers_walkforward_promoted(tmp_path):
     module = _load_loop_module()
     promoted = tmp_path / "promoted.json"

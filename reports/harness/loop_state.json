@@ -1,101 +1,128 @@
 {
-  "generated_at_utc": "2026-07-13T14:28:43.968791+00:00",
+  "generated_at_utc": "2026-07-22T00:40:28.011623+00:00",
   "overall_status": "NO_TRADE",
   "quant": {
     "status": "NO_TRADE",
-    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_2022-01-01_2026-latest_ohlcv_panel.csv",
+    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv",
     "panel_exists": true,
     "sample_csv_exists": true,
-    "policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/contextual_mon_fri_policy_seed20260607_aggressive_small_account.json",
+    "policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/daily_multifactor_v1_practical400.json",
     "policy_exists": true,
-    "candidate_json": "/Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2026-07-10_contextual_mon_fri_policy_seed20260607_aggressive_small_account.json",
+    "candidate_json": "/Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2026-07-16_daily_multifactor_v1_practical400.json",
     "steps": [
       {
         "name": "generate_candidates",
         "exit_code": 0,
         "stdout_tail": [
-          "      \"limit_price\": 2160,",
-          "      \"reference_close\": 2150.0,",
-          "      \"score\": 9.243556946681183,",
-          "      \"reason\": \"approved_situation=down_high_vol; whole_share_qty=25; limit_price=2160; budget_krw=55000.0; reversal mom_20d/vol_20d; exit=monfri_open_to_fri_close_ret\"",
-          "    }",
-          "  ],",
-          "  \"skipped_orders\": [],",
-          "  \"planned_total_notional_krw\": 156900.0,",
-          "  \"sizing_model\": \"whole_share_limit_order_budget_to_quantity_with_cash_fraction_cap\",",
-          "  \"sizing_inputs\": {",
-          "    \"max_total_notional_krw\": 180000.0,",
-          "    \"max_notional_krw_per_position\": 55000.0,",
-          "    \"cash_fraction_per_entry\": 0.0,",
-          "    \"portfolio_value_krw\": 180000.0,",
-          "    \"cash_fraction_budget_krw\": 55000.0,",
-          "    \"per_position_budget_krw\": 55000.0",
-          "  },",
-          "  \"disclaimer\": \"Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.\"",
+          "{",
+          "  \"generated_at_utc\": \"2026-07-22T00:40:24.583018+00:00\",",
+          "  \"as_of\": \"2026-07-16\",",
+          "  \"status\": \"NO_TRADE\",",
+          "  \"reason\": \"situation_not_approved:down_high_vol\",",
+          "  \"situation\": \"down_high_vol\",",
+          "  \"live_order_submitted\": false,",
+          "  \"orders\": []",
           "}",
-          "CANDIDATES_JSON=/Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2026-07-10_contextual_mon_fri_policy_seed20260607_aggressive_small_account.json"
+          "CANDIDATES_JSON=/Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2026-07-16_daily_multifactor_v1_practical400.json"
         ],
         "stderr_tail": []
       }
     ],
     "candidate_payload": {
-      "generated_at_utc": "2026-07-13T14:28:40.239319+00:00",
-      "as_of": "2026-07-10",
+      "generated_at_utc": "2026-07-22T00:40:24.583018+00:00",
+      "as_of": "2026-07-16",
       "status": "NO_TRADE",
+      "reason": "situation_not_approved:down_high_vol",
       "situation": "down_high_vol",
-      "policy_id": "contextual_mon_fri_policy_seed20260607_aggressive_small_account",
-      "execution_stage": "paper_or_manual_draft_only",
       "live_order_submitted": false,
-      "requires_manual_confirmation": true,
-      "risk_gates": {
-        "max_positions": 4,
-        "max_notional_krw_per_position": 55000,
-        "max_total_notional_krw": 180000,
-        "daily_loss_stop_krw": 6000,
-        "weekly_loss_stop_krw": 15000,
-        "require_manual_confirmation": true,
-        "limit_orders_only": true,
-        "block_if_live_trading_enabled": true,
-        "block_margin_credit": true,
-        "buy_limit_aggressiveness_pct": 0.005,
-        "sizing_model": "whole_share_limit_order_budget_to_quantity"
-      },
       "orders": [],
-      "skipped_orders": [],
-      "planned_total_notional_krw": 156900.0,
-      "sizing_model": "whole_share_limit_order_budget_to_quantity_with_cash_fraction_cap",
-      "sizing_inputs": {
-        "max_total_notional_krw": 180000.0,
-        "max_notional_krw_per_position": 55000.0,
-        "cash_fraction_per_entry": 0.0,
-        "portfolio_value_krw": 180000.0,
-        "cash_fraction_budget_krw": 55000.0,
-        "per_position_budget_krw": 55000.0
-      },
-      "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
       "intraday_decision": {
-        "decision_id": "intraday-b366ac03e86d4d689c6d70cf7dca8892",
-        "generated_at_utc": "2026-07-13T14:28:40.333907+00:00",
+        "decision_id": "intraday-775bf80d4f424b3aabc5bb8999e5a1d2",
+        "generated_at_utc": "2026-07-22T00:40:24.659281+00:00",
         "daily_regime": "down_high_vol",
         "news_severity": "low",
-        "evidence_status": "MISSING",
+        "evidence_status": "FRESH",
         "signal_conflict": false,
         "regime_liquidation_allowed": false,
-        "market_regime": null,
+        "market_regime": "risk_on",
         "sell_symbols": [],
         "market_symbol": "069500",
         "inverse_symbol": "114800",
-        "verdict": "NO_TRADE",
-        "reason": "news_evidence_unavailable",
-        "news_evidence_status": "STALE",
-        "news_age_seconds": 5680.219179
+        "news_evidence_status": "FRESH",
+        "news_age_seconds": 584.736068,
+        "metrics": {
+          "market_day_return": 0.05395783243943031,
+          "market_open_return": 0.003566082592233899,
+          "inverse_day_return": -0.053057553956834536,
+          "bullish_confirmed": true,
+          "bearish_confirmed": false,
+          "risk_context": true,
+          "daily_risk": true,
+          "news_risk": false,
+          "market_override_confirmed": true
+        },
+        "raw_quotes": {
+          "069500": {
+            "symbol": "069500",
+            "last": 113975.0,
+            "open": 113570.0,
+            "prev_close": 108140.0,
+            "volume": 4727940.0,
+            "observed_at": "2026-07-22T00:40:24.659281+00:00",
+            "source": "kis_realtime_quote"
+          },
+          "114800": {
+            "symbol": "114800",
+            "last": 1053.0,
+            "open": 1059.0,
+            "prev_close": 1112.0,
+            "volume": 176714124.0,
+            "observed_at": "2026-07-22T00:40:24.659281+00:00",
+            "source": "kis_realtime_quote"
+          }
+        },
+        "verdict": "LONG_BUY",
+        "reason": "strong_intraday_strength_overrides_risk_context"
       },
-      "reason": "inverse_sleeve_blocked:intraday_decision:NO_TRADE"
+      "symbol_issue": {
+        "generated_at_utc": "2026-07-22T00:40:26.352733+00:00",
+        "max_age_seconds": 43200,
+        "max_disclosure_age_seconds": 129600,
+        "checked_symbols": [],
+        "verdicts_by_symbol": {},
+        "symbols": {},
+        "buy_count": 0,
+        "watch_count": 0,
+        "review_count": 0,
+        "veto_count": 0,
+        "status": "WATCH",
+        "events_collected": 0,
+        "disclosure_events_collected": 0,
+        "collector_errors": {},
+        "disclosure_errors": {},
+        "manual_events_path": "/Users/01chungee10/Github/TOSS/reports/harness/manual_news_events.json",
+        "manual_events_error": null,
+        "require_positive": true
+      },
+      "symbol_issue_policy": {
+        "require_positive": true
+      },
+      "market_overlay": {
+        "ordinary_buy_authorized": false,
+        "authorized_symbols": [],
+        "size_multiplier": 1.0,
+        "emergency_block": false,
+        "emergency_threshold": -0.03,
+        "market_day_return": 0.05395783243943031,
+        "market_regime": "risk_on",
+        "news_severity": "low",
+        "reason": "risk_on_full_size"
+      }
     },
     "inverse_sleeve": {
-      "enabled": true,
+      "enabled": false,
       "applied": false,
-      "reason": "inverse_sleeve_blocked:intraday_decision:NO_TRADE",
+      "reason": "inverse_sleeve_disabled",
       "trigger_situations": [
         "down_high_vol",
         "flat_high_vol",
@@ -103,18 +130,18 @@
       ],
       "source_situation": "down_high_vol",
       "source_status": "NO_TRADE",
-      "source_policy_id": "contextual_mon_fri_policy_seed20260607_aggressive_small_account"
+      "source_policy_id": null
     }
   },
   "intraday": {
-    "generated_at_utc": "2026-07-13T14:28:40.333907+00:00",
+    "generated_at_utc": "2026-07-22T00:40:24.659281+00:00",
     "daily_regime": "down_high_vol",
     "news_severity": "low",
-    "issue_path": "/Users/01chungee10/Github/TOSS/reports/harness/current_issues/current_issue_risk_report_20260713.json",
+    "issue_path": "/Users/01chungee10/Github/TOSS/reports/harness/current_issues/current_issue_risk_report_20260722.json",
     "inverse_sleeve": {
-      "enabled": true,
+      "enabled": false,
       "applied": false,
-      "reason": "inverse_sleeve_blocked:intraday_decision:NO_TRADE",
+      "reason": "inverse_sleeve_disabled",
       "trigger_situations": [
         "down_high_vol",
         "flat_high_vol",
@@ -122,7 +149,7 @@
       ],
       "source_situation": "down_high_vol",
       "source_status": "NO_TRADE",
-      "source_policy_id": "contextual_mon_fri_policy_seed20260607_aggressive_small_account"
+      "source_policy_id": null
     },
     "quote_symbols": [
       "069500",
@@ -130,26 +157,88 @@
     ],
     "position_symbols": [],
     "decision": {
-      "decision_id": "intraday-b366ac03e86d4d689c6d70cf7dca8892",
-      "generated_at_utc": "2026-07-13T14:28:40.333907+00:00",
+      "decision_id": "intraday-775bf80d4f424b3aabc5bb8999e5a1d2",
+      "generated_at_utc": "2026-07-22T00:40:24.659281+00:00",
       "daily_regime": "down_high_vol",
       "news_severity": "low",
-      "evidence_status": "MISSING",
+      "evidence_status": "FRESH",
       "signal_conflict": false,
       "regime_liquidation_allowed": false,
-      "market_regime": null,
+      "market_regime": "risk_on",
       "sell_symbols": [],
       "market_symbol": "069500",
       "inverse_symbol": "114800",
-      "verdict": "NO_TRADE",
-      "reason": "news_evidence_unavailable",
-      "news_evidence_status": "STALE",
-      "news_age_seconds": 5680.219179
+      "news_evidence_status": "FRESH",
+      "news_age_seconds": 584.736068,
+      "metrics": {
+        "market_day_return": 0.05395783243943031,
+        "market_open_return": 0.003566082592233899,
+        "inverse_day_return": -0.053057553956834536,
+        "bullish_confirmed": true,
+        "bearish_confirmed": false,
+        "risk_context": true,
+        "daily_risk": true,
+        "news_risk": false,
+        "market_override_confirmed": true
+      },
+      "raw_quotes": {
+        "069500": {
+          "symbol": "069500",
+          "last": 113975.0,
+          "open": 113570.0,
+          "prev_close": 108140.0,
+          "volume": 4727940.0,
+          "observed_at": "2026-07-22T00:40:24.659281+00:00",
+          "source": "kis_realtime_quote"
+        },
+        "114800": {
+          "symbol": "114800",
+          "last": 1053.0,
+          "open": 1059.0,
+          "prev_close": 1112.0,
+          "volume": 176714124.0,
+          "observed_at": "2026-07-22T00:40:24.659281+00:00",
+          "source": "kis_realtime_quote"
+        }
+      },
+      "verdict": "LONG_BUY",
+      "reason": "strong_intraday_strength_overrides_risk_context"
     },
-    "status": "NO_TRADE"
+    "status": "LONG_BUY",
+    "market_overlay": {
+      "ordinary_buy_authorized": false,
+      "authorized_symbols": [],
+      "size_multiplier": 1.0,
+      "emergency_block": false,
+      "emergency_threshold": -0.03,
+      "market_day_return": 0.05395783243943031,
+      "market_regime": "risk_on",
+      "news_severity": "low",
+      "reason": "risk_on_full_size"
+    }
+  },
+  "symbol_issue": {
+    "generated_at_utc": "2026-07-22T00:40:26.352733+00:00",
+    "max_age_seconds": 43200,
+    "max_disclosure_age_seconds": 129600,
+    "checked_symbols": [],
+    "verdicts_by_symbol": {},
+    "symbols": {},
+    "buy_count": 0,
+    "watch_count": 0,
+    "review_count": 0,
+    "veto_count": 0,
+    "status": "WATCH",
+    "events_collected": 0,
+    "disclosure_events_collected": 0,
+    "collector_errors": {},
+    "disclosure_errors": {},
+    "manual_events_path": "/Users/01chungee10/Github/TOSS/reports/harness/manual_news_events.json",
+    "manual_events_error": null,
+    "require_positive": true
   },
   "fast": {
-    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/random500_seed20260607_2022-01-01_2026-latest_ohlcv_panel.csv",
+    "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv",
     "panel_exists": true,
     "status": "SKIPPED_NO_CANDIDATES",
     "reasons": [
@@ -159,75 +248,87 @@
     "vetoed_symbols": [],
     "reasons_by_symbol": {},
     "checked_symbols": [],
-    "policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/contextual_mon_fri_policy_seed20260607_aggressive_small_account.json",
+    "policy_json": "/Users/01chungee10/Github/TOSS/config/generated_policies/daily_multifactor_v1_practical400.json",
     "allowed_count": 0,
     "original_order_count": 0,
     "effective_candidate_payload": {
-      "generated_at_utc": "2026-07-13T14:28:40.239319+00:00",
-      "as_of": "2026-07-10",
+      "generated_at_utc": "2026-07-22T00:40:24.583018+00:00",
+      "as_of": "2026-07-16",
       "status": "NO_TRADE",
+      "reason": "situation_not_approved:down_high_vol",
       "situation": "down_high_vol",
-      "policy_id": "contextual_mon_fri_policy_seed20260607_aggressive_small_account",
-      "execution_stage": "paper_or_manual_draft_only",
       "live_order_submitted": false,
-      "requires_manual_confirmation": true,
-      "risk_gates": {
-        "max_positions": 4,
-        "max_notional_krw_per_position": 55000,
-        "max_total_notional_krw": 180000,
-        "daily_loss_stop_krw": 6000,
-        "weekly_loss_stop_krw": 15000,
-        "require_manual_confirmation": true,
-        "limit_orders_only": true,
-        "block_if_live_trading_enabled": true,
-        "block_margin_credit": true,
-        "buy_limit_aggressiveness_pct": 0.005,
-        "sizing_model": "whole_share_limit_order_budget_to_quantity"
-      },
       "orders": [],
-      "skipped_orders": [],
-      "planned_total_notional_krw": 156900.0,
-      "sizing_model": "whole_share_limit_order_budget_to_quantity_with_cash_fraction_cap",
-      "sizing_inputs": {
-        "max_total_notional_krw": 180000.0,
-        "max_notional_krw_per_position": 55000.0,
-        "cash_fraction_per_entry": 0.0,
-        "portfolio_value_krw": 180000.0,
-        "cash_fraction_budget_krw": 55000.0,
-        "per_position_budget_krw": 55000.0
-      },
-      "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
       "intraday_decision": {
-        "decision_id": "intraday-b366ac03e86d4d689c6d70cf7dca8892",
-        "generated_at_utc": "2026-07-13T14:28:40.333907+00:00",
+        "decision_id": "intraday-775bf80d4f424b3aabc5bb8999e5a1d2",
+        "generated_at_utc": "2026-07-22T00:40:24.659281+00:00",
         "daily_regime": "down_high_vol",
         "news_severity": "low",
-        "evidence_status": "MISSING",
+        "evidence_status": "FRESH",
         "signal_conflict": false,
         "regime_liquidation_allowed": false,
-        "market_regime": null,
+        "market_regime": "risk_on",
         "sell_symbols": [],
         "market_symbol": "069500",
         "inverse_symbol": "114800",
-        "verdict": "NO_TRADE",
-        "reason": "news_evidence_unavailable",
-        "news_evidence_status": "STALE",
-        "news_age_seconds": 5680.219179
-      },
-      "reason": "inverse_sleeve_blocked:intraday_decision:NO_TRADE"
+        "news_evidence_status": "FRESH",
+        "news_age_seconds": 584.736068,
+        "metrics": {
+          "market_day_return": 0.05395783243943031,
+          "market_open_return": 0.003566082592233899,
+          "inverse_day_return": -0.053057553956834536,
+          "bullish_confirmed": true,
+          "bearish_confirmed": false,
+          "risk_context": true,
+          "daily_risk": true,
+          "news_risk": false,
+          "market_override_confirmed": true
+        },
+        "raw_quotes": {
+          "069500": {
+            "symbol": "069500",
+            "last": 113975.0,
+            "open": 113570.0,
+            "prev_close": 108140.0,
+            "volume": 4727940.0,
+            "observed_at": "2026-07-22T00:40:24.659281+00:00",
+            "source": "kis_realtime_quote"
+          },
+          "114800": {
+            "symbol": "114800",
+            "last": 1053.0,
+            "open": 1059.0,
+            "prev_close": 1112.0,
+            "volume": 176714124.0,
+            "observed_at": "2026-07-22T00:40:24.659281+00:00",
+            "source": "kis_realtime_quote"
+          }
+        },
+        "verdict": "LONG_BUY",
+        "reason": "strong_intraday_strength_overrides_risk_context"
+      }
     }
   },
   "position_exit": {
     "enabled": true,
-    "generated_at_utc": "2026-07-13T14:28:42.279147+00:00",
+    "generated_at_utc": "2026-07-22T00:40:26.354217+00:00",
     "sell_order_count": 0,
     "position_quote_errors": {},
     "position_quote_count": 0,
-    "as_of": "2026-07-10",
+    "as_of": "2026-07-16",
     "stop_loss_pct": 0.05,
     "take_profit_pct": 0.1,
     "trailing_stop_pct": 0.05,
-    "max_holding_trading_days": 20,
+    "inverse_exit_policy": {
+      "stop_loss_pct": 0.05,
+      "profit_lock_activation_pct": 0.015,
+      "profit_floor_pct": 0.002,
+      "partial_1_pct": 0.025,
+      "partial_2_pct": 0.04,
+      "partial_fraction": 0.33,
+      "trailing_stop_pct": 0.015
+    },
+    "max_holding_trading_days": 3,
     "risk_off_exit": true,
     "risk_off_regimes": [
       "down_high_vol",
@@ -256,77 +357,138 @@
       "account": {
         "account_id": "80238735-01",
         "currency": "KRW",
-        "cash": 805.0,
+        "cash": 410286.0,
         "buying_power": null,
-        "total_equity": 418784.0,
-        "as_of": "2026-07-13T14:28:43.702462+00:00",
+        "total_equity": 410286.0,
+        "as_of": "2026-07-22T00:40:27.742510+00:00",
         "source": "kis"
       },
-      "current_equity": 418784.0,
+      "current_equity": 410286.0,
       "status": "READY",
-      "peak_equity": 418784.0,
-      "drawdown_pct": 0.0,
+      "peak_equity": 410747.0,
+      "drawdown_pct": -0.001122345385358825,
       "cooldown_active": false,
       "cooldown_remaining_seconds": 0,
       "cooldown_until_ts": 0.0
+    },
+    "live_performance_gate": {
+      "enabled": true,
+      "path": "/Users/01chungee10/Github/TOSS/reports/harness/live_performance_gate.json",
+      "preserve_sell_exits": true,
+      "status": "PROBATION_CONTINUE",
+      "block_new_buys": false,
+      "reasons": [],
+      "age_hours": 0.001129278888888889,
+      "policy_id": "daily_multifactor_v1_practical400",
+      "sample": {
+        "settlement_days": 2,
+        "fill_count": 4,
+        "consecutive_losing_fill_days": 1,
+        "latest_settlement_date": "2026-07-21"
+      },
+      "live_performance": {
+        "baseline_equity_krw": 410286.0,
+        "latest_equity_krw": 410286.0,
+        "cumulative_realized_matched_fifo_krw": -893.0,
+        "unmatched_sell_qty": 0.0,
+        "inherited_deployment_day_unmatched_sell_qty": 1.0,
+        "loss_budget_krw": 12308.58
+      }
     },
     "block_new_buys": false,
     "buy_block_reasons": [],
     "report_path": "/Users/01chungee10/Github/TOSS/reports/harness/latest_position_exit_report.json"
   },
   "execution_candidate_payload": {
-    "generated_at_utc": "2026-07-13T14:28:40.239319+00:00",
-    "as_of": "2026-07-10",
+    "generated_at_utc": "2026-07-22T00:40:24.583018+00:00",
+    "as_of": "2026-07-16",
     "status": "NO_TRADE",
+    "reason": "situation_not_approved:down_high_vol",
     "situation": "down_high_vol",
-    "policy_id": "contextual_mon_fri_policy_seed20260607_aggressive_small_account",
-    "execution_stage": "paper_or_manual_draft_only",
     "live_order_submitted": false,
-    "requires_manual_confirmation": true,
-    "risk_gates": {
-      "max_positions": 4,
-      "max_notional_krw_per_position": 55000,
-      "max_total_notional_krw": 180000,
-      "daily_loss_stop_krw": 6000,
-      "weekly_loss_stop_krw": 15000,
-      "require_manual_confirmation": true,
-      "limit_orders_only": true,
-      "block_if_live_trading_enabled": true,
-      "block_margin_credit": true,
-      "buy_limit_aggressiveness_pct": 0.005,
-      "sizing_model": "whole_share_limit_order_budget_to_quantity"
-    },
     "orders": [],
-    "skipped_orders": [],
-    "planned_total_notional_krw": 156900.0,
-    "sizing_model": "whole_share_limit_order_budget_to_quantity_with_cash_fraction_cap",
-    "sizing_inputs": {
-      "max_total_notional_krw": 180000.0,
-      "max_notional_krw_per_position": 55000.0,
-      "cash_fraction_per_entry": 0.0,
-      "portfolio_value_krw": 180000.0,
-      "cash_fraction_budget_krw": 55000.0,
-      "per_position_budget_krw": 55000.0
-    },
-    "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
     "intraday_decision": {
-      "decision_id": "intraday-b366ac03e86d4d689c6d70cf7dca8892",
-      "generated_at_utc": "2026-07-13T14:28:40.333907+00:00",
+      "decision_id": "intraday-775bf80d4f424b3aabc5bb8999e5a1d2",
+      "generated_at_utc": "2026-07-22T00:40:24.659281+00:00",
       "daily_regime": "down_high_vol",
       "news_severity": "low",
-      "evidence_status": "MISSING",
+      "evidence_status": "FRESH",
       "signal_conflict": false,
       "regime_liquidation_allowed": false,
-      "market_regime": null,
+      "market_regime": "risk_on",
       "sell_symbols": [],
       "market_symbol": "069500",
       "inverse_symbol": "114800",
-      "verdict": "NO_TRADE",
-      "reason": "news_evidence_unavailable",
-      "news_evidence_status": "STALE",
-      "news_age_seconds": 5680.219179
+      "news_evidence_status": "FRESH",
+      "news_age_seconds": 584.736068,
+      "metrics": {
+        "market_day_return": 0.05395783243943031,
+        "market_open_return": 0.003566082592233899,
+        "inverse_day_return": -0.053057553956834536,
+        "bullish_confirmed": true,
+        "bearish_confirmed": false,
+        "risk_context": true,
+        "daily_risk": true,
+        "news_risk": false,
+        "market_override_confirmed": true
+      },
+      "raw_quotes": {
+        "069500": {
+          "symbol": "069500",
+          "last": 113975.0,
+          "open": 113570.0,
+          "prev_close": 108140.0,
+          "volume": 4727940.0,
+          "observed_at": "2026-07-22T00:40:24.659281+00:00",
+          "source": "kis_realtime_quote"
+        },
+        "114800": {
+          "symbol": "114800",
+          "last": 1053.0,
+          "open": 1059.0,
+          "prev_close": 1112.0,
+          "volume": 176714124.0,
+          "observed_at": "2026-07-22T00:40:24.659281+00:00",
+          "source": "kis_realtime_quote"
+        }
+      },
+      "verdict": "LONG_BUY",
+      "reason": "strong_intraday_strength_overrides_risk_context"
     },
-    "reason": "inverse_sleeve_blocked:intraday_decision:NO_TRADE"
+    "symbol_issue": {
+      "generated_at_utc": "2026-07-22T00:40:26.352733+00:00",
+      "max_age_seconds": 43200,
+      "max_disclosure_age_seconds": 129600,
+      "checked_symbols": [],
+      "verdicts_by_symbol": {},
+      "symbols": {},
+      "buy_count": 0,
+      "watch_count": 0,
+      "review_count": 0,
+      "veto_count": 0,
+      "status": "WATCH",
+      "events_collected": 0,
+      "disclosure_events_collected": 0,
+      "collector_errors": {},
+      "disclosure_errors": {},
+      "manual_events_path": "/Users/01chungee10/Github/TOSS/reports/harness/manual_news_events.json",
+      "manual_events_error": null,
+      "require_positive": true
+    },
+    "symbol_issue_policy": {
+      "require_positive": true
+    },
+    "market_overlay": {
+      "ordinary_buy_authorized": false,
+      "authorized_symbols": [],
+      "size_multiplier": 1.0,
+      "emergency_block": false,
+      "emergency_threshold": -0.03,
+      "market_day_return": 0.05395783243943031,
+      "market_regime": "risk_on",
+      "news_severity": "low",
+      "reason": "risk_on_full_size"
+    }
   },
   "qual": {
     "connector_path": "/Users/01chungee10/Github/TOSS/src/toss_alpha/connectors/dart_events.py",
@@ -348,21 +510,16 @@
     "sources": {}
   },
   "live": {
-    "status": "LIVE_BLOCKED",
-    "ready": "False",
+    "status": "LIVE_READY",
+    "ready": "True",
     "default_mode": "BLOCK_UNLESS_DOUBLE_OPT_IN",
-    "missing": [
-      "live_trading_disabled",
-      "env_live_trading_not_enabled"
-    ],
+    "missing": [],
     "dry_run_available": "True",
     "exit_code": 0,
     "stdout_tail": [
-      "ready: False",
+      "ready: True",
       "default_mode: BLOCK_UNLESS_DOUBLE_OPT_IN",
       "missing:",
-      "- live_trading_disabled",
-      "- env_live_trading_not_enabled",
       "dry_run_available: True"
     ],
     "stderr_tail": []
@@ -377,7 +534,7 @@
     "submitted_count": 0,
     "unknown_count": 0,
     "blocked_count": 0,
-    "artifact_path": "/Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260713T142843Z.json",
+    "artifact_path": "/Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260722T004028Z.json",
     "ledger_path": "/Users/01chungee10/Github/TOSS/reports/harness/live_order_ledger.jsonl",
     "divergence_ledger_path": "/Users/01chungee10/Github/TOSS/reports/harness/live_paper_divergence_ledger.jsonl",
     "results": [],

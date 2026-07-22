@@ -97,7 +97,14 @@ def evaluate_intraday_decision(
         }
     bullish = (market_day >= 0.005 or market_open >= 0.003) and inverse_day <= 0.001
     bearish = market_day <= -0.005 and market_open <= -0.003 and inverse_day >= 0.003
-    risk_context = daily in RISK_OFF_DAILY or news in HIGH_NEWS
+    daily_risk = daily in RISK_OFF_DAILY
+    news_risk = news in HIGH_NEWS
+    risk_context = daily_risk or news_risk
+    # Headlines and yesterday's regime remain risk context, but fresh prices can
+    # resolve the conflict. Critical news needs materially stronger confirmation.
+    high_news_override = bullish and market_day >= 0.01 and market_open >= 0.003 and inverse_day <= -0.005
+    critical_news_override = bullish and market_day >= 0.02 and market_open >= 0.005 and inverse_day <= -0.01
+    market_override_confirmed = critical_news_override if news == "critical" else high_news_override
 
     ordinary = [p for p in positions if str(p.get("symbol") or "").zfill(6) not in INVERSE_SYMBOLS]
     inverse_positions = [p for p in positions if str(p.get("symbol") or "").zfill(6) in INVERSE_SYMBOLS]
@@ -109,6 +116,9 @@ def evaluate_intraday_decision(
         "bullish_confirmed": bullish,
         "bearish_confirmed": bearish,
         "risk_context": risk_context,
+        "daily_risk": daily_risk,
+        "news_risk": news_risk,
+        "market_override_confirmed": market_override_confirmed,
     }
     ready = {
         **base,
@@ -118,8 +128,15 @@ def evaluate_intraday_decision(
     }
 
     if risk_context and bullish:
+        if market_override_confirmed:
+            return {
+                **ready,
+                "verdict": "HOLD" if positions else "LONG_BUY",
+                "reason": "strong_intraday_strength_overrides_risk_context",
+                "market_regime": "risk_on",
+            }
         verdict = "HOLD" if positions else "NO_TRADE"
-        return {**ready, "verdict": verdict, "reason": "risk_context_conflicts_with_intraday_strength", "signal_conflict": True}
+        return {**ready, "verdict": verdict, "reason": "risk_context_awaiting_strong_intraday_confirmation", "signal_conflict": True}
     if risk_context and bearish:
         if weak_symbols:
             return {**ready, "verdict": "SELL", "reason": "risk_off_confirmed_and_positions_weak", "market_regime": "risk_off", "sell_symbols": weak_symbols}

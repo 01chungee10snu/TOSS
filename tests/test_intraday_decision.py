@@ -30,6 +30,41 @@ def test_risk_context_conflicting_with_intraday_strength_holds_position():
     assert decision["regime_liquidation_allowed"] is False
 
 
+def test_high_news_is_overridden_by_strong_two_proxy_intraday_strength():
+    decision = evaluate_intraday_decision(
+        daily_regime="down_high_vol",
+        news_severity="high",
+        market_quotes=quotes(market_last=102.0, market_open=101.0, inverse_last=98.5),
+        now=NOW,
+    )
+
+    assert decision["verdict"] == "LONG_BUY"
+    assert decision["reason"] == "strong_intraday_strength_overrides_risk_context"
+    assert decision["market_regime"] == "risk_on"
+    assert decision["signal_conflict"] is False
+    assert decision["metrics"]["market_override_confirmed"] is True
+
+
+def test_critical_news_requires_stronger_override_than_high_news():
+    too_weak = evaluate_intraday_decision(
+        daily_regime="down_high_vol",
+        news_severity="critical",
+        market_quotes=quotes(market_last=101.5, market_open=101.0, inverse_last=99.0),
+        now=NOW,
+    )
+    strong = evaluate_intraday_decision(
+        daily_regime="down_high_vol",
+        news_severity="critical",
+        market_quotes=quotes(market_last=103.0, market_open=102.0, inverse_last=98.0),
+        now=NOW,
+    )
+
+    assert too_weak["verdict"] == "NO_TRADE"
+    assert too_weak["signal_conflict"] is True
+    assert strong["verdict"] == "LONG_BUY"
+    assert strong["metrics"]["market_override_confirmed"] is True
+
+
 def test_stale_news_fails_closed_even_with_fresh_bullish_quotes():
     decision = evaluate_intraday_decision(
         daily_regime="up_low_vol",

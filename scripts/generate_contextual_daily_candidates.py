@@ -33,8 +33,21 @@ def prepare_features(panel: pd.DataFrame) -> pd.DataFrame:
     data["mom_20d"] = g["Close"].shift(1) / g["Close"].shift(21) - 1
     data["vol_10d"] = g["ret_cc"].transform(lambda s: s.shift(1).rolling(10).std())
     data["vol_20d"] = g["ret_cc"].transform(lambda s: s.shift(1).rolling(20).std())
+    # RSI 14
+    _delta = g["Close"].diff()
+    _gain = _delta.clip(lower=0)
+    _loss = (-_delta).clip(lower=0)
+    _avg_gain = _gain.groupby(data["code"]).transform(lambda s: s.rolling(14).mean())
+    _avg_loss = _loss.groupby(data["code"]).transform(lambda s: s.rolling(14).mean())
+    _rs = _avg_gain / _avg_loss.replace(0, pd.NA)
+    data["rsi_14"] = 100 - 100 / (1 + _rs)
+    # Volume ratio (today vs 20d average)
     data["raw_dollar_volume"] = data["Close"] * data["Volume"]
     data["dollar_volume"] = data.groupby("code")["raw_dollar_volume"].shift(1)
+    data["avg_dollar_vol_20d"] = g["dollar_volume"].transform(lambda s: s.shift(1).rolling(20).mean())
+    data["vol_ratio"] = g["Volume"].transform(
+        lambda s: s.shift(1) / s.shift(1).rolling(20).mean().replace(0, pd.NA)
+    )
 
     market = data.pivot_table(index="Date", columns="code", values="Close").sort_index()
     market_eq = market.pct_change(fill_method=None).mean(axis=1, skipna=True).fillna(0)
@@ -53,8 +66,29 @@ def prepare_features(panel: pd.DataFrame) -> pd.DataFrame:
 
 
 def score(frame: pd.DataFrame, params: dict[str, Any]) -> pd.Series:
+    """Single-factor or multi-factor scoring depending on params['scoring_mode']."""
+    mode = params.get("scoring_mode", "single")
+    if mode == "multi":
+        return _score_multi(frame, params)
     base = frame[params["momentum_col"]] / frame[params["vol_col"]].replace(0, pd.NA)
     return -base if params["mode"] == "reversal" else base
+
+
+def _score_multi(frame: pd.DataFrame, params: dict[str, Any]) -> pd.Series:
+    """Multi-factor composite score: momentum + low-vol + vol-normalization + RSI-centrality."""
+    is_momentum = params.get("mode", "momentum") == "momentum"
+    mom_col = params.get("momentum_col", "mom_5d")
+    s_mom = frame[mom_col].rank(pct=True) if is_momentum else (-frame[mom_col]).rank(pct=True)
+    s_lowvol = (-frame["vol_20d"]).rank(pct=True)
+    s_vol_norm = (-(frame["vol_ratio"] - 1).abs()).rank(pct=True)
+    s_rsi_mid = (-(frame["rsi_14"] - 50).abs()).rank(pct=True)
+    w = params.get("weights", {})
+    return (
+        w.get("momentum", 0.40) * s_mom
+        + w.get("low_vol", 0.25) * s_lowvol
+        + w.get("vol_norm", 0.15) * s_vol_norm
+        + w.get("rsi_mid", 0.20) * s_rsi_mid
+    )
 
 
 def krx_tick_size(price: float) -> int:
@@ -110,13 +144,26 @@ def generate(policy: dict[str, Any], panel: pd.DataFrame, as_of: str | None = No
         }
     params = approved[situation]
     todays["score"] = score(todays, params)
+    is_multi = params.get("scoring_mode") == "multi"
+    min_dv_col = "avg_dollar_vol_20d" if is_multi else "dollar_volume"
     eligible = todays[
         todays["score"].notna()
-        & todays["dollar_volume"].ge(params["min_dollar_volume"])
+        & todays[min_dv_col].ge(params["min_dollar_volume"])
         & todays["Open"].gt(0)
         & todays["Close"].gt(0)
     ].copy()
-    if params["mode"] == "momentum":
+    if is_multi:
+        # Strict multi-factor filters
+        for col, lo, hi in [
+            ("mom_5d", params.get("min_mom_5d", -0.15), params.get("max_mom_5d", 0.15)),
+            ("rsi_14", params.get("min_rsi", 30), params.get("max_rsi", 70)),
+            ("vol_ratio", params.get("min_vol_ratio", 0.8), params.get("max_vol_ratio", 3.0)),
+            ("vol_20d", 0, params.get("max_vol_20d", 0.08)),
+            ("Close", params.get("min_price", 1000), 1e12),
+        ]:
+            if col in eligible.columns:
+                eligible = eligible[eligible[col].between(lo, hi, inclusive="left" if col == "Close" else "both")].copy()
+    elif params["mode"] == "momentum":
         eligible = eligible[eligible[params["momentum_col"]] >= params["min_abs_momentum"]].copy()
     else:
         eligible = eligible[eligible[params["momentum_col"]] <= -params["min_abs_momentum"]].copy()

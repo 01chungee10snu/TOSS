@@ -21,6 +21,7 @@ from toss_alpha.connectors.kis_readonly import KisReadOnlyClient
 from toss_alpha.data.schema import AccountSnapshot, PositionSnapshot, Quote
 from toss_alpha.execution.inverse_sleeve import DEFAULT_ETF_CODE, LEVERAGED_INVERSE_ETF_CODES
 from toss_alpha.execution.krx_calendar import is_krx_trading_day
+from toss_alpha.execution.live_performance import read_live_performance_gate
 from toss_alpha.execution.live_ready import LiveExecutionConfig
 
 
@@ -756,6 +757,23 @@ def append_position_exit_orders(
             report_dir=report_dir,
             env=source,
         )
+        performance_gate_enabled = _env_true(
+            source.get("TOSS_LIVE_PERFORMANCE_GATE_ENABLED"),
+            default=True,
+        )
+        performance_gate_path = source.get(
+            "TOSS_LIVE_PERFORMANCE_GATE_PATH",
+            str(Path(report_dir) / "live_performance_gate.json"),
+        )
+        performance_gate = read_live_performance_gate(
+            performance_gate_path,
+            enabled=performance_gate_enabled,
+            max_artifact_age_hours=_env_float(
+                source,
+                "TOSS_LIVE_PERFORMANCE_GATE_MAX_AGE_HOURS",
+                96.0,
+            ),
+        )
         build_env = dict(source)
         if equity_guard.get("liquidation_required"):
             build_env["TOSS_FORCE_EXIT_ALL"] = "1"
@@ -782,6 +800,7 @@ def append_position_exit_orders(
         )
         audit.update(build_audit)
         audit["equity_guard"] = equity_guard
+        audit["live_performance_gate"] = performance_gate
         base_payload = candidate_payload
         buy_block_reasons: list[str] = []
         if quote_errors:
@@ -790,6 +809,9 @@ def append_position_exit_orders(
         if equity_guard.get("block_new_buys"):
             base_payload = _without_buy_orders(base_payload, "equity_drawdown_guard_active")
             buy_block_reasons.append("equity_drawdown_guard_active")
+        if performance_gate.get("block_new_buys"):
+            base_payload = _without_buy_orders(base_payload, "live_performance_gate_active")
+            buy_block_reasons.append("live_performance_gate_active")
         if build_audit.get("block_new_buys"):
             recovery_reason = str(build_audit.get("status") or "position_exit_recovery_blocked").lower()
             base_payload = _without_buy_orders(base_payload, recovery_reason)

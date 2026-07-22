@@ -1,0 +1,34 @@
+{
+  "strategy": "daily_multifactor_v1_practical400_v5",
+  "optimization_date": "2026-07-21 14:38",
+  "data_period": "2022-02-11 ~ 2026-07-14",
+  "n_stocks": 400,
+  "n_days": 1080,
+  "n_weight_combos": 1771,
+  "factor_processing": "cross-sectional rank normalization [-0.5, 0.5]",
+  "forward_return": "1-day (non-overlapping)",
+  "stop_loss": "5% per-stock",
+  "txn_cost": "0.03% per trade",
+  "optimal_weights": {
+    "momentum": 0.8,
+    "low_vol": 0.0,
+    "rsi": 0.0,
+    "volume_ratio": 0.2
+  },
+  "performance": {
+    "walkforward_train": {
+      "sharpe": 3.590707778930664
+    },
+    "walkforward_test": {
+      "sharpe": 4.927828788757324,
+      "cumulative_return": 81.39759826660156,
+      "annual_return": 18.8553524017334,
+      "max_drawdown": -0.20136818289756775,
+      "win_rate": 0.5725806355476379
+    },
+    "overfit_ratio": 1.372383713722229
+  },
+  "monte_carlo": {
+    "prob_positive": 1.0
+  }
+}

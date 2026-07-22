@@ -81,7 +81,21 @@ def count_matches(text: str, patterns: list[str]) -> int:
     return sum(1 for pattern in patterns if re.search(pattern, text, flags=re.IGNORECASE))
 
 
-def classify(headlines: list[dict], *, now: datetime | None = None, lookback_hours: int = 36) -> dict:
+def normalize_title(value: str) -> str:
+    """Return a publisher-agnostic key for RSS duplicate suppression."""
+    title = re.sub(r"\s+-\s+[^-]{1,80}$", "", str(value or "")).strip().lower()
+    return re.sub(r"[^0-9a-z가-힣]+", "", title)
+
+
+def headline_age_weight(age_hours: float) -> float:
+    if age_hours <= 3:
+        return 1.0
+    if age_hours <= 6:
+        return 0.75
+    return 0.5
+
+
+def classify(headlines: list[dict], *, now: datetime | None = None, lookback_hours: int = 12) -> dict:
     now = now or datetime.now(timezone.utc)
     cutoff = now - timedelta(hours=lookback_hours)
     counts = Counter()
@@ -89,44 +103,81 @@ def classify(headlines: list[dict], *, now: datetime | None = None, lookback_hou
     categories = Counter()
     considered = []
     stale = []
-    for row in headlines:
+    undated = []
+    duplicates = []
+    unique_rows = []
+    seen_titles: set[str] = set()
+    oldest = datetime.min.replace(tzinfo=timezone.utc)
+    for row in sorted(headlines, key=lambda item: parse_pubdate(item.get("published") or "") or oldest, reverse=True):
+        key = normalize_title(row.get("title") or "")
+        if key and key in seen_titles:
+            duplicates.append(row)
+            continue
+        if key:
+            seen_titles.add(key)
+        unique_rows.append(row)
+
+    weighted_risk_score = 0.0
+    freshest_critical_age_hours: float | None = None
+    for row in unique_rows:
         published_dt = parse_pubdate(row.get("published") or "")
-        if published_dt is not None and published_dt < cutoff:
+        if published_dt is None:
+            undated.append(row)
+            continue
+        if published_dt < cutoff or published_dt > now + timedelta(minutes=5):
             stale.append(row)
             continue
         considered.append(row)
-        # Important: classify only the article title. Do not include the search
-        # query, otherwise a query like "이란 공습" creates false critical hits
-        # even for relief/irrelevant headlines.
+        # Classify only the article title. Including the search query creates
+        # false critical hits for relief and unrelated headlines.
         text = str(row.get("title", ""))
         c = count_matches(text, CRITICAL_PATTERNS)
         h = count_matches(text, HIGH_PATTERNS)
         m = count_matches(text, MEDIUM_PATTERNS)
         r = count_matches(text, RELIEF_PATTERNS)
+        age_hours = max(0.0, (now - published_dt).total_seconds() / 3600.0)
+        age_weight = headline_age_weight(age_hours)
         if c:
             counts["critical"] += c
+            if freshest_critical_age_hours is None or age_hours < freshest_critical_age_hours:
+                freshest_critical_age_hours = age_hours
         if h:
             counts["high"] += h
         if m:
             counts["medium"] += m
         if r:
             counts["relief"] += r
+        weighted_risk_score += (c * 4 + h * 2 + m - r * 2) * age_weight
         bucket = categorize_title(text)
         if bucket:
             categories[bucket] += 1
         if c or h or m or r:
-            matched.append({**row, "category": bucket or "uncategorized", "critical_hits": c, "high_hits": h, "medium_hits": m, "relief_hits": r})
-    risk_score = counts["critical"] * 4 + counts["high"] * 2 + counts["medium"] - counts["relief"] * 2
-    if counts["critical"] >= 2 or risk_score >= 8:
+            matched.append({**row, "category": bucket or "uncategorized", "age_hours": round(age_hours, 2), "age_weight": age_weight, "critical_hits": c, "high_hits": h, "medium_hits": m, "relief_hits": r})
+    risk_score = round(weighted_risk_score, 2)
+    if risk_score >= 8 or (freshest_critical_age_hours is not None and freshest_critical_age_hours <= 3):
         severity = "critical"
-    elif counts["critical"] >= 1 or counts["high"] >= 2 or risk_score >= 5:
+    elif risk_score >= 5 or (freshest_critical_age_hours is not None and freshest_critical_age_hours <= 6):
         severity = "high"
-    elif counts["high"] >= 1 or counts["medium"] >= 2 or risk_score >= 2:
+    elif risk_score >= 2:
         severity = "medium"
     else:
         severity = "low"
-    buy_gate = "block_new_buy" if severity in {"critical", "high"} else "allow_with_caution" if severity == "medium" else "allow"
-    return {"severity": severity, "risk_score": risk_score, "counts": dict(counts), "category_counts": dict(categories), "buy_gate": buy_gate, "matched_headlines": matched[:20], "considered_headline_count": len(considered), "stale_headline_count": len(stale), "lookback_hours": lookback_hours}
+    buy_gate = "block_unless_strong_intraday_confirmation" if severity == "critical" else "require_intraday_confirmation" if severity == "high" else "allow_with_caution" if severity == "medium" else "allow"
+    return {
+        "severity": severity,
+        "risk_score": risk_score,
+        "counts": dict(counts),
+        "category_counts": dict(categories),
+        "buy_gate": buy_gate,
+        "matched_headlines": matched[:20],
+        "considered_headline_count": len(considered),
+        "stale_headline_count": len(stale),
+        "undated_headline_count": len(undated),
+        "duplicate_headline_count": len(duplicates),
+        "unique_headline_count": len(unique_rows),
+        "lookback_hours": lookback_hours,
+        "decay_policy": {"0_3h": 1.0, "3_6h": 0.75, "6_12h": 0.5},
+    }
 
 
 def categorize_title(text: str) -> str | None:
@@ -180,7 +231,8 @@ def main() -> int:
         "errors": errors,
         **assessment,
         "policy": {
-            "critical_or_high": "block all new BUY live-submit unless explicitly overridden by TOSS_ALLOW_CURRENT_ISSUE_BUY=true",
+            "critical": "block unless the unified intraday decision has fresh strong two-proxy risk-on confirmation",
+            "high": "require a fresh unified intraday LONG_BUY decision; headlines alone cannot veto confirmed market strength",
             "medium": "allow but strategy should reduce size and require quote confirmation",
             "low": "no current-issue block",
         },
@@ -205,10 +257,14 @@ def print_strategy_brief(payload: dict, out: Path) -> None:
     score = payload.get("risk_score")
     categories = payload.get("category_counts") or {}
     matched = payload.get("matched_headlines") or []
-    if buy_gate == "block_new_buy":
-        strategy = "일반 주식 신규 BUY 차단, 인버스/현금 방어 우선"
-        rebound = "장초 반등주는 current issue 완화 전까지 자동 차단"
+    if buy_gate == "block_unless_strong_intraday_confirmation":
+        strategy = "강한 실시간 양방향 ETF 확인 전 일반 주식 신규 BUY 차단"
+        rebound = "실시간 강세가 뉴스를 반증하면 통합판정에서만 제한적으로 허용"
         inverse = "인버스는 실시간 시장 약세가 독립 확인된 통합판정(INVERSE_BUY)에서만 진입"
+    elif buy_gate == "require_intraday_confirmation":
+        strategy = "뉴스 단독 차단 금지, 실시간 LONG_BUY 확인 시 일반 주식 신규 BUY 허용"
+        rebound = "시장 ETF 상승·인버스 하락 동시 확인 필수"
+        inverse = "강세 확인 중 인버스 신규 진입 금지"
     elif buy_gate == "allow_with_caution":
         strategy = "일반 주식 신규 BUY 축소 허용, 장초 확인 후 제한가만 사용"
         rebound = "09:03~09:25 저점 대비 +1% 반등 확인 시 일부 진입"
@@ -218,7 +274,7 @@ def print_strategy_brief(payload: dict, out: Path) -> None:
         rebound = "장초 반등 detector 정상 가동"
         inverse = "인버스 branch 비활성 또는 대기"
     severity_kr = {"critical": "매우 높음", "high": "높음", "medium": "주의", "low": "낮음"}.get(severity, severity)
-    gate_kr = {"block_new_buy": "신규 일반매수 차단", "allow_with_caution": "축소 매수", "allow": "매수 허용"}.get(buy_gate, buy_gate)
+    gate_kr = {"block_unless_strong_intraday_confirmation": "강한 장중 확인 전 차단", "require_intraday_confirmation": "장중 확인 후 허용", "allow_with_caution": "축소 매수", "allow": "매수 허용"}.get(buy_gate, buy_gate)
     category_kr = {
         "geopolitical": "지정학",
         "oil_fx_rates": "유가·환율·금리",

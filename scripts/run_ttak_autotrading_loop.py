@@ -5,7 +5,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping
 from zoneinfo import ZoneInfo
@@ -169,7 +169,7 @@ def quant_phase(build_missing_panel: bool, rebuild_policy_if_missing: bool, as_o
     return phase
 
 
-def intraday_phase(candidate_payload: dict[str, Any], *, now: datetime | None = None) -> tuple[dict[str, Any], dict[str, Any]]:
+def intraday_phase(candidate_payload: dict[str, Any], *, now: datetime | None = None, defer_branch: bool = False) -> tuple[dict[str, Any], dict[str, Any]]:
     """Collect fresh KIS evidence and apply the unified intraday verdict."""
     from toss_alpha.connectors.kis_readonly import KisReadOnlyClient
     from toss_alpha.execution.intraday_decision import apply_intraday_decision, evaluate_intraday_decision
@@ -264,6 +264,13 @@ def intraday_phase(candidate_payload: dict[str, Any], *, now: datetime | None = 
             "exception_type": type(exc).__name__,
             "exception": str(exc),
         }
+    if defer_branch:
+        filtered = dict(candidate_payload)
+        filtered["intraday_decision"] = dict(decision)
+        audit["decision"] = decision
+        audit["inverse_sleeve"] = {"applied": False, "reason": "deferred_until_symbol_issue_gate"}
+        audit["status"] = decision.get("verdict")
+        return filtered, audit
     filtered = apply_intraday_decision(candidate_payload, decision)
     transformed, inverse_audit = maybe_apply_inverse_sleeve(
         filtered,
@@ -276,6 +283,113 @@ def intraday_phase(candidate_payload: dict[str, Any], *, now: datetime | None = 
     audit["inverse_sleeve"] = inverse_audit
     audit["status"] = decision.get("verdict")
     return transformed, audit
+
+
+def symbol_issue_phase(candidate_payload: dict[str, Any], *, now: datetime | None = None) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Authorize ordinary BUYs from fresh, company-specific evidence."""
+    from toss_alpha.execution.symbol_issue import apply_symbol_issue_gate, collect_google_news_events, evaluate_symbol_issues
+
+    now = now or datetime.now(timezone.utc)
+    orders = list(candidate_payload.get("orders") or [])
+    enabled = os.getenv("TOSS_SYMBOL_ISSUE_GATE_ENABLED", "true").strip().lower() in {"1", "true", "yes", "y"}
+    require_positive = os.getenv("TOSS_REQUIRE_POSITIVE_SYMBOL_ISSUE", "true").strip().lower() in {"1", "true", "yes", "y"}
+    if not enabled:
+        audit = {"status": "DISABLED", "verdicts_by_symbol": {}, "symbols": {}, "collector_errors": {}}
+        return dict(candidate_payload), audit
+    events, errors = collect_google_news_events(
+        orders,
+        timeout_seconds=float(os.getenv("TOSS_SYMBOL_NEWS_TIMEOUT_SECONDS", "10")),
+        articles_per_symbol=int(os.getenv("TOSS_SYMBOL_NEWS_ARTICLES_PER_SYMBOL", "10")),
+    )
+    manual_events, manual_path, manual_error = load_news_events()
+    dart_events: list[dict[str, Any]] = []
+    dart_errors: dict[str, str] = {}
+    if os.getenv("OPENDART_API_KEY") and DART_CONNECTOR.exists():
+        try:
+            from toss_alpha.dart_adapter import recent_filings
+            start = (now - timedelta(days=2)).strftime("%Y%m%d")
+            for order in orders:
+                if str(order.get("side", "BUY")).upper() != "BUY":
+                    continue
+                symbol = str(order.get("symbol") or "").zfill(6)
+                try:
+                    filings = recent_filings(symbol, start=start)
+                    records = filings.to_dict("records") if hasattr(filings, "to_dict") else list(filings or [])
+                    for row in records:
+                        if not isinstance(row, Mapping):
+                            continue
+                        date_text = str(row.get("rcept_dt") or row.get("date") or "").replace("-", "")[:8]
+                        try:
+                            reported_at = datetime.strptime(date_text, "%Y%m%d").replace(tzinfo=timezone.utc).isoformat()
+                        except ValueError:
+                            reported_at = None
+                        dart_events.append({
+                            "symbol": symbol,
+                            "name": str(order.get("name") or ""),
+                            "title": str(row.get("report_nm") or row.get("title") or ""),
+                            "reported_at": reported_at,
+                            "source": "opendart",
+                        })
+                except Exception as exc:
+                    dart_errors[symbol] = f"{type(exc).__name__}:{exc}"
+        except Exception as exc:
+            dart_errors["_import"] = f"{type(exc).__name__}:{exc}"
+    max_age = int(os.getenv("TOSS_SYMBOL_ISSUE_MAX_AGE_SECONDS", str(12 * 3600)))
+    max_disclosure_age = int(os.getenv("TOSS_SYMBOL_DISCLOSURE_MAX_AGE_SECONDS", str(36 * 3600)))
+    audit = evaluate_symbol_issues(
+        orders,
+        [*events, *dart_events, *manual_events],
+        now=now,
+        max_age_seconds=max_age,
+        max_disclosure_age_seconds=max_disclosure_age,
+    )
+    audit.update({
+        "status": "READY" if audit.get("buy_count") else "WATCH",
+        "events_collected": len(events),
+        "disclosure_events_collected": len(dart_events),
+        "collector_errors": errors,
+        "disclosure_errors": dart_errors,
+        "manual_events_path": manual_path,
+        "manual_events_error": manual_error,
+        "require_positive": require_positive,
+    })
+    return apply_symbol_issue_gate(candidate_payload, audit, require_positive=require_positive), audit
+
+
+def finalize_symbol_first_branch(candidate_payload: dict[str, Any], intraday: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Apply broad-market size/emergency overlay, then retain inverse fallback."""
+    from toss_alpha.execution.inverse_sleeve import maybe_apply_inverse_sleeve
+    from toss_alpha.execution.symbol_issue import INVERSE_SYMBOLS, apply_symbol_market_overlay
+
+    decision = intraday.get("decision") if isinstance(intraday.get("decision"), dict) else {}
+    overlaid, market_overlay = apply_symbol_market_overlay(candidate_payload, decision=decision, env=os.environ)
+    ordinary = [
+        order for order in overlaid.get("orders", [])
+        if str(order.get("side", "BUY")).upper() == "BUY" and str(order.get("symbol") or "").zfill(6) not in INVERSE_SYMBOLS
+    ]
+    if ordinary:
+        transformed = overlaid
+        inverse_audit = {"applied": False, "reason": "symbol_specific_ordinary_buy_authorized"}
+    else:
+        inverse_symbol = str(os.environ.get("TOSS_INVERSE_ETF_CODE", "114800")).zfill(6)
+        raw_inverse = ((decision.get("raw_quotes") or {}).get(inverse_symbol) or {})
+        realtime_quote = {
+            "close": raw_inverse.get("last"),
+            "volume": raw_inverse.get("volume"),
+            "price_date": datetime.now(ZoneInfo("Asia/Seoul")).date().isoformat(),
+            "observed_at": raw_inverse.get("observed_at"),
+            "source": raw_inverse.get("source"),
+        }
+        transformed, inverse_audit = maybe_apply_inverse_sleeve(
+            overlaid,
+            out_dir=CANDIDATE_DIR,
+            env=os.environ,
+            realtime_quote=realtime_quote,
+            original_candidate_json=None,
+        )
+    intraday["market_overlay"] = market_overlay
+    intraday["inverse_sleeve"] = inverse_audit
+    return transformed, intraday
 
 
 def _kis_quote_evidence(payload: Mapping[str, Any], *, symbol: str, observed_at: datetime) -> dict[str, Any]:
@@ -549,6 +663,7 @@ def summarize(payload: dict[str, Any]) -> str:
     quant = payload["quant"]
     fast = payload["fast"]
     qual = payload["qual"]
+    symbol_issue = payload.get("symbol_issue") or {}
     live = payload["live"]
     submit = payload.get("live_submit") or {}
     position_exit = payload.get("position_exit") or {}
@@ -589,6 +704,17 @@ def summarize(payload: dict[str, Any]) -> str:
         f"- vetoed_symbols: {fast.get('vetoed_symbols', [])}",
         f"- allowed_count: {fast.get('allowed_count', 0)} / {fast.get('original_order_count', 0)}",
         f"- reasons_by_symbol: {fast.get('reasons_by_symbol', {})}",
+        "",
+        "## Symbol issue authorization",
+        f"- status: {symbol_issue.get('status')}",
+        f"- require_positive: {symbol_issue.get('require_positive')}",
+        f"- checked_symbols: {symbol_issue.get('checked_symbols', [])}",
+        f"- verdicts_by_symbol: {symbol_issue.get('verdicts_by_symbol', {})}",
+        f"- buy/watch/review/veto: {symbol_issue.get('buy_count', 0)}/{symbol_issue.get('watch_count', 0)}/{symbol_issue.get('review_count', 0)}/{symbol_issue.get('veto_count', 0)}",
+        f"- news/disclosure events: {symbol_issue.get('events_collected', 0)}/{symbol_issue.get('disclosure_events_collected', 0)}",
+        f"- collector_errors: {symbol_issue.get('collector_errors', {})}",
+        f"- disclosure_errors: {symbol_issue.get('disclosure_errors', {})}",
+        f"- market_overlay: {(payload.get('intraday') or {}).get('market_overlay', {})}",
         "",
         "## Position exit",
         f"- enabled: {position_exit.get('enabled')}",
@@ -692,16 +818,18 @@ def main() -> None:
     args = parser.parse_args()
 
     quant = quant_phase(args.build_missing_panel, args.rebuild_policy_if_missing, args.as_of)
-    intraday_candidate_payload, intraday = intraday_phase(quant.get("candidate_payload") or {})
-    quant["candidate_payload"] = intraday_candidate_payload
+    intraday_candidate_payload, intraday = intraday_phase(quant.get("candidate_payload") or {}, defer_branch=True)
+    fast = fast_phase(intraday_candidate_payload)
+    issue_candidate_payload, symbol_issue = symbol_issue_phase(fast.get("effective_candidate_payload") or {})
+    execution_entry_payload, intraday = finalize_symbol_first_branch(issue_candidate_payload, intraday)
+    quant["candidate_payload"] = execution_entry_payload
     inverse_audit = intraday.get("inverse_sleeve") or {}
     quant["inverse_sleeve"] = inverse_audit
     if inverse_audit.get("applied") and inverse_audit.get("candidate_json"):
         quant["candidate_json"] = str(inverse_audit["candidate_json"])
-    candidate_status = str(intraday_candidate_payload.get("status") or "UNKNOWN")
+    candidate_status = str(execution_entry_payload.get("status") or "UNKNOWN")
     quant["status"] = "ACTIONABLE_CANDIDATES" if candidate_status == "CANDIDATES" else candidate_status
-    fast = fast_phase(intraday_candidate_payload)
-    execution_candidate_payload, position_exit = position_exit_phase(fast.get("effective_candidate_payload") or {})
+    execution_candidate_payload, position_exit = position_exit_phase(execution_entry_payload)
     qual = qual_phase(execution_candidate_payload)
     live = live_phase()
     submit = live_submit_phase(execution_candidate_payload, qual, live)
@@ -710,6 +838,7 @@ def main() -> None:
         "overall_status": choose_overall(quant, fast, qual, live, submit, position_exit),
         "quant": quant,
         "intraday": intraday,
+        "symbol_issue": symbol_issue,
         "fast": fast,
         "position_exit": position_exit,
         "execution_candidate_payload": execution_candidate_payload,

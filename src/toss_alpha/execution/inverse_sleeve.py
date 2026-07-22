@@ -82,6 +82,11 @@ def maybe_apply_inverse_sleeve(
     if not settings.enabled:
         audit["reason"] = "inverse_sleeve_disabled"
         return candidate_payload, audit
+    intraday_decision = candidate_payload.get("intraday_decision")
+    verdict = str(intraday_decision.get("verdict") or "") if isinstance(intraday_decision, Mapping) else ""
+    if verdict == "LONG_BUY":
+        audit["reason"] = "inverse_sleeve_not_needed:intraday_decision:LONG_BUY"
+        return candidate_payload, audit
     eligibility_block = inverse_etf_eligibility_block(settings, env=env)
     if eligibility_block:
         blocked = dict(candidate_payload)
@@ -97,8 +102,6 @@ def maybe_apply_inverse_sleeve(
     if situation not in settings.trigger_situations:
         audit["reason"] = f"situation_not_triggered:{situation or 'unknown'}"
         return candidate_payload, audit
-    intraday_decision = candidate_payload.get("intraday_decision")
-    verdict = str(intraday_decision.get("verdict") or "") if isinstance(intraday_decision, Mapping) else ""
     if verdict != "INVERSE_BUY":
         blocked = dict(candidate_payload)
         blocked["status"] = "NO_TRADE"

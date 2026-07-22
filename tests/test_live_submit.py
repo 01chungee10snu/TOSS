@@ -96,6 +96,21 @@ def _env(tmp_path: Path):
     }
 
 
+def _risk_on_payload(market_day_return: float, *, signal_conflict: bool = False):
+    return {
+        "intraday_decision": {
+            "verdict": "LONG_BUY",
+            "market_regime": "risk_on",
+            "evidence_status": "FRESH",
+            "signal_conflict": signal_conflict,
+            "metrics": {
+                "market_override_confirmed": True,
+                "market_day_return": market_day_return,
+            },
+        }
+    }
+
+
 def test_adaptive_buy_uses_best_ask_and_reduces_quantity():
     class FakeQuoteClient:
         def quote_snapshot(self, symbol):
@@ -129,6 +144,72 @@ def test_adaptive_buy_blocks_above_chase_cap():
 
     assert audit["violation"] == "adaptive_limit_chase_cap_exceeded"
     assert order["limit_price"] == 1023
+
+
+def test_adaptive_buy_expands_chase_cap_relative_to_confirmed_risk_on_market():
+    class FakeQuoteClient:
+        def quote_snapshot(self, symbol):
+            return Quote(symbol=symbol, timestamp=datetime.now(timezone.utc), last=1089, bid=1088, ask=1089, volume=1_000_000, source="kis")
+
+    order, audit = adapt_buy_order_to_live_quote(
+        {"symbol": "005930", "side": "BUY", "reference_close": 1000, "limit_price": 1005, "quantity": 50, "notional_krw": 50_000},
+        config=LiveExecutionConfig.from_env({"BROKER_PROVIDER": "kis", "KIS_APP_KEY": "app", "KIS_APP_SECRET": "sec", "KIS_CANO": "12345678"}),
+        env={
+            "TOSS_ADAPTIVE_LIMIT_MAX_CHASE_PCT": "0.02",
+            "TOSS_ADAPTIVE_LIMIT_HARD_MAX_CHASE_PCT": "0.10",
+            "TOSS_RISK_ON_RELATIVE_CHASE_BUFFER_PCT": "0.015",
+        },
+        quote_client=FakeQuoteClient(),
+        candidate_payload=_risk_on_payload(0.0785),
+    )
+
+    assert audit["risk_on_dynamic"] is True
+    assert audit["max_chase_pct"] == pytest.approx(0.0935)
+    assert audit["chase_pct"] == pytest.approx(0.089)
+    assert audit["status"] == "ADAPTED"
+    assert order["limit_price"] == 1089
+    assert order["notional_krw"] <= 50_000
+
+
+def test_adaptive_buy_keeps_absolute_hard_cap_in_extreme_risk_on_market():
+    class FakeQuoteClient:
+        def quote_snapshot(self, symbol):
+            return Quote(symbol=symbol, timestamp=datetime.now(timezone.utc), last=1101, bid=1100, ask=1101, volume=1_000_000, source="kis")
+
+    order, audit = adapt_buy_order_to_live_quote(
+        {"symbol": "005930", "side": "BUY", "reference_close": 1000, "limit_price": 1005, "quantity": 50, "notional_krw": 50_000},
+        config=LiveExecutionConfig.from_env({"BROKER_PROVIDER": "kis", "KIS_APP_KEY": "app", "KIS_APP_SECRET": "sec", "KIS_CANO": "12345678"}),
+        env={
+            "TOSS_ADAPTIVE_LIMIT_MAX_CHASE_PCT": "0.02",
+            "TOSS_ADAPTIVE_LIMIT_HARD_MAX_CHASE_PCT": "0.10",
+            "TOSS_RISK_ON_RELATIVE_CHASE_BUFFER_PCT": "0.015",
+        },
+        quote_client=FakeQuoteClient(),
+        candidate_payload=_risk_on_payload(0.20),
+    )
+
+    assert audit["risk_on_dynamic"] is True
+    assert audit["max_chase_pct"] == pytest.approx(0.10)
+    assert audit["violation"] == "adaptive_limit_chase_cap_exceeded"
+    assert order["limit_price"] == 1005
+
+
+def test_adaptive_buy_does_not_expand_when_risk_on_signal_conflicts():
+    class FakeQuoteClient:
+        def quote_snapshot(self, symbol):
+            return Quote(symbol=symbol, timestamp=datetime.now(timezone.utc), last=1040, bid=1039, ask=1040, volume=1_000_000, source="kis")
+
+    _, audit = adapt_buy_order_to_live_quote(
+        {"symbol": "005930", "side": "BUY", "reference_close": 1000, "limit_price": 1005, "quantity": 50, "notional_krw": 50_000},
+        config=LiveExecutionConfig.from_env({"BROKER_PROVIDER": "kis", "KIS_APP_KEY": "app", "KIS_APP_SECRET": "sec", "KIS_CANO": "12345678"}),
+        env={"TOSS_ADAPTIVE_LIMIT_MAX_CHASE_PCT": "0.02"},
+        quote_client=FakeQuoteClient(),
+        candidate_payload=_risk_on_payload(0.0785, signal_conflict=True),
+    )
+
+    assert audit["risk_on_dynamic"] is False
+    assert audit["max_chase_pct"] == pytest.approx(0.02)
+    assert audit["violation"] == "adaptive_limit_chase_cap_exceeded"
 
 
 def test_adaptive_buy_uses_reference_close_not_aggressive_generated_limit():
@@ -245,6 +326,20 @@ def test_live_submit_blocks_when_qual_data_is_blocked(tmp_path):
         now=datetime(2026, 7, 2, tzinfo=timezone.utc),
     )
 
+    assert result["status"] == "LIVE_SUBMIT_DRY_RUN_BLOCKED"
+    assert "qual_gate_blocked" in result["violations"]
+    assert result["results"][0]["status"] == "BLOCK"
+
+
+def test_live_submit_blocks_review_required_qual_state(tmp_path):
+    result = run_live_submit_phase(
+        candidate_payload=_candidate_payload(),
+        qual={"status": "REVIEW_REQUIRED_QUAL_EVENT", "review_required_symbols": ["005930"]},
+        live=_live_ready(),
+        report_dir=tmp_path,
+        env=_env(tmp_path),
+        now=datetime(2026, 7, 2, tzinfo=timezone.utc),
+    )
     assert result["status"] == "LIVE_SUBMIT_DRY_RUN_BLOCKED"
     assert "qual_gate_blocked" in result["violations"]
     assert result["results"][0]["status"] == "BLOCK"
@@ -464,6 +559,16 @@ def test_promoted_policy_guard_allows_non_aggressive_and_promoted_candidates(tmp
 def test_regime_recent_fill_liquidity_and_bad_event_guards():
     assert market_regime_violation({"situation": "down_high_vol"}) == "market_regime_blocked:down_high_vol"
     assert market_regime_violation({"situation": "flat_low_vol"}) is None
+    assert market_regime_violation({
+        "situation": "down_high_vol",
+        "intraday_decision": {
+            "verdict": "LONG_BUY",
+            "market_regime": "risk_on",
+            "evidence_status": "FRESH",
+            "signal_conflict": False,
+            "metrics": {"market_override_confirmed": True},
+        },
+    }) is None
     assert recent_candidate_violation({"as_of": "2026-07-01"}, now=datetime(2026, 7, 3, 1, 0, tzinfo=timezone.utc)) == "candidate_as_of_not_recent_krx_trading_day"
     assert fill_probability_violation({"side": "BUY", "limit_price": 1000, "current_price": 1010}) == "fill_probability_low_limit_too_far_below_current"
     assert order_quality_violations(
@@ -697,6 +802,60 @@ def test_current_issue_report_blocks_buy_but_not_sell(tmp_path):
     assert current_issue_buy_violation({"symbol": "005930", "side": "BUY"}, root=tmp_path, now=now, env={}) == "current_issue_buy_block:critical"
     assert current_issue_buy_violation({"symbol": "005930", "side": "SELL"}, root=tmp_path, now=now, env={}) is None
     assert current_issue_buy_violation({"symbol": "005930", "side": "BUY"}, root=tmp_path, now=now, env={"TOSS_ALLOW_CURRENT_ISSUE_BUY": "true"}) is None
+
+
+def test_current_issue_high_allows_only_fresh_confirmed_long_buy(tmp_path):
+    issue_dir = tmp_path / "reports" / "harness" / "current_issues"
+    issue_dir.mkdir(parents=True)
+    report = issue_dir / "current_issue_risk_report_20260708.json"
+    report.write_text('{"as_of":"2026-07-08","severity":"high","buy_gate":"require_intraday_confirmation"}', encoding="utf-8")
+    now = datetime(2026, 7, 8, 0, 30, tzinfo=timezone.utc)
+    payload = {
+        "intraday_decision": {
+            "verdict": "LONG_BUY",
+            "evidence_status": "FRESH",
+            "news_evidence_status": "FRESH",
+            "signal_conflict": False,
+            "metrics": {"market_override_confirmed": True},
+        }
+    }
+
+    assert current_issue_buy_violation(
+        {"symbol": "005930", "side": "BUY"}, root=tmp_path, now=now, env={}, candidate_payload=payload
+    ) is None
+    payload["intraday_decision"]["metrics"]["market_override_confirmed"] = False
+    assert current_issue_buy_violation(
+        {"symbol": "005930", "side": "BUY"}, root=tmp_path, now=now, env={}, candidate_payload=payload
+    ) == "current_issue_buy_block:high"
+
+
+def test_current_issue_high_allows_reduced_symbol_specific_buy(tmp_path):
+    issue_dir = tmp_path / "reports" / "harness" / "current_issues"
+    issue_dir.mkdir(parents=True)
+    report = issue_dir / "current_issue_risk_report_20260708.json"
+    report.write_text('{"as_of":"2026-07-08","severity":"high","buy_gate":"require_intraday_confirmation"}', encoding="utf-8")
+    now = datetime(2026, 7, 8, 0, 30, tzinfo=timezone.utc)
+    payload = {
+        "intraday_decision": {"evidence_status": "FRESH", "news_evidence_status": "FRESH"},
+        "market_overlay": {
+            "ordinary_buy_authorized": True,
+            "authorized_symbols": ["005930"],
+            "emergency_block": False,
+            "size_multiplier": 0.35,
+        },
+    }
+    order = {"symbol": "005930", "side": "BUY", "symbol_issue_authorized": True, "symbol_issue_verdict": "BUY"}
+    assert current_issue_buy_violation(order, root=tmp_path, now=now, env={}, candidate_payload=payload) is None
+
+
+def test_current_issue_critical_cannot_be_overridden_by_market_long_verdict(tmp_path):
+    issue_dir = tmp_path / "reports" / "harness" / "current_issues"
+    issue_dir.mkdir(parents=True)
+    report = issue_dir / "current_issue_risk_report_20260708.json"
+    report.write_text('{"as_of":"2026-07-08","severity":"critical","buy_gate":"require_intraday_confirmation"}', encoding="utf-8")
+    now = datetime(2026, 7, 8, 0, 30, tzinfo=timezone.utc)
+    payload = {"intraday_decision": {"verdict": "LONG_BUY", "evidence_status": "FRESH", "news_evidence_status": "FRESH", "signal_conflict": False, "metrics": {"market_override_confirmed": True}}}
+    assert current_issue_buy_violation({"symbol": "005930", "side": "BUY"}, root=tmp_path, now=now, env={}, candidate_payload=payload) == "current_issue_buy_block:critical"
 
 
 def test_current_issue_report_missing_is_fail_closed_for_buy(tmp_path):

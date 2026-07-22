@@ -1,0 +1,136 @@
+{
+  "strategy": "daily_multifactor_v1_practical400_v6",
+  "optimization_date": "2026-07-21 17:43",
+  "data_period": "2022-02-11 ~ 2026-07-14",
+  "n_stocks": 400,
+  "n_days": 1080,
+  "n_weight_combos": 1771,
+  "factors": [
+    "momentum",
+    "low_vol",
+    "rsi",
+    "volume_ratio"
+  ],
+  "factor_processing": "cross-sectional rank normalization [-0.5, 0.5]",
+  "forward_return": "1-day non-overlapping",
+  "stop_loss": "5% per-stock",
+  "txn_cost": "0.03%/side",
+  "slippage": "0.10%/side",
+  "limit_up_filter": "open gap >= 29% excluded",
+  "universe_validation": {
+    "full_coverage_stocks": 1,
+    "long_gap_stocks_60d": 40,
+    "verdict": "INCONCLUSIVE_REQUIRES_POINT_IN_TIME_MEMBERSHIP",
+    "panel_sha256": "ffd3dd8a49509b08504d9cbe6ed0ca35ce62f121fcb080821df38716147bc20f",
+    "note": "Missingness alone cannot prove absence of survivorship bias; point-in-time membership is required."
+  },
+  "results_by_k": {
+    "k=3": {
+      "k": 3,
+      "sel_weights": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sel_method": "Train Sharpe 최고 (Test 미사용 선택)",
+      "train_sharpe": 3.5091893672943115,
+      "test_sharpe": 3.753878355026245,
+      "test_cumret": 30.77815818786621,
+      "test_annual": 9.412885665893555,
+      "test_mdd": -0.3109872043132782,
+      "test_winrate": 0.5080645084381104,
+      "train_sharpe_range": [
+        -3.546069383621216,
+        3.5091893672943115
+      ],
+      "test_sharpe_range": [
+        -1.700096845626831,
+        4.5142316818237305
+      ],
+      "n_positive_test": 1407
+    },
+    "k=5": {
+      "k": 5,
+      "sel_weights": [
+        0.9500000000000001,
+        0.0,
+        0.0,
+        0.05
+      ],
+      "sel_method": "Train Sharpe 최고 (Test 미사용 선택)",
+      "train_sharpe": 3.5009326934814453,
+      "test_sharpe": 4.796911716461182,
+      "test_cumret": 38.468170166015625,
+      "test_annual": 11.059481620788574,
+      "test_mdd": -0.21604669094085693,
+      "test_winrate": 0.5779569745063782,
+      "train_sharpe_range": [
+        -3.375505208969116,
+        3.5009326934814453
+      ],
+      "test_sharpe_range": [
+        -0.9909536838531494,
+        5.103350639343262
+      ],
+      "n_positive_test": 1646
+    },
+    "k=10": {
+      "k": 10,
+      "sel_weights": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sel_method": "Train Sharpe 최고 (Test 미사용 선택)",
+      "train_sharpe": 3.407768487930298,
+      "test_sharpe": 5.515576362609863,
+      "test_cumret": 31.223804473876953,
+      "test_annual": 9.511585235595703,
+      "test_mdd": -0.1420843005180359,
+      "test_winrate": 0.5967742204666138,
+      "train_sharpe_range": [
+        -3.353104591369629,
+        3.407768487930298
+      ],
+      "test_sharpe_range": [
+        -0.16860967874526978,
+        5.603928089141846
+      ],
+      "n_positive_test": 1766
+    },
+    "k=20": {
+      "k": 20,
+      "sel_weights": [
+        0.8500000000000001,
+        0.0,
+        0.05,
+        0.1
+      ],
+      "sel_method": "Train Sharpe 최고 (Test 미사용 선택)",
+      "train_sharpe": 2.723555088043213,
+      "test_sharpe": 5.157202243804932,
+      "test_cumret": 13.553474426269531,
+      "test_annual": 5.1350226402282715,
+      "test_mdd": -0.17169387638568878,
+      "test_winrate": 0.6290322542190552,
+      "train_sharpe_range": [
+        -2.5238490104675293,
+        2.723555088043213
+      ],
+      "test_sharpe_range": [
+        0.6023883819580078,
+        5.362131118774414
+      ],
+      "n_positive_test": 1771
+    },
+    "monte_carlo_k10": {
+      "actual_cumulative": 642.23779296875,
+      "prob_positive": 1.0,
+      "p5": 182.0733184814453,
+      "p50": 639.9635009765625,
+      "p95": 2279.611572265625
+    }
+  }
+}

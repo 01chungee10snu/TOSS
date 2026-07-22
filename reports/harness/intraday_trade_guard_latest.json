@@ -1,0 +1,86 @@
+{
+  "generated_at_kst": "2026-07-22T09:31:41+09:00",
+  "evidence_timestamps": {
+    "quotes_069500": "2026-07-22T09:31:28.021457+09:00 (kis_realtime_quote)",
+    "quotes_114800": "2026-07-22T09:31:28.021457+09:00 (kis_realtime_quote)",
+    "loop_report": "2026-07-22T09:24:33.510096+09:00",
+    "position_exit": "2026-07-22T09:29:40.277302+09:00",
+    "current_issue": "2026-07-22T09:30:39.923213+09:00",
+    "realtime_guard": "2026-07-22T09:30:45.294963+09:00"
+  },
+  "market_state": "CONFLICT",
+  "price_metrics": {
+    "069500_KODEX200": {
+      "last": 114435.0,
+      "open": 113570.0,
+      "prev_close": 108140.0,
+      "day_return": 0.058211577584612595,
+      "open_return": 0.007616448005635323,
+      "volume": 4197683.0,
+      "quote_source": "kis_realtime_quote"
+    },
+    "114800_KODEX_INV": {
+      "last": 1048.0,
+      "open": 1059.0,
+      "prev_close": 1112.0,
+      "day_return": -0.05755395683453235,
+      "open_return": -0.010387157695939565,
+      "volume": 164213198.0,
+      "quote_source": "kis_realtime_quote"
+    },
+    "direction_consistent": true,
+    "bullish_price_signal": true,
+    "bearish_price_signal": false,
+    "quotes_fresh_within_5min": true,
+    "required_confirmation": {
+      "market_breadth": "missing",
+      "vwap": "missing",
+      "investor_flow": "missing"
+    },
+    "price_only_interpretation": "KODEX200 +5.82%, KODEX인버스 -5.76%로 강한 위험선호 방향은 일치하지만, 필수 시장 폭/VWAP/수급 근거가 없어 RISK_ON 확정은 보류합니다."
+  },
+  "account_drawdown": {
+    "total_equity": 410286.0,
+    "cash": 410286.0,
+    "holdings_value": 0.0,
+    "held_positions": 0,
+    "peak_equity": 410747.0,
+    "drawdown_fraction": -0.001122345385358825,
+    "drawdown_pct": -0.1122345385358825,
+    "drawdown_tier": "normal",
+    "size_limit_from_drawdown": 1.0
+  },
+  "action": "NO_TRADE",
+  "allowed_symbols": [],
+  "blocked_reasons": [
+    "required_market_breadth_vwap_investor_flow_evidence_missing",
+    "no_fresh_symbol_specific_buy_authorization",
+    "latest_strategy_payload_no_trade:down_high_vol",
+    "inverse_rebound_failure_and_redecline_not_independently_confirmed",
+    "no_positions_to_exit"
+  ],
+  "suggested_size_multiplier": 0.0,
+  "confidence": "medium_price_evidence_but_required_confirmation_missing",
+  "current_issue": {
+    "severity": "low",
+    "buy_gate": "allow",
+    "risk_score": -6.0,
+    "note": "뉴스 위험 차단은 없으나 종목별 BUY 승인 또는 체결시점 근거로 사용하지 않습니다."
+  },
+  "sell_handling": "보유 종목이 없어 현재 SELL 후보는 없습니다. 향후 손절·익절·수익보호 SELL은 1분 sell-only watchdog에 맡깁니다.",
+  "inverse_assessment": "114800은 시가 대비 이미 -1.04%, 전일종가 대비 -5.76%입니다. 시장 반등 실패와 재하락 독립 증거가 없으므로 신규 인버스 추격 진입을 허용하지 않습니다.",
+  "execution_safety": {
+    "order_api_called": false,
+    "cancel_api_called": false,
+    "live_environment_changed": false,
+    "readonly_kis_quote_refresh_succeeded": true
+  },
+  "artifact_paths": [
+    "reports/harness/intraday_trade_guard_latest.json",
+    "reports/harness/intraday_trade_guard_latest.md",
+    "reports/harness/latest_loop_report.json",
+    "reports/harness/latest_position_exit_report.json",
+    "reports/harness/intraday_realtime_guard_latest.json",
+    "reports/harness/current_issues/current_issue_risk_report_20260722.json"
+  ]
+}

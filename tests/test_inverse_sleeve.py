@@ -156,6 +156,34 @@ def test_maybe_apply_inverse_sleeve_requires_fresh_integrated_decision(tmp_path:
     assert audit["reason"] == "inverse_sleeve_blocked:intraday_decision:missing"
 
 
+def test_maybe_apply_inverse_sleeve_preserves_long_orders_on_confirmed_risk_on(tmp_path: Path):
+    payload = {
+        "status": "CANDIDATES",
+        "as_of": "2026-07-14",
+        "situation": "down_high_vol",
+        "intraday_decision": {
+            "verdict": "LONG_BUY",
+            "market_regime": "risk_on",
+            "evidence_status": "FRESH",
+            "signal_conflict": False,
+            "metrics": {"market_override_confirmed": True},
+        },
+        "orders": [{"symbol": "005930", "side": "BUY"}],
+    }
+
+    transformed, audit = maybe_apply_inverse_sleeve(
+        payload,
+        out_dir=tmp_path,
+        env={"TOSS_INVERSE_SLEEVE_ENABLED": "true"},
+        price_provider=lambda *_: (_ for _ in ()).throw(AssertionError("inverse quote must not run")),
+    )
+
+    assert transformed is payload
+    assert transformed["orders"] == [{"symbol": "005930", "side": "BUY"}]
+    assert audit["applied"] is False
+    assert audit["reason"] == "inverse_sleeve_not_needed:intraday_decision:LONG_BUY"
+
+
 def test_maybe_apply_inverse_sleeve_is_noop_when_disabled(tmp_path: Path):
     payload = {"status": "NO_TRADE", "as_of": "2026-07-03", "reason": "situation_not_approved:down_high_vol", "orders": []}
 

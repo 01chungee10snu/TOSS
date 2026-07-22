@@ -86,7 +86,8 @@ def run_live_submit_phase(
     # Exits are always evaluated before entries, regardless of caller ordering.
     orders.sort(key=lambda order: 0 if str(order.get("side", "BUY")).upper() == "SELL" else 1)
     readiness_ready = live.get("ready") is True or str(live.get("ready")) == "True"
-    qual_blocked = str(qual.get("status", "")).startswith("BLOCKED")
+    qual_status = str(qual.get("status", "")).upper()
+    qual_blocked = qual_status.startswith("BLOCKED") or "REVIEW_REQUIRED" in qual_status
 
     artifact_path = report_dir / f"live_submit_{now.strftime('%Y%m%dT%H%M%SZ')}.json"
     phase: dict[str, Any] = {
@@ -206,7 +207,12 @@ def run_live_submit_phase(
             raw_order["reprice_remaining_cap"] = int(reprice_remaining)
         adaptive_audit: dict[str, Any] | None = None
         if not settings.dry_run and str(raw_order.get("side", "BUY")).upper() == "BUY":
-            raw_order, adaptive_audit = adapt_buy_order_to_live_quote(raw_order, config=config, env=env)
+            raw_order, adaptive_audit = adapt_buy_order_to_live_quote(
+                raw_order,
+                config=config,
+                env=env,
+                candidate_payload=candidate_payload or {},
+            )
         intent = order_to_intent(raw_order, strategy_id=order_strategy_id)
         order_violations = validate_live_order_intent(intent, raw_order=raw_order, policy=policy)
         if adaptive_audit and adaptive_audit.get("violation"):
@@ -230,7 +236,13 @@ def run_live_submit_phase(
                 intraday_violation = intraday_decision_buy_violation(raw_order, candidate_payload or {}, now=now, env=env)
                 if intraday_violation:
                     order_violations.append(intraday_violation)
-            issue_violation = current_issue_buy_violation(raw_order, root=root, now=now, env=env)
+            issue_violation = current_issue_buy_violation(
+                raw_order,
+                root=root,
+                now=now,
+                env=env,
+                candidate_payload=candidate_payload or {},
+            )
             if issue_violation:
                 order_violations.append(issue_violation)
             harness_violation = strategic_harness_audit_buy_violation(raw_order, root=root, now=now, env=env)
@@ -337,6 +349,7 @@ def adapt_buy_order_to_live_quote(
     config: LiveExecutionConfig,
     env: Mapping[str, str] | None = None,
     quote_client: Any | None = None,
+    candidate_payload: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build a marketable BUY limit from a fresh KIS quote, fail-closed."""
     order = dict(raw_order)
@@ -347,9 +360,38 @@ def adapt_buy_order_to_live_quote(
         or order.get("current_price")
         or order.get("last_price")
     )
-    max_chase_pct = float(_env_value(env, "TOSS_ADAPTIVE_LIMIT_MAX_CHASE_PCT", "0.02"))
+    base_chase_pct = max(0.0, float(_env_value(env, "TOSS_ADAPTIVE_LIMIT_MAX_CHASE_PCT", "0.02")))
+    hard_chase_pct = max(0.0, float(_env_value(env, "TOSS_ADAPTIVE_LIMIT_HARD_MAX_CHASE_PCT", "0.10")))
+    risk_on_buffer_pct = max(0.0, float(_env_value(env, "TOSS_RISK_ON_RELATIVE_CHASE_BUFFER_PCT", "0.015")))
+    max_chase_pct = min(base_chase_pct, hard_chase_pct)
+    decision = (candidate_payload or {}).get("intraday_decision")
+    decision = decision if isinstance(decision, Mapping) else {}
+    metrics = decision.get("metrics")
+    metrics = metrics if isinstance(metrics, Mapping) else {}
+    market_day_return = _float_or_none(metrics.get("market_day_return"))
+    risk_on_dynamic = (
+        str(decision.get("verdict") or "").upper() == "LONG_BUY"
+        and str(decision.get("market_regime") or "").lower() == "risk_on"
+        and str(decision.get("evidence_status") or "").upper() == "FRESH"
+        and not bool(decision.get("signal_conflict"))
+        and bool(metrics.get("market_override_confirmed"))
+        and market_day_return is not None
+        and market_day_return > 0
+    )
+    if risk_on_dynamic:
+        max_chase_pct = min(hard_chase_pct, max(base_chase_pct, market_day_return + risk_on_buffer_pct))
     enabled = _env_true(_env_value(env, "TOSS_ADAPTIVE_LIMIT_ENABLED", "true"))
-    audit: dict[str, Any] = {"enabled": enabled, "symbol": symbol, "reference_price": reference, "max_chase_pct": max_chase_pct}
+    audit: dict[str, Any] = {
+        "enabled": enabled,
+        "symbol": symbol,
+        "reference_price": reference,
+        "base_chase_pct": base_chase_pct,
+        "hard_chase_pct": hard_chase_pct,
+        "risk_on_buffer_pct": risk_on_buffer_pct,
+        "risk_on_dynamic": risk_on_dynamic,
+        "market_day_return": market_day_return,
+        "max_chase_pct": max_chase_pct,
+    }
     if not enabled:
         audit["status"] = "DISABLED"
         return order, audit
@@ -623,12 +665,43 @@ def recent_candidate_violation(candidate_payload: Mapping[str, Any], *, now: dat
     return None
 
 
+def _symbol_market_overlay_authorized(candidate_payload: Mapping[str, Any]) -> bool:
+    overlay = candidate_payload.get("market_overlay")
+    if not isinstance(overlay, Mapping):
+        return False
+    decision = candidate_payload.get("intraday_decision")
+    if not isinstance(decision, Mapping):
+        return False
+    return (
+        bool(overlay.get("ordinary_buy_authorized"))
+        and not bool(overlay.get("emergency_block"))
+        and float(overlay.get("size_multiplier") or 0) > 0
+        and str(decision.get("evidence_status") or "").upper() == "FRESH"
+        and str(decision.get("news_evidence_status") or "").upper() == "FRESH"
+    )
+
+
 def market_regime_violation(candidate_payload: Mapping[str, Any], *, env: Mapping[str, str] | None = None) -> str | None:
     situation = str(candidate_payload.get("situation") or "").strip()
     if not situation:
         return "market_regime_missing"
     blocked = {item.strip() for item in _env_value(env, "TOSS_BLOCK_LIVE_REGIMES", "down_high_vol,flat_high_vol").split(",") if item.strip()}
     if situation in blocked:
+        if _symbol_market_overlay_authorized(candidate_payload):
+            return None
+        decision = candidate_payload.get("intraday_decision")
+        decision = decision if isinstance(decision, Mapping) else {}
+        metrics = decision.get("metrics")
+        metrics = metrics if isinstance(metrics, Mapping) else {}
+        intraday_risk_on = (
+            str(decision.get("verdict") or "").upper() == "LONG_BUY"
+            and str(decision.get("market_regime") or "").lower() == "risk_on"
+            and str(decision.get("evidence_status") or "").upper() == "FRESH"
+            and not bool(decision.get("signal_conflict"))
+            and bool(metrics.get("market_override_confirmed"))
+        )
+        if intraday_risk_on:
+            return None
         return f"market_regime_blocked:{situation}"
     return None
 
@@ -685,13 +758,25 @@ def intraday_decision_buy_violation(
     decision = candidate_payload.get("intraday_decision")
     if not isinstance(decision, Mapping):
         return "intraday_decision_missing"
+    symbol = str(raw_order.get("symbol") or "").zfill(6)
+    inverse_symbols = {
+        "114800", "251340", "252670",
+        str(_env_value(env, "TOSS_INVERSE_ETF_CODE", "114800")).zfill(6),
+    }
+    symbol_specific = (
+        symbol not in inverse_symbols
+        and bool(raw_order.get("symbol_issue_authorized"))
+        and str(raw_order.get("symbol_issue_verdict") or "").upper() == "BUY"
+        and symbol in {str(item).zfill(6) for item in ((candidate_payload.get("market_overlay") or {}).get("authorized_symbols") or [])}
+        and _symbol_market_overlay_authorized(candidate_payload)
+    )
     if not str(decision.get("decision_id") or "").startswith("intraday-"):
         return "intraday_decision_id_missing"
     if str(decision.get("evidence_status") or "").upper() != "FRESH":
         return "intraday_evidence_not_fresh"
     if str(decision.get("news_evidence_status") or "").upper() != "FRESH":
         return "intraday_news_evidence_not_fresh"
-    if bool(decision.get("signal_conflict")):
+    if bool(decision.get("signal_conflict")) and not symbol_specific:
         return "intraday_signal_conflict"
     generated = decision.get("generated_at_utc")
     if not generated:
@@ -709,24 +794,29 @@ def intraday_decision_buy_violation(
     if age < -30 or age > max_age:
         return "intraday_decision_stale"
     verdict = str(decision.get("verdict") or "").upper()
-    symbol = str(raw_order.get("symbol") or "").zfill(6)
-    inverse_symbols = {
-        "114800", "251340", "252670",
-        str(_env_value(env, "TOSS_INVERSE_ETF_CODE", "114800")).zfill(6),
-    }
+    if symbol_specific:
+        return None
     expected = "INVERSE_BUY" if symbol in inverse_symbols else "LONG_BUY"
     if verdict != expected:
         return f"intraday_verdict_mismatch:{verdict or 'missing'}:{expected}"
     return None
 
 
-def current_issue_buy_violation(raw_order: Mapping[str, Any], *, root: Path, now: datetime, env: Mapping[str, str] | None = None) -> str | None:
-    """Block new BUY submissions when the daily current-issue gate is high risk.
+def current_issue_buy_violation(
+    raw_order: Mapping[str, Any],
+    *,
+    root: Path,
+    now: datetime,
+    env: Mapping[str, str] | None = None,
+    candidate_payload: Mapping[str, Any] | None = None,
+) -> str | None:
+    """Require fresh price confirmation when current-issue risk is high.
 
     SELL orders are intentionally exempt so stop-loss/take-profit exits keep
-    working during risk-off headlines. The report is generated by
-    scripts/current_issue_risk_report.py and can be overridden only with the
-    explicit env ``TOSS_ALLOW_CURRENT_ISSUE_BUY=true``.
+    working during risk-off headlines. A high/critical report remains a hard
+    block unless the unified intraday decision independently resolves it with
+    fresh two-proxy market evidence. The explicit global override is retained
+    for emergency/manual operations.
     """
     if str(raw_order.get("side", "BUY")).upper() != "BUY":
         return None
@@ -758,7 +848,34 @@ def current_issue_buy_violation(raw_order: Mapping[str, Any], *, root: Path, now
         return "current_issue_report_stale"
     severity = str(payload.get("severity") or "").lower()
     buy_gate = str(payload.get("buy_gate") or "").lower()
-    if severity in {"critical", "high"} or buy_gate == "block_new_buy":
+    guarded_gates = {
+        "block_new_buy",  # legacy report compatibility
+        "block_unless_strong_intraday_confirmation",
+        "require_intraday_confirmation",
+    }
+    if severity == "critical":
+        return "current_issue_buy_block:critical"
+    if severity == "high" or buy_gate in guarded_gates:
+        if (
+            isinstance(candidate_payload, Mapping)
+            and bool(raw_order.get("symbol_issue_authorized"))
+            and str(raw_order.get("symbol_issue_verdict") or "").upper() == "BUY"
+            and _symbol_market_overlay_authorized(candidate_payload)
+        ):
+            return None
+        decision = candidate_payload.get("intraday_decision") if isinstance(candidate_payload, Mapping) else None
+        decision = decision if isinstance(decision, Mapping) else {}
+        metrics = decision.get("metrics")
+        metrics = metrics if isinstance(metrics, Mapping) else {}
+        confirmed = (
+            str(decision.get("verdict") or "").upper() == "LONG_BUY"
+            and str(decision.get("evidence_status") or "").upper() == "FRESH"
+            and str(decision.get("news_evidence_status") or "FRESH").upper() == "FRESH"
+            and not bool(decision.get("signal_conflict"))
+            and bool(metrics.get("market_override_confirmed"))
+        )
+        if confirmed:
+            return None
         return f"current_issue_buy_block:{severity or buy_gate}"
     return None
 
