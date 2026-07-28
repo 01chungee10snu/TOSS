@@ -1,86 +1,119 @@
 {
-  "generated_at_kst": "2026-07-22T09:31:41+09:00",
+  "generated_at_kst": "2026-07-28T11:33:31.467057+09:00",
   "evidence_timestamps": {
-    "quotes_069500": "2026-07-22T09:31:28.021457+09:00 (kis_realtime_quote)",
-    "quotes_114800": "2026-07-22T09:31:28.021457+09:00 (kis_realtime_quote)",
-    "loop_report": "2026-07-22T09:24:33.510096+09:00",
-    "position_exit": "2026-07-22T09:29:40.277302+09:00",
-    "current_issue": "2026-07-22T09:30:39.923213+09:00",
-    "realtime_guard": "2026-07-22T09:30:45.294963+09:00"
+    "current_issue_generated_at_kst": "2026-07-28T11:30:47.455796+09:00",
+    "loop_report_generated_at_utc": "2026-07-28T02:33:08.344351+00:00",
+    "position_exit_generated_at_utc": "2026-07-28T02:33:04.767369+00:00",
+    "realtime_guard_snapshot_at_kst": "2026-07-28T11:30:53.394057+09:00",
+    "fresh_quote_observed_at_utc": "2026-07-28T02:32:32.180705+00:00",
+    "fresh_quote_observed_at_kst": "2026-07-28T11:32:32.180705+09:00",
+    "prior_trade_guard_quote_observed_at_kst": "2026-07-28T11:16:46.522911+09:00",
+    "account_observed_at_kst": "2026-07-28T11:30:53.394057+09:00"
   },
-  "market_state": "CONFLICT",
+  "market_state": "PANIC",
+  "market_state_detail": "최신 KIS 읽기 전용 가격에서 KODEX200은 전일 대비 -9.84%, 시가 대비 -4.36%, VWAP 대용치 대비 -1.98%이며 장중 저점 반등은 0.41%에 불과합니다. KODEX인버스는 전일 대비 +10.06%, 시가 대비 +3.81%, VWAP 대용치 대비 +1.92%로 장중 고점권입니다. 두 프록시는 PANIC 방향으로 일치하지만 시장 폭과 완전한 수급 근거가 없고, 인버스는 급등 추격 구간이므로 신규 진입을 fail-closed합니다.",
   "price_metrics": {
-    "069500_KODEX200": {
-      "last": 114435.0,
-      "open": 113570.0,
-      "prev_close": 108140.0,
-      "day_return": 0.058211577584612595,
-      "open_return": 0.007616448005635323,
-      "volume": 4197683.0,
-      "quote_source": "kis_realtime_quote"
+    "069500": {
+      "name": "KODEX200",
+      "source": "KIS_readonly",
+      "observed_at_kst": "2026-07-28T11:32:32.180705+09:00",
+      "previous_close": 107730,
+      "open": 101555,
+      "current": 97130,
+      "session_high": 101900,
+      "session_low": 96730,
+      "volume": 9251874,
+      "accumulated_trading_value_krw": 916769781881,
+      "vwap_proxy": 99090.17,
+      "foreign_net_buy_qty": -900000,
+      "program_net_buy_qty": null,
+      "open_vs_previous_close_pct": -5.7319,
+      "current_vs_previous_close_pct": -9.8394,
+      "current_vs_open_pct": -4.3572,
+      "current_vs_vwap_pct": -1.9782,
+      "current_vs_session_high_pct": -4.6811,
+      "rebound_from_session_low_pct": 0.4135,
+      "change_since_prior_trade_guard_quote_pct": -0.0772,
+      "direction": "BELOW_PREV_CLOSE_OPEN_AND_VWAP_NEAR_SESSION_LOW"
     },
-    "114800_KODEX_INV": {
-      "last": 1048.0,
-      "open": 1059.0,
-      "prev_close": 1112.0,
-      "day_return": -0.05755395683453235,
-      "open_return": -0.010387157695939565,
-      "volume": 164213198.0,
-      "quote_source": "kis_realtime_quote"
+    "114800": {
+      "name": "KODEX인버스",
+      "source": "KIS_readonly",
+      "observed_at_kst": "2026-07-28T11:32:32.180705+09:00",
+      "previous_close": 1113,
+      "open": 1180,
+      "current": 1225,
+      "session_high": 1230,
+      "session_low": 1174,
+      "volume": 407189153,
+      "accumulated_trading_value_krw": 489407565852,
+      "vwap_proxy": 1201.92,
+      "foreign_net_buy_qty": -800000,
+      "program_net_buy_qty": null,
+      "open_vs_previous_close_pct": 6.0198,
+      "current_vs_previous_close_pct": 10.0629,
+      "current_vs_open_pct": 3.8136,
+      "current_vs_vwap_pct": 1.9203,
+      "current_vs_session_high_pct": -0.4065,
+      "rebound_from_session_low_pct": 4.3441,
+      "change_since_prior_trade_guard_quote_pct": 0.0817,
+      "direction": "ABOVE_PREV_CLOSE_OPEN_AND_VWAP_NEAR_SESSION_HIGH"
     },
-    "direction_consistent": true,
-    "bullish_price_signal": true,
-    "bearish_price_signal": false,
-    "quotes_fresh_within_5min": true,
-    "required_confirmation": {
-      "market_breadth": "missing",
-      "vwap": "missing",
-      "investor_flow": "missing"
-    },
-    "price_only_interpretation": "KODEX200 +5.82%, KODEX인버스 -5.76%로 강한 위험선호 방향은 일치하지만, 필수 시장 폭/VWAP/수급 근거가 없어 RISK_ON 확정은 보류합니다."
+    "cross_proxy_consistency": "CONSISTENT_PANIC_RISK_OFF_DIRECTION",
+    "market_breadth": null,
+    "vwap": "AVAILABLE_PER_PROXY",
+    "investor_flow": "KODEX200_FOREIGN_SELLING_BUT_BREADTH_AND_PROGRAM_CONFIRMATION_MISSING"
   },
   "account_drawdown": {
-    "total_equity": 410286.0,
-    "cash": 410286.0,
-    "holdings_value": 0.0,
-    "held_positions": 0,
-    "peak_equity": 410747.0,
-    "drawdown_fraction": -0.001122345385358825,
-    "drawdown_pct": -0.1122345385358825,
-    "drawdown_tier": "normal",
-    "size_limit_from_drawdown": 1.0
+    "status": "CURRENT_EQUITY_WITH_PERSISTED_PEAK",
+    "current_total_equity_krw": 410286,
+    "peak_equity_krw": 410747,
+    "current_drawdown_pct": -0.1122,
+    "size_rule": "ABOVE_MINUS_4_PERCENT_NO_DRAWDOWN_REDUCTION",
+    "held_symbols": []
   },
   "action": "NO_TRADE",
   "allowed_symbols": [],
   "blocked_reasons": [
-    "required_market_breadth_vwap_investor_flow_evidence_missing",
-    "no_fresh_symbol_specific_buy_authorization",
-    "latest_strategy_payload_no_trade:down_high_vol",
-    "inverse_rebound_failure_and_redecline_not_independently_confirmed",
-    "no_positions_to_exit"
+    "panic_market_emergency_block:069500_down_9.84pct",
+    "market_breadth_evidence_missing",
+    "investor_flow_confirmation_incomplete",
+    "inverse_chase_block:114800_up_10.06pct_vs_previous_close_and_3.81pct_vs_open",
+    "inverse_entry_blocked:no_confirmed_rebound_failure_cycle_separable_from_extended_opening_move",
+    "ordinary_buy_not_authorized:market_state_not_risk_on",
+    "ordinary_buy_not_authorized:latest_symbol_specific_buy_approval_absent",
+    "latest_loop_status_no_trade:inverse_sleeve_blocked:intraday_decision:NO_TRADE",
+    "latest_intraday_decision_invalid:quote_basis_inconsistent"
   ],
   "suggested_size_multiplier": 0.0,
-  "confidence": "medium_price_evidence_but_required_confirmation_missing",
+  "confidence": "high_for_panic_price_direction_medium_for_full_market_state_due_missing_breadth",
   "current_issue": {
     "severity": "low",
     "buy_gate": "allow",
-    "risk_score": -6.0,
-    "note": "뉴스 위험 차단은 없으나 종목별 BUY 승인 또는 체결시점 근거로 사용하지 않습니다."
+    "risk_score": 1.5,
+    "generated_at_kst": "2026-07-28T11:30:47.455796+09:00",
+    "considered_headline_count": 1,
+    "stale_headline_count": 37,
+    "note": "뉴스는 보조 증거입니다. low/allow는 가격 급락 비상차단을 해제하거나 종목 매수를 승인하지 않습니다."
   },
-  "sell_handling": "보유 종목이 없어 현재 SELL 후보는 없습니다. 향후 손절·익절·수익보호 SELL은 1분 sell-only watchdog에 맡깁니다.",
-  "inverse_assessment": "114800은 시가 대비 이미 -1.04%, 전일종가 대비 -5.76%입니다. 시장 반등 실패와 재하락 독립 증거가 없으므로 신규 인버스 추격 진입을 허용하지 않습니다.",
-  "execution_safety": {
-    "order_api_called": false,
-    "cancel_api_called": false,
-    "live_environment_changed": false,
-    "readonly_kis_quote_refresh_succeeded": true
+  "change_from_previous_guard": {
+    "material": true,
+    "market_state_changed": false,
+    "action_changed": false,
+    "current_issue_severity_changed": true,
+    "previous_current_issue_severity": "medium",
+    "current_current_issue_severity": "low",
+    "summary": "PANIC/NO_TRADE는 유지되지만 뉴스 보조 위험이 medium에서 low로 완화되었습니다. 직전 가드 대비 KODEX200은 -0.08%, KODEX인버스는 +0.08% 변동했습니다."
   },
+  "order_submission_performed": false,
+  "order_cancel_performed": false,
+  "live_environment_changed": false,
   "artifact_paths": [
-    "reports/harness/intraday_trade_guard_latest.json",
-    "reports/harness/intraday_trade_guard_latest.md",
     "reports/harness/latest_loop_report.json",
     "reports/harness/latest_position_exit_report.json",
     "reports/harness/intraday_realtime_guard_latest.json",
-    "reports/harness/current_issues/current_issue_risk_report_20260722.json"
+    "reports/harness/current_issues/current_issue_risk_report_20260728.json",
+    "reports/harness/intraday_trade_guard_latest.json",
+    "reports/harness/intraday_trade_guard_latest.md"
   ]
 }

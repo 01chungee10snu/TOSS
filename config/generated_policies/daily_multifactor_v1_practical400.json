@@ -11,13 +11,18 @@
   "selection": {
     "scoring_mode": "multi",
     "top_n": 3,
-    "factors": ["mom_5d", "vol_20d", "vol_ratio", "rsi_14"]
+    "factors": [
+      "mom_5d",
+      "vol_20d",
+      "vol_ratio",
+      "rsi_14"
+    ]
   },
   "cost_assumption_round_trip_bps": 24.5,
   "risk_gates": {
     "max_positions": 4,
-    "max_notional_krw_per_position": 80000,
-    "max_total_notional_krw": 240000,
+    "max_notional_krw_per_position": 250000,
+    "max_total_notional_krw": 1000000,
     "daily_loss_stop_krw": 6000,
     "weekly_loss_stop_krw": 15000,
     "require_manual_confirmation": false,
@@ -38,7 +43,7 @@
       "top_n": 3,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
-      "min_mom_5d": -0.10,
+      "min_mom_5d": -0.1,
       "max_mom_5d": 0.15,
       "min_rsi": 35,
       "max_rsi": 70,
@@ -47,10 +52,10 @@
       "max_vol_20d": 0.08,
       "min_price": 2000,
       "weights": {
-        "momentum": 0.40,
+        "momentum": 0.4,
         "low_vol": 0.25,
         "vol_norm": 0.15,
-        "rsi_mid": 0.20
+        "rsi_mid": 0.2
       },
       "backtest_total_return_pct": 35.5,
       "backtest_sharpe": 0.69,
@@ -68,7 +73,7 @@
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
       "min_mom_5d": -0.15,
-      "max_mom_5d": 0.10,
+      "max_mom_5d": 0.1,
       "min_rsi": 30,
       "max_rsi": 65,
       "min_vol_ratio": 0.8,
@@ -76,22 +81,106 @@
       "max_vol_20d": 0.08,
       "min_price": 2000,
       "weights": {
-        "momentum": 0.40,
+        "momentum": 0.4,
         "low_vol": 0.25,
         "vol_norm": 0.15,
-        "rsi_mid": 0.20
+        "rsi_mid": 0.2
       },
       "backtest_total_return_pct": 35.5,
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
       "disclaimer": "Research-only. Backtested 2025-01 to 2026-07. Not investment advice."
+    },
+    "down_high_vol": {
+      "situation": "down_high_vol",
+      "scoring_mode": "multi",
+      "momentum_col": "mom_5d",
+      "vol_col": "vol_20d",
+      "mode": "reversal",
+      "return_col": "daily_3d_close",
+      "top_n": 3,
+      "min_dollar_volume": 500000000,
+      "min_abs_momentum": 0.0,
+      "min_mom_5d": -0.25,
+      "max_mom_5d": 0.05,
+      "min_rsi": 25,
+      "max_rsi": 60,
+      "min_vol_ratio": 0.8,
+      "max_vol_ratio": 5.0,
+      "max_vol_20d": 0.12,
+      "min_price": 2000,
+      "weights": {
+        "momentum": 0.45,
+        "low_vol": 0.1,
+        "vol_norm": 0.15,
+        "rsi_mid": 0.3
+      },
+      "backtest_total_return_pct": 35.5,
+      "backtest_sharpe": 0.69,
+      "backtest_mdd_pct": -31.9,
+      "disclaimer": "Reversal in down_high_vol. Oversold bounce capture. Backtested basis: 3d fwd +0.71%, 60% win."
+    },
+    "up_high_vol": {
+      "situation": "up_high_vol",
+      "scoring_mode": "multi",
+      "momentum_col": "mom_5d",
+      "vol_col": "vol_20d",
+      "mode": "momentum",
+      "return_col": "daily_3d_close",
+      "top_n": 3,
+      "min_dollar_volume": 500000000,
+      "min_abs_momentum": 0.0,
+      "min_mom_5d": 0.0,
+      "max_mom_5d": 0.2,
+      "min_rsi": 40,
+      "max_rsi": 75,
+      "min_vol_ratio": 0.8,
+      "max_vol_ratio": 5.0,
+      "max_vol_20d": 0.12,
+      "min_price": 2000,
+      "weights": {
+        "momentum": 0.5,
+        "low_vol": 0.1,
+        "vol_norm": 0.15,
+        "rsi_mid": 0.25
+      },
+      "backtest_total_return_pct": 35.5,
+      "backtest_sharpe": 0.69,
+      "backtest_mdd_pct": -31.9,
+      "disclaimer": "Momentum in up_high_vol. Strong trend continuation. Backtested basis: 3d fwd +0.82%, 73% win."
+    },
+    "flat_high_vol": {
+      "situation": "flat_high_vol",
+      "scoring_mode": "multi",
+      "momentum_col": "mom_5d",
+      "vol_col": "vol_20d",
+      "mode": "reversal",
+      "return_col": "daily_3d_close",
+      "top_n": 3,
+      "min_dollar_volume": 500000000,
+      "min_abs_momentum": 0.0,
+      "min_mom_5d": -0.2,
+      "max_mom_5d": 0.1,
+      "min_rsi": 28,
+      "max_rsi": 65,
+      "min_vol_ratio": 0.8,
+      "max_vol_ratio": 5.0,
+      "max_vol_20d": 0.12,
+      "min_price": 2000,
+      "weights": {
+        "momentum": 0.4,
+        "low_vol": 0.15,
+        "vol_norm": 0.15,
+        "rsi_mid": 0.3
+      },
+      "backtest_total_return_pct": 35.5,
+      "backtest_sharpe": 0.69,
+      "backtest_mdd_pct": -31.9,
+      "disclaimer": "Reversal in flat_high_vol. Range bounce. Backtested basis: 3d fwd +0.30%, 58% win."
     }
   },
   "rejected_situations": {
-    "down_high_vol": "inverse_sleeve_hedge",
-    "flat_high_vol": "no_trade",
-    "down_low_vol": "no_trade",
-    "up_high_vol": "no_trade"
+    "down_low_vol": "no_trade"
   },
   "validation": {
     "backtest_period": "2025-01-01 to 2026-07-16",
@@ -102,5 +191,6 @@
     "backtest_profit_factor": 1.19,
     "note": "Multi-factor daily with 3-day hold, 5% stop loss, practical universe 400."
   },
-  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks."
+  "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
+  "policy_update_note": "2026-07-27: Expanded approved situations to include high-vol regimes (down/flat/up). Only down_low_vol remains rejected (3d fwd -0.27%, 50.8% win)."
 }

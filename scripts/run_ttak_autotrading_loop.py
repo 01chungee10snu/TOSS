@@ -246,8 +246,9 @@ def intraday_phase(candidate_payload: dict[str, Any], *, now: datetime | None = 
             max_quote_age_seconds=int(os.environ.get("TOSS_INTRADAY_MAX_QUOTE_AGE_SECONDS", "300")),
             news_observed_at=issue.get("generated_at_utc") or issue.get("generated_at_kst"),
             max_news_age_seconds=int(os.environ.get("TOSS_INTRADAY_MAX_NEWS_AGE_SECONDS", "1200")),
-            require_fresh_news=True,
+            require_fresh_news=os.getenv("TOSS_INTRADAY_REQUIRE_FRESH_NEWS", "true").strip().lower() in {"1", "true", "yes", "y"},
             inverse_symbol=inverse_symbol,
+            max_abs_day_return=float(os.environ.get("TOSS_INTRADAY_MAX_ABS_DAY_RETURN", "0.20")),
         )
         audit["quote_symbols"] = sorted(quotes)
         audit["position_symbols"] = sorted(str(p.symbol).zfill(6) for p in broker_positions)

@@ -1,0 +1,9 @@
+{
+  "panel_csv": "/Users/01chungee10/Github/TOSS/reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv",
+  "target_trading_day": "2026-07-28",
+  "latest_before": "2026-07-27",
+  "max_allowed_lag": 1,
+  "lag_before": 1,
+  "refreshed": false,
+  "status": "FRESH_ENOUGH"
+}

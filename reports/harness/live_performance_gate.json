@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-07-22T00:40:23.679334+00:00",
+  "generated_at_utc": "2026-07-28T02:35:32.869133+00:00",
   "policy_id": "daily_multifactor_v1_practical400",
   "deployed_since": "2026-07-20",
   "status": "PROBATION_CONTINUE",
@@ -8,10 +8,10 @@
   "preserve_sell_exits": true,
   "reasons": [],
   "sample": {
-    "settlement_days": 2,
+    "settlement_days": 6,
     "fill_count": 4,
     "consecutive_losing_fill_days": 1,
-    "latest_settlement_date": "2026-07-21"
+    "latest_settlement_date": "2026-07-27"
   },
   "live_performance": {
     "baseline_equity_krw": 410286.0,

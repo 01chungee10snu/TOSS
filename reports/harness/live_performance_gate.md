@@ -6,7 +6,7 @@
 - block_new_buys: False
 - preserve_sell_exits: True
 - reasons: []
-- settlements/fills: 2/4
+- settlements/fills: 6/4
 - cumulative_realized_fifo_krw: -893.0
 - loss_budget_krw: 12308.58
 - unmatched_sell_qty: 0.0

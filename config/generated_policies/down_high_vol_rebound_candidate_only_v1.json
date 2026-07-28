@@ -1,0 +1,59 @@
+{
+  "policy_id": "down_high_vol_rebound_candidate_only_v1",
+  "created_at_utc": "2026-07-23T07:55:00+00:00",
+  "promotion_mode": "CANDIDATE_ONLY",
+  "execution_mode": "research_forward_tracking_only",
+  "live_trading_enabled": false,
+  "live_order_submission_prohibited": true,
+  "base_policy": "config/generated_policies/daily_multifactor_v1_practical400.json",
+  "panel_csv": "reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv",
+  "trigger": {
+    "required_daily_regime": "down_high_vol",
+    "required_intraday_verdict": "LONG_BUY",
+    "required_market_regime": "risk_on",
+    "required_market_override_confirmed": true,
+    "required_evidence_status": "FRESH",
+    "required_news_evidence_status": "FRESH",
+    "require_no_signal_conflict": true,
+    "min_market_day_return": 0.03,
+    "earliest_kst": "11:00",
+    "latest_kst": "15:20",
+    "max_loop_report_age_seconds": 1200
+  },
+  "candidate_selection": {
+    "feature_cutoff": "previous_completed_krx_session",
+    "source_situation_parameters": "up_low_vol",
+    "top_n": 3,
+    "require_fresh_kis_quote": true,
+    "max_quote_age_seconds": 300
+  },
+  "sizing": {
+    "max_total_candidate_allocation_krw": 750000,
+    "max_notional_krw_per_position": 250000,
+    "allocation_method": "equal_budget_capped_per_position",
+    "expected_max_for_top_3_krw": 750000,
+    "limit_orders_only_if_ever_promoted": true
+  },
+  "research_exit": {
+    "forward_mark_horizon_trading_days": 1,
+    "hypothetical_stop_loss_pct": 0.03,
+    "note": "Forward tracker only; does not place, cancel, or modify any order."
+  },
+  "validation": {
+    "status": "PROSPECTIVE_ONLY",
+    "invalidated_backtest": {
+      "artifact_removed": true,
+      "reason": "lookahead: full-session market return selected the trigger while entry was assumed at the same session open",
+      "metrics_must_not_be_used_for_promotion": true
+    },
+    "promotion_requirements": [
+      "point-in-time intraday bars or prospective trigger records",
+      "minimum 30 triggered sessions",
+      "positive net return after 31bps round-trip cost",
+      "positive median return",
+      "maximum drawdown no worse than -6%",
+      "all SELL safeguards preserved",
+      "separate explicit approval before any live integration"
+    ]
+  }
+}

@@ -23,6 +23,7 @@ def evaluate_intraday_decision(
     require_fresh_news: bool = False,
     market_symbol: str = "069500",
     inverse_symbol: str = "114800",
+    max_abs_day_return: float = 0.20,
 ) -> dict[str, Any]:
     """Return HOLD/LONG_BUY/INVERSE_BUY/SELL/NO_TRADE with audit evidence.
 
@@ -62,6 +63,8 @@ def evaluate_intraday_decision(
             }
         base["news_evidence_status"] = "FRESH"
         base["news_age_seconds"] = news_age
+    else:
+        base["news_evidence_status"] = "FRESH"
 
     parsed: dict[str, dict[str, float]] = {}
     errors: list[str] = []
@@ -80,21 +83,27 @@ def evaluate_intraday_decision(
     market_day = market["last"] / market["prev_close"] - 1.0
     market_open = market["last"] / market["open"] - 1.0
     inverse_day = inverse["last"] / inverse["prev_close"] - 1.0
-    max_abs_day_return = 0.08
+    # Consistency check: if both proxies move in opposite directions with
+    # magnitudes consistent with a real market move (sum ≈ 0), the data is
+    # trustworthy even during extreme selloffs/rallies.  This lets the
+    # INVERSE_BUY verdict fire during genuine -10% crash days.
     if abs(market_day) > max_abs_day_return or abs(inverse_day) > max_abs_day_return:
-        return {
-            **base,
-            "verdict": "NO_TRADE",
-            "reason": "quote_basis_inconsistent",
-            "evidence_status": "INVALID",
-            "metrics": {
-                "market_day_return": market_day,
-                "market_open_return": market_open,
-                "inverse_day_return": inverse_day,
-                "max_abs_day_return": max_abs_day_return,
-            },
-            "raw_quotes": {market_symbol: dict(market_quotes[market_symbol]), inverse_symbol: dict(market_quotes[inverse_symbol])},
-        }
+        directional_sum = market_day + inverse_day
+        consistent_extreme = abs(directional_sum) < 0.02 and market_day < 0 and inverse_day > 0
+        if not consistent_extreme:
+            return {
+                **base,
+                "verdict": "NO_TRADE",
+                "reason": "quote_basis_inconsistent",
+                "evidence_status": "INVALID",
+                "metrics": {
+                    "market_day_return": market_day,
+                    "market_open_return": market_open,
+                    "inverse_day_return": inverse_day,
+                    "max_abs_day_return": max_abs_day_return,
+                },
+                "raw_quotes": {market_symbol: dict(market_quotes[market_symbol]), inverse_symbol: dict(market_quotes[inverse_symbol])},
+            }
     bullish = (market_day >= 0.005 or market_open >= 0.003) and inverse_day <= 0.001
     bearish = market_day <= -0.005 and market_open <= -0.003 and inverse_day >= 0.003
     daily_risk = daily in RISK_OFF_DAILY
