@@ -543,7 +543,11 @@ def build_position_exit_orders(
                 ):
                     reasons.append(f"trailing_stop_{trailing_stop_pct:.2%}")
         # Time exit: max holding trading days.
-        if max_holding_days > 0 and first_seen is not None:
+        # Inverse hedges are exempt: risk-off regimes persist longer than the
+        # 3-day ordinary-position cap, and forced time-exit would truncate
+        # directional gains.  Inverse exits via trailing-stop, regime recovery,
+        # or its own stop-loss — never via ordinary max-hold.
+        if max_holding_days > 0 and first_seen is not None and not is_inverse_hedge:
             try:
                 start_date = date.fromisoformat(str(first_seen)[:10])
                 held_days = _trading_days_between(start_date, today, env=source)
