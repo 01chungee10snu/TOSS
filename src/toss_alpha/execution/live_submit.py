@@ -33,6 +33,7 @@ from toss_alpha.risk import RiskPolicy
 
 KST = ZoneInfo("Asia/Seoul")
 KOREA_REGULAR_MARKET_OPEN = time(9, 0)
+KOREA_REGULAR_MARKET_CLOSE = time(15, 30)
 KOREA_REGULAR_MARKET_LAST_BUY = time(15, 20)
 
 
@@ -170,7 +171,10 @@ def run_live_submit_phase(
         if freshness_violations:
             phase["status"] = "BLOCKED_STALE_DATA"
             phase["violations"].extend(freshness_violations)
-        market_violation = korea_regular_market_violation(now, env=env)
+        # BUY market-time gate: 09:00–15:20.  SELL gets its own wider gate
+        # (09:00–15:30) checked per-order below, so a late-day exit is never
+        # trapped by the BUY cutoff.
+        market_violation = korea_regular_market_violation(now, env=env, side="BUY")
         if market_violation:
             phase["status"] = "BLOCKED_MARKET_TIME"
             phase["violations"].append(market_violation)
@@ -258,6 +262,10 @@ def run_live_submit_phase(
                 violation for violation in phase_violations
                 if not _buy_only_phase_violation(str(violation))
             ]
+            # SELL-specific market-time gate: 09:00–15:30 (full regular session).
+            sell_market_violation = korea_regular_market_violation(now, env=env, side="SELL")
+            if sell_market_violation:
+                order_violations.append(sell_market_violation)
         if phase_violations:
             order_violations.extend(phase_violations)
         reserved = False
@@ -470,6 +478,7 @@ def _buy_only_phase_violation(violation: str) -> bool:
         "candidate_as_of_",
         "panel_latest_",
         "sentiment_",
+        "after_korea_regular_market_last_buy_",
     ))
 
 
@@ -566,12 +575,11 @@ def _positive_float_or_none(value: Any) -> float | None:
     return parsed
 
 
-def korea_regular_market_violation(now: datetime, env: Mapping[str, str] | None = None) -> str | None:
+def korea_regular_market_violation(now: datetime, *, env: Mapping[str, str] | None = None, side: str = "BUY") -> str | None:
     """Return fail-closed violation if real KIS submit is outside KR regular session.
 
-    The cron may run pre-open for research/readiness, but live BUY submission is
-    only allowed after the 09:00 KST open. The 15:20 cutoff avoids relying on
-    closing-auction/session-specific order semantics.
+    BUY: 09:00–15:20 (avoids closing-auction reliance).
+    SELL: 09:00–15:30 (full regular session — exits must always be executable).
     """
     if now.tzinfo is None:
         now = now.replace(tzinfo=timezone.utc)
@@ -582,8 +590,12 @@ def korea_regular_market_violation(now: datetime, env: Mapping[str, str] | None 
         return "outside_krx_trading_day"
     if kst_now.time() < KOREA_REGULAR_MARKET_OPEN:
         return "before_korea_regular_market_open_0900_kst"
-    if kst_now.time() > KOREA_REGULAR_MARKET_LAST_BUY:
-        return "after_korea_regular_market_last_buy_1520_kst"
+    if side.upper() == "SELL":
+        if kst_now.time() > KOREA_REGULAR_MARKET_CLOSE:
+            return "after_korea_regular_market_close_1530_kst"
+    else:
+        if kst_now.time() > KOREA_REGULAR_MARKET_LAST_BUY:
+            return "after_korea_regular_market_last_buy_1520_kst"
     return None
 
 

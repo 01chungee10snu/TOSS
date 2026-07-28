@@ -1,6 +1,6 @@
 # TOSS ttak autotrading loop report
 
-- generated_at_utc: 2026-07-28T03:34:05.867169+00:00
+- generated_at_utc: 2026-07-28T06:33:29.050202+00:00
 - overall_status: NO_TRADE
 
 ## Quant
@@ -31,10 +31,10 @@
 - checked_symbols: ['108490', '161390']
 - verdicts_by_symbol: {'161390': 'WATCH', '108490': 'WATCH'}
 - buy/watch/review/veto: 0/2/0/0
-- news/disclosure events: 6/0
+- news/disclosure events: 7/0
 - collector_errors: {}
 - disclosure_errors: {}
-- market_overlay: {'ordinary_buy_authorized': False, 'authorized_symbols': [], 'size_multiplier': 0.0, 'emergency_block': True, 'emergency_threshold': -0.03, 'market_day_return': -0.10735171261487053, 'market_regime': 'risk_off', 'news_severity': 'low', 'reason': 'symbol_market_emergency_block'}
+- market_overlay: {'ordinary_buy_authorized': False, 'authorized_symbols': [], 'size_multiplier': 0.0, 'emergency_block': True, 'emergency_threshold': -0.03, 'market_day_return': -0.11190012067205046, 'market_regime': 'risk_off', 'news_severity': 'low', 'reason': 'symbol_market_emergency_block'}
 
 ## Position exit
 - enabled: True
@@ -44,13 +44,13 @@
 - stop_loss_pct: 0.05
 - take_profit_pct: 0.1
 - trailing_stop_pct: 0.05
-- max_holding_trading_days: 3
+- max_holding_trading_days: 1
 - max_positions_limit: None
 - equity_guard: READY
 - equity_guard_threshold_pct: 0.06
 - equity_guard_cooldown_seconds: 691200
 - equity_guard_cooldown_unit: days
-- equity_guard_drawdown_pct: -0.00118164223957673
+- equity_guard_drawdown_pct: -0.0011793196829911201
 - equity_guard_block_new_buys: False
 - equity_guard_liquidation_required: False
 - report_path: /Users/01chungee10/Github/TOSS/reports/harness/latest_position_exit_report.json
@@ -87,7 +87,7 @@
 - submitted_count: 0
 - blocked_count: 0
 - violations: []
-- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260728T033405Z.json
+- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260728T063329Z.json
 - ledger_path: /Users/01chungee10/Github/TOSS/reports/harness/live_order_ledger.jsonl
 
 ## Notes

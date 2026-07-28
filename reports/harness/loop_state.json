@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-28T03:34:05.867169+00:00",
+  "generated_at_utc": "2026-07-28T06:33:29.050202+00:00",
   "overall_status": "NO_TRADE",
   "quant": {
     "status": "NO_TRADE",
@@ -39,7 +39,7 @@
       }
     ],
     "candidate_payload": {
-      "generated_at_utc": "2026-07-28T03:33:57.815505+00:00",
+      "generated_at_utc": "2026-07-28T06:33:23.460103+00:00",
       "as_of": "2026-07-27",
       "status": "NO_TRADE",
       "situation": "down_high_vol",
@@ -74,8 +74,8 @@
       },
       "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
       "intraday_decision": {
-        "decision_id": "intraday-1fcc205462a24b978fe091d47cc5425d",
-        "generated_at_utc": "2026-07-28T03:33:57.878424+00:00",
+        "decision_id": "intraday-24bba515aa9b49f684d98885ff983a12",
+        "generated_at_utc": "2026-07-28T06:33:23.521366+00:00",
         "daily_regime": "down_high_vol",
         "news_severity": "low",
         "evidence_status": "FRESH",
@@ -87,9 +87,9 @@
         "inverse_symbol": "114800",
         "news_evidence_status": "FRESH",
         "metrics": {
-          "market_day_return": -0.10735171261487053,
-          "market_open_return": -0.0530746885923884,
-          "inverse_day_return": 0.10871518418688231,
+          "market_day_return": -0.11190012067205046,
+          "market_open_return": -0.057899660282605514,
+          "inverse_day_return": 0.11230907457322559,
           "bullish_confirmed": false,
           "bearish_confirmed": true,
           "risk_context": true,
@@ -101,20 +101,20 @@
         "raw_quotes": {
           "069500": {
             "symbol": "069500",
-            "last": 96165.0,
+            "last": 95675.0,
             "open": 101555.0,
             "prev_close": 107730.0,
-            "volume": 11938472.0,
-            "observed_at": "2026-07-28T03:33:57.878424+00:00",
+            "volume": 20991710.0,
+            "observed_at": "2026-07-28T06:33:23.521366+00:00",
             "source": "kis_realtime_quote"
           },
           "114800": {
             "symbol": "114800",
-            "last": 1234.0,
+            "last": 1238.0,
             "open": 1180.0,
             "prev_close": 1113.0,
-            "volume": 528970314.0,
-            "observed_at": "2026-07-28T03:33:57.878424+00:00",
+            "volume": 780971918.0,
+            "observed_at": "2026-07-28T06:33:23.521366+00:00",
             "source": "kis_realtime_quote"
           }
         },
@@ -122,7 +122,7 @@
         "reason": "risk_off_confirmed_inverse_already_held"
       },
       "symbol_issue": {
-        "generated_at_utc": "2026-07-28T03:34:01.145739+00:00",
+        "generated_at_utc": "2026-07-28T06:33:25.495054+00:00",
         "max_age_seconds": 43200,
         "max_disclosure_age_seconds": 129600,
         "checked_symbols": [
@@ -160,7 +160,7 @@
         "review_count": 0,
         "veto_count": 0,
         "status": "WATCH",
-        "events_collected": 6,
+        "events_collected": 7,
         "disclosure_events_collected": 0,
         "collector_errors": {},
         "disclosure_errors": {},
@@ -177,7 +177,7 @@
         "size_multiplier": 0.0,
         "emergency_block": true,
         "emergency_threshold": -0.03,
-        "market_day_return": -0.10735171261487053,
+        "market_day_return": -0.11190012067205046,
         "market_regime": "risk_off",
         "news_severity": "low",
         "reason": "symbol_market_emergency_block"
@@ -199,7 +199,7 @@
     }
   },
   "intraday": {
-    "generated_at_utc": "2026-07-28T03:33:57.878424+00:00",
+    "generated_at_utc": "2026-07-28T06:33:23.521366+00:00",
     "daily_regime": "down_high_vol",
     "news_severity": "low",
     "issue_path": "/Users/01chungee10/Github/TOSS/reports/harness/current_issues/current_issue_risk_report_20260728.json",
@@ -224,8 +224,8 @@
       "114800"
     ],
     "decision": {
-      "decision_id": "intraday-1fcc205462a24b978fe091d47cc5425d",
-      "generated_at_utc": "2026-07-28T03:33:57.878424+00:00",
+      "decision_id": "intraday-24bba515aa9b49f684d98885ff983a12",
+      "generated_at_utc": "2026-07-28T06:33:23.521366+00:00",
       "daily_regime": "down_high_vol",
       "news_severity": "low",
       "evidence_status": "FRESH",
@@ -237,9 +237,9 @@
       "inverse_symbol": "114800",
       "news_evidence_status": "FRESH",
       "metrics": {
-        "market_day_return": -0.10735171261487053,
-        "market_open_return": -0.0530746885923884,
-        "inverse_day_return": 0.10871518418688231,
+        "market_day_return": -0.11190012067205046,
+        "market_open_return": -0.057899660282605514,
+        "inverse_day_return": 0.11230907457322559,
         "bullish_confirmed": false,
         "bearish_confirmed": true,
         "risk_context": true,
@@ -251,20 +251,20 @@
       "raw_quotes": {
         "069500": {
           "symbol": "069500",
-          "last": 96165.0,
+          "last": 95675.0,
           "open": 101555.0,
           "prev_close": 107730.0,
-          "volume": 11938472.0,
-          "observed_at": "2026-07-28T03:33:57.878424+00:00",
+          "volume": 20991710.0,
+          "observed_at": "2026-07-28T06:33:23.521366+00:00",
           "source": "kis_realtime_quote"
         },
         "114800": {
           "symbol": "114800",
-          "last": 1234.0,
+          "last": 1238.0,
           "open": 1180.0,
           "prev_close": 1113.0,
-          "volume": 528970314.0,
-          "observed_at": "2026-07-28T03:33:57.878424+00:00",
+          "volume": 780971918.0,
+          "observed_at": "2026-07-28T06:33:23.521366+00:00",
           "source": "kis_realtime_quote"
         }
       },
@@ -278,14 +278,14 @@
       "size_multiplier": 0.0,
       "emergency_block": true,
       "emergency_threshold": -0.03,
-      "market_day_return": -0.10735171261487053,
+      "market_day_return": -0.11190012067205046,
       "market_regime": "risk_off",
       "news_severity": "low",
       "reason": "symbol_market_emergency_block"
     }
   },
   "symbol_issue": {
-    "generated_at_utc": "2026-07-28T03:34:01.145739+00:00",
+    "generated_at_utc": "2026-07-28T06:33:25.495054+00:00",
     "max_age_seconds": 43200,
     "max_disclosure_age_seconds": 129600,
     "checked_symbols": [
@@ -323,7 +323,7 @@
     "review_count": 0,
     "veto_count": 0,
     "status": "WATCH",
-    "events_collected": 6,
+    "events_collected": 7,
     "disclosure_events_collected": 0,
     "collector_errors": {},
     "disclosure_errors": {},
@@ -393,7 +393,7 @@
     "allowed_count": 2,
     "original_order_count": 3,
     "effective_candidate_payload": {
-      "generated_at_utc": "2026-07-28T03:33:57.815505+00:00",
+      "generated_at_utc": "2026-07-28T06:33:23.460103+00:00",
       "as_of": "2026-07-27",
       "status": "CANDIDATES",
       "situation": "down_high_vol",
@@ -459,8 +459,8 @@
       },
       "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
       "intraday_decision": {
-        "decision_id": "intraday-1fcc205462a24b978fe091d47cc5425d",
-        "generated_at_utc": "2026-07-28T03:33:57.878424+00:00",
+        "decision_id": "intraday-24bba515aa9b49f684d98885ff983a12",
+        "generated_at_utc": "2026-07-28T06:33:23.521366+00:00",
         "daily_regime": "down_high_vol",
         "news_severity": "low",
         "evidence_status": "FRESH",
@@ -472,9 +472,9 @@
         "inverse_symbol": "114800",
         "news_evidence_status": "FRESH",
         "metrics": {
-          "market_day_return": -0.10735171261487053,
-          "market_open_return": -0.0530746885923884,
-          "inverse_day_return": 0.10871518418688231,
+          "market_day_return": -0.11190012067205046,
+          "market_open_return": -0.057899660282605514,
+          "inverse_day_return": 0.11230907457322559,
           "bullish_confirmed": false,
           "bearish_confirmed": true,
           "risk_context": true,
@@ -486,20 +486,20 @@
         "raw_quotes": {
           "069500": {
             "symbol": "069500",
-            "last": 96165.0,
+            "last": 95675.0,
             "open": 101555.0,
             "prev_close": 107730.0,
-            "volume": 11938472.0,
-            "observed_at": "2026-07-28T03:33:57.878424+00:00",
+            "volume": 20991710.0,
+            "observed_at": "2026-07-28T06:33:23.521366+00:00",
             "source": "kis_realtime_quote"
           },
           "114800": {
             "symbol": "114800",
-            "last": 1234.0,
+            "last": 1238.0,
             "open": 1180.0,
             "prev_close": 1113.0,
-            "volume": 528970314.0,
-            "observed_at": "2026-07-28T03:33:57.878424+00:00",
+            "volume": 780971918.0,
+            "observed_at": "2026-07-28T06:33:23.521366+00:00",
             "source": "kis_realtime_quote"
           }
         },
@@ -510,7 +510,7 @@
   },
   "position_exit": {
     "enabled": true,
-    "generated_at_utc": "2026-07-28T03:34:01.882809+00:00",
+    "generated_at_utc": "2026-07-28T06:33:26.214620+00:00",
     "sell_order_count": 0,
     "position_quote_errors": {},
     "position_quote_count": 1,
@@ -527,7 +527,7 @@
       "partial_fraction": 0.33,
       "trailing_stop_pct": 0.03
     },
-    "max_holding_trading_days": 3,
+    "max_holding_trading_days": 1,
     "risk_off_exit": true,
     "risk_off_regimes": [
       "down_high_vol",
@@ -550,11 +550,11 @@
         "quantity": 162.0,
         "sellable_quantity": 162.0,
         "avg_price": 1228.0,
-        "current_price": 1233.0,
+        "current_price": 1238.0,
         "quote_source": "kis",
-        "quote_observed_at": "2026-07-28T03:34:05.622903+00:00",
-        "best_bid": 1232.0,
-        "peak_price": 1242.0,
+        "quote_observed_at": "2026-07-28T06:33:28.804488+00:00",
+        "best_bid": 1238.0,
+        "peak_price": 1247.0,
         "protected_price": null,
         "initial_quantity": 162.0,
         "partial_stage": null,
@@ -562,8 +562,8 @@
         "lifecycle_id": "20260728T023553821525Z",
         "first_seen_date": "2026-07-28",
         "held_trading_days": 0,
-        "market_value": 199746.0,
-        "unrealized_pnl": 810.0,
+        "market_value": 200556.0,
+        "unrealized_pnl": 1620.0,
         "reasons": [],
         "action": "HOLD"
       }
@@ -581,14 +581,14 @@
         "currency": "KRW",
         "cash": 410286.0,
         "buying_power": null,
-        "total_equity": 410806.0,
-        "as_of": "2026-07-28T03:34:04.032309+00:00",
+        "total_equity": 411616.0,
+        "as_of": "2026-07-28T06:33:27.122500+00:00",
         "source": "kis"
       },
-      "current_equity": 410806.0,
+      "current_equity": 411616.0,
       "status": "READY",
-      "peak_equity": 411292.0,
-      "drawdown_pct": -0.00118164223957673,
+      "peak_equity": 412102.0,
+      "drawdown_pct": -0.0011793196829911201,
       "cooldown_active": false,
       "cooldown_remaining_seconds": 0,
       "cooldown_until_ts": 0.0
@@ -600,7 +600,7 @@
       "status": "PROBATION_CONTINUE",
       "block_new_buys": false,
       "reasons": [],
-      "age_hours": 0.002367938611111111,
+      "age_hours": 0.0016816127777777778,
       "policy_id": "daily_multifactor_v1_practical400",
       "sample": {
         "settlement_days": 6,
@@ -622,7 +622,7 @@
     "report_path": "/Users/01chungee10/Github/TOSS/reports/harness/latest_position_exit_report.json"
   },
   "execution_candidate_payload": {
-    "generated_at_utc": "2026-07-28T03:33:57.815505+00:00",
+    "generated_at_utc": "2026-07-28T06:33:23.460103+00:00",
     "as_of": "2026-07-27",
     "status": "NO_TRADE",
     "situation": "down_high_vol",
@@ -657,8 +657,8 @@
     },
     "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
     "intraday_decision": {
-      "decision_id": "intraday-1fcc205462a24b978fe091d47cc5425d",
-      "generated_at_utc": "2026-07-28T03:33:57.878424+00:00",
+      "decision_id": "intraday-24bba515aa9b49f684d98885ff983a12",
+      "generated_at_utc": "2026-07-28T06:33:23.521366+00:00",
       "daily_regime": "down_high_vol",
       "news_severity": "low",
       "evidence_status": "FRESH",
@@ -670,9 +670,9 @@
       "inverse_symbol": "114800",
       "news_evidence_status": "FRESH",
       "metrics": {
-        "market_day_return": -0.10735171261487053,
-        "market_open_return": -0.0530746885923884,
-        "inverse_day_return": 0.10871518418688231,
+        "market_day_return": -0.11190012067205046,
+        "market_open_return": -0.057899660282605514,
+        "inverse_day_return": 0.11230907457322559,
         "bullish_confirmed": false,
         "bearish_confirmed": true,
         "risk_context": true,
@@ -684,20 +684,20 @@
       "raw_quotes": {
         "069500": {
           "symbol": "069500",
-          "last": 96165.0,
+          "last": 95675.0,
           "open": 101555.0,
           "prev_close": 107730.0,
-          "volume": 11938472.0,
-          "observed_at": "2026-07-28T03:33:57.878424+00:00",
+          "volume": 20991710.0,
+          "observed_at": "2026-07-28T06:33:23.521366+00:00",
           "source": "kis_realtime_quote"
         },
         "114800": {
           "symbol": "114800",
-          "last": 1234.0,
+          "last": 1238.0,
           "open": 1180.0,
           "prev_close": 1113.0,
-          "volume": 528970314.0,
-          "observed_at": "2026-07-28T03:33:57.878424+00:00",
+          "volume": 780971918.0,
+          "observed_at": "2026-07-28T06:33:23.521366+00:00",
           "source": "kis_realtime_quote"
         }
       },
@@ -705,7 +705,7 @@
       "reason": "risk_off_confirmed_inverse_already_held"
     },
     "symbol_issue": {
-      "generated_at_utc": "2026-07-28T03:34:01.145739+00:00",
+      "generated_at_utc": "2026-07-28T06:33:25.495054+00:00",
       "max_age_seconds": 43200,
       "max_disclosure_age_seconds": 129600,
       "checked_symbols": [
@@ -743,7 +743,7 @@
       "review_count": 0,
       "veto_count": 0,
       "status": "WATCH",
-      "events_collected": 6,
+      "events_collected": 7,
       "disclosure_events_collected": 0,
       "collector_errors": {},
       "disclosure_errors": {},
@@ -760,7 +760,7 @@
       "size_multiplier": 0.0,
       "emergency_block": true,
       "emergency_threshold": -0.03,
-      "market_day_return": -0.10735171261487053,
+      "market_day_return": -0.11190012067205046,
       "market_regime": "risk_off",
       "news_severity": "low",
       "reason": "symbol_market_emergency_block"
@@ -811,7 +811,7 @@
     "submitted_count": 0,
     "unknown_count": 0,
     "blocked_count": 0,
-    "artifact_path": "/Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260728T033405Z.json",
+    "artifact_path": "/Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260728T063329Z.json",
     "ledger_path": "/Users/01chungee10/Github/TOSS/reports/harness/live_order_ledger.jsonl",
     "divergence_ledger_path": "/Users/01chungee10/Github/TOSS/reports/harness/live_paper_divergence_ledger.jsonl",
     "results": [],
