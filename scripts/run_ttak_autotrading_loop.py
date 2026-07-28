@@ -823,6 +823,27 @@ def main() -> None:
     fast = fast_phase(intraday_candidate_payload)
     issue_candidate_payload, symbol_issue = symbol_issue_phase(fast.get("effective_candidate_payload") or {})
     execution_entry_payload, intraday = finalize_symbol_first_branch(issue_candidate_payload, intraday)
+    # Oversold bounce sleeve: after a market crash, the next session's rebound
+    # in heavily-oversold large-caps can be captured.  Only fires when the
+    # inverse sleeve did not apply and no ordinary BUYs exist.
+    from toss_alpha.execution.oversold_bounce_sleeve import maybe_apply_oversold_bounce
+
+    inverse_audit = intraday.get("inverse_sleeve") or {}
+    if not inverse_audit.get("applied"):
+        panel_path = Path(os.environ.get("TOSS_PANEL_CSV", "reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv"))
+        decision = intraday.get("decision") if isinstance(intraday.get("decision"), dict) else {}
+        metrics = decision.get("metrics") if isinstance(decision.get("metrics"), dict) else {}
+        bounce_payload, bounce_audit = maybe_apply_oversold_bounce(
+            execution_entry_payload,
+            panel_path=panel_path,
+            out_dir=CANDIDATE_DIR,
+            env=os.environ,
+            intraday_verdict=str(decision.get("verdict") or ""),
+            market_day_return=metrics.get("market_day_return"),
+        )
+        if bounce_audit.get("applied"):
+            execution_entry_payload = bounce_payload
+        intraday["oversold_bounce"] = bounce_audit
     quant["candidate_payload"] = execution_entry_payload
     inverse_audit = intraday.get("inverse_sleeve") or {}
     quant["inverse_sleeve"] = inverse_audit
