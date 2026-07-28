@@ -104,7 +104,8 @@ def test_confirmed_bear_market_without_holdings_allows_inverse_candidate():
     assert decision["raw_quotes"]["114800"]["last"] == 101.2
 
 
-def test_extreme_etf_returns_fail_closed_as_quote_basis_inconsistent():
+def test_extreme_but_directionally_consistent_etf_returns_proceed():
+    """A genuine -10% crash with inverse +10% is a real market move, not bad data."""
     decision = evaluate_intraday_decision(
         daily_regime="down_high_vol",
         news_severity="high",
@@ -118,12 +119,30 @@ def test_extreme_etf_returns_fail_closed_as_quote_basis_inconsistent():
         ),
         now=NOW,
     )
+    # Directionally consistent (market down + inverse up, sum ≈ 0) → not inconsistent
+    assert decision["verdict"] == "INVERSE_BUY"
+    assert decision["evidence_status"] == "FRESH"
+    assert decision["metrics"]["intraday_bearish_override"] is True
 
+
+def test_directionally_inconsistent_extreme_returns_fail_closed():
+    """Both proxies falling 25% is genuinely bad data, not a real market move."""
+    decision = evaluate_intraday_decision(
+        daily_regime="down_high_vol",
+        news_severity="high",
+        market_quotes=quotes(
+            market_last=75.0,
+            market_open=100.0,
+            market_prev=100.0,
+            inverse_last=790.0,
+            inverse_open=1000.0,
+            inverse_prev=1050.0,
+        ),
+        now=NOW,
+    )
     assert decision["verdict"] == "NO_TRADE"
     assert decision["reason"] == "quote_basis_inconsistent"
     assert decision["evidence_status"] == "INVALID"
-    assert decision["metrics"]["inverse_day_return"] > 0.09
-    assert decision["raw_quotes"]["114800"]["prev_close"] == 1017.0
 
 
 def test_confirmed_bear_market_sells_only_independently_weak_losing_position():

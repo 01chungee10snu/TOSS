@@ -108,7 +108,12 @@ def evaluate_intraday_decision(
     bearish = market_day <= -0.005 and market_open <= -0.003 and inverse_day >= 0.003
     daily_risk = daily in RISK_OFF_DAILY
     news_risk = news in HIGH_NEWS
-    risk_context = daily_risk or news_risk
+    # Intraday bearish override: a strong intraday selloff (market ≤ -1% with
+    # inverse confirming) creates an effective risk-off context even when the
+    # daily regime or news hasn't caught up.  This lets INVERSE_BUY fire during
+    # live crashes regardless of yesterday's regime classification.
+    intraday_bearish_override = market_day <= -0.01 and inverse_day >= 0.005
+    risk_context = daily_risk or news_risk or intraday_bearish_override
     # Headlines and yesterday's regime remain risk context, but fresh prices can
     # resolve the conflict. Critical news needs materially stronger confirmation.
     high_news_override = bullish and market_day >= 0.01 and market_open >= 0.003 and inverse_day <= -0.005
@@ -128,6 +133,7 @@ def evaluate_intraday_decision(
         "daily_risk": daily_risk,
         "news_risk": news_risk,
         "market_override_confirmed": market_override_confirmed,
+        "intraday_bearish_override": intraday_bearish_override,
     }
     ready = {
         **base,
