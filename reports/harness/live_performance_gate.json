@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-07-28T06:33:22.751726+00:00",
+  "generated_at_utc": "2026-07-29T03:03:04.922364+00:00",
   "policy_id": "daily_multifactor_v1_practical400",
   "deployed_since": "2026-07-20",
   "status": "PROBATION_CONTINUE",
@@ -8,14 +8,14 @@
   "preserve_sell_exits": true,
   "reasons": [],
   "sample": {
-    "settlement_days": 6,
-    "fill_count": 4,
-    "consecutive_losing_fill_days": 1,
-    "latest_settlement_date": "2026-07-27"
+    "settlement_days": 7,
+    "fill_count": 5,
+    "consecutive_losing_fill_days": 0,
+    "latest_settlement_date": "2026-07-28"
   },
   "live_performance": {
     "baseline_equity_krw": 410286.0,
-    "latest_equity_krw": 410286.0,
+    "latest_equity_krw": 411616.0,
     "cumulative_realized_matched_fifo_krw": -893.0,
     "unmatched_sell_qty": 0.0,
     "inherited_deployment_day_unmatched_sell_qty": 1.0,
@@ -30,8 +30,7 @@
   "research": {
     "review_required": true,
     "reasons": [
-      "live_realized_pnl_negative",
-      "latest_fill_day_lost"
+      "live_realized_pnl_negative"
     ],
     "promotion_mode": "CANDIDATE_ONLY_AFTER_PIT_WALKFORWARD_YEAR_COST_GATES",
     "auto_replace_live_policy": false

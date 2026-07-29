@@ -497,7 +497,26 @@ def build_position_exit_orders(
         elif risk_off_exit and market_regime is not None and is_inverse_hedge:
             # Once independently classified market risk clears, unwind the
             # hedge through the same guarded SELL path.
-            reasons.append("inverse_regime_recovery")
+            # [2026-07-29] Grace period: prevent early liquidation from intraday
+            # regime noise. Require a minimum hold time (default 2 hours) before
+            # honoring regime recovery, so transient open-hour flicker doesn't
+            # truncate directional gains.
+            inverse_recovery_min_hours = _env_float(source, "TOSS_INVERSE_RECOVERY_MIN_HOURS", 2.0)
+            _skip_recovery = False
+            if first_seen is not None and inverse_recovery_min_hours > 0:
+                try:
+                    from datetime import datetime as _dt
+                    _first = _dt.fromisoformat(str(first_seen).replace("Z", "+00:00"))
+                    _now = as_of or _dt.now(timezone.utc)
+                    if _first.tzinfo is None:
+                        _first = _first.replace(tzinfo=timezone.utc)
+                    _elapsed_hours = (_now - _first).total_seconds() / 3600.0
+                    if _elapsed_hours < inverse_recovery_min_hours:
+                        _skip_recovery = True
+                except (ValueError, TypeError):
+                    pass
+            if not _skip_recovery:
+                reasons.append("inverse_regime_recovery")
         if avg_price is not None and current is not None:
             avg = float(avg_price)
             if is_inverse_hedge:

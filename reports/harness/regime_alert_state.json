@@ -1,0 +1,16 @@
+{
+  "last_regime": {
+    "bearish_confirmed": true,
+    "bullish_confirmed": false,
+    "daily_regime": "flat_high_vol",
+    "emergency_block": true,
+    "generated_at_utc": "2026-07-29T01:49:01.920891+00:00",
+    "market_day_return": -0.03464854977789389,
+    "market_regime": "risk_off",
+    "news_severity": "low",
+    "ordinary_buy_authorized": false,
+    "size_multiplier": 0.0,
+    "verdict": "HOLD"
+  },
+  "updated_at": "2026-07-29T10:51:08.019699+09:00"
+}

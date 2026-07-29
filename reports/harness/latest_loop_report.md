@@ -1,6 +1,6 @@
 # TOSS ttak autotrading loop report
 
-- generated_at_utc: 2026-07-28T06:33:29.050202+00:00
+- generated_at_utc: 2026-07-29T03:03:11.203036+00:00
 - overall_status: NO_TRADE
 
 ## Quant
@@ -8,49 +8,49 @@
 - panel_exists: True
 - policy_exists: True
 - policy_json: /Users/01chungee10/Github/TOSS/config/generated_policies/daily_multifactor_v1_practical400.json
-- candidate_json: /Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2026-07-27_daily_multifactor_v1_practical400.json
+- candidate_json: /Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2026-07-28_daily_multifactor_v1_practical400.json
 - candidate_status: NO_TRADE
-- candidate_situation: down_high_vol
+- candidate_situation: flat_high_vol
 - strategy_type: None
 - order_count: 0
 - inverse_sleeve: applied=False reason=inverse_sleeve_blocked:intraday_decision:HOLD
 
 ## Fast veto
-- status: READY_WITH_VETO
+- status: READY
 - policy_json: /Users/01chungee10/Github/TOSS/config/generated_policies/daily_multifactor_v1_practical400.json
 - thresholds: {'max_gap_pct': 0.08, 'max_intraday_range_pct': 0.15, 'min_dollar_volume_krw': 10000000.0, 'max_prev_volatility_20d': 0.1}
-- reasons: ['excessive_intraday_range']
-- checked_symbols: ['319400', '161390', '108490']
-- vetoed_symbols: ['319400']
-- allowed_count: 2 / 3
-- reasons_by_symbol: {'319400': ['excessive_intraday_range']}
+- reasons: []
+- checked_symbols: ['010950', '088980']
+- vetoed_symbols: []
+- allowed_count: 2 / 2
+- reasons_by_symbol: {}
 
 ## Symbol issue authorization
 - status: WATCH
 - require_positive: False
-- checked_symbols: ['108490', '161390']
-- verdicts_by_symbol: {'161390': 'WATCH', '108490': 'WATCH'}
+- checked_symbols: ['010950', '088980']
+- verdicts_by_symbol: {'010950': 'WATCH', '088980': 'WATCH'}
 - buy/watch/review/veto: 0/2/0/0
-- news/disclosure events: 7/0
+- news/disclosure events: 1/0
 - collector_errors: {}
 - disclosure_errors: {}
-- market_overlay: {'ordinary_buy_authorized': False, 'authorized_symbols': [], 'size_multiplier': 0.0, 'emergency_block': True, 'emergency_threshold': -0.03, 'market_day_return': -0.11190012067205046, 'market_regime': 'risk_off', 'news_severity': 'low', 'reason': 'symbol_market_emergency_block'}
+- market_overlay: {'ordinary_buy_authorized': False, 'authorized_symbols': [], 'size_multiplier': 0.0, 'emergency_block': True, 'emergency_threshold': -0.03, 'market_day_return': -0.08528873791481584, 'market_regime': 'risk_off', 'news_severity': 'low', 'reason': 'symbol_market_emergency_block'}
 
 ## Position exit
 - enabled: True
 - status_reason: None
 - positions_checked: 1
 - sell_order_count: 0
-- stop_loss_pct: 0.05
-- take_profit_pct: 0.1
-- trailing_stop_pct: 0.05
+- stop_loss_pct: 0.03
+- take_profit_pct: 0.04
+- trailing_stop_pct: 0.03
 - max_holding_trading_days: 1
 - max_positions_limit: None
 - equity_guard: READY
 - equity_guard_threshold_pct: 0.06
 - equity_guard_cooldown_seconds: 691200
 - equity_guard_cooldown_unit: days
-- equity_guard_drawdown_pct: -0.0011793196829911201
+- equity_guard_drawdown_pct: -0.004151884727567445
 - equity_guard_block_new_buys: False
 - equity_guard_liquidation_required: False
 - report_path: /Users/01chungee10/Github/TOSS/reports/harness/latest_position_exit_report.json
@@ -87,7 +87,7 @@
 - submitted_count: 0
 - blocked_count: 0
 - violations: []
-- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260728T063329Z.json
+- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260729T030311Z.json
 - ledger_path: /Users/01chungee10/Github/TOSS/reports/harness/live_order_ledger.jsonl
 
 ## Notes
