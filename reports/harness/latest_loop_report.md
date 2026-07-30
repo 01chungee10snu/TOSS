@@ -1,6 +1,6 @@
 # TOSS ttak autotrading loop report
 
-- generated_at_utc: 2026-07-30T03:33:46.967619+00:00
+- generated_at_utc: 2026-07-30T04:33:55.592150+00:00
 - overall_status: LIVE_SUBMIT_BLOCKED
 
 ## Quant
@@ -34,7 +34,7 @@
 - news/disclosure events: 3/0
 - collector_errors: {}
 - disclosure_errors: {}
-- market_overlay: {'ordinary_buy_authorized': True, 'authorized_symbols': ['475150', '388210'], 'size_multiplier': 0.35, 'emergency_block': False, 'emergency_threshold': -0.03, 'market_day_return': -0.004528934861615874, 'market_regime': '', 'news_severity': 'low', 'reason': 'risk_off_reduced_size'}
+- market_overlay: {'ordinary_buy_authorized': True, 'authorized_symbols': ['475150', '388210'], 'size_multiplier': 0.35, 'emergency_block': False, 'emergency_threshold': -0.03, 'market_day_return': -0.009616997483925083, 'market_regime': 'risk_off', 'news_severity': 'high', 'reason': 'risk_off_reduced_size'}
 
 ## Position exit
 - enabled: True
@@ -87,7 +87,7 @@
 - submitted_count: 0
 - blocked_count: 2
 - violations: []
-- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260730T033344Z.json
+- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260730T043352Z.json
 - ledger_path: /Users/01chungee10/Github/TOSS/reports/harness/live_order_ledger.jsonl
 
 ## Notes

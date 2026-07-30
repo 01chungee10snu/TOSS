@@ -6,11 +6,11 @@
   "universe_source": "/Users/01chungee10/Github/TOSS/reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv",
   "entry_exit_cycle": {
     "buy": "daily_open",
-    "sell": "hold_3d_close_or_stop_loss"
+    "sell": "hold_7d_close"
   },
   "selection": {
     "scoring_mode": "multi",
-    "top_n": 3,
+    "top_n": 2,
     "factors": [
       "mom_5d",
       "vol_20d",
@@ -38,18 +38,18 @@
       "scoring_mode": "multi",
       "momentum_col": "mom_5d",
       "vol_col": "vol_20d",
-      "mode": "momentum",
-      "return_col": "daily_3d_close",
-      "top_n": 3,
+      "mode": "reversal",
+      "return_col": "daily_7d_close",
+      "top_n": 2,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
-      "min_mom_5d": -0.1,
-      "max_mom_5d": 0.15,
-      "min_rsi": 35,
-      "max_rsi": 70,
+      "min_mom_5d": -0.3,
+      "max_mom_5d": -0.02,
+      "min_rsi": 0,
+      "max_rsi": 30,
       "min_vol_ratio": 0.8,
-      "max_vol_ratio": 3.0,
-      "max_vol_20d": 0.08,
+      "max_vol_ratio": 5.0,
+      "max_vol_20d": 0.15,
       "min_price": 2000,
       "weights": {
         "momentum": 0.4,
@@ -60,7 +60,8 @@
       "backtest_total_return_pct": 35.5,
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
-      "disclaimer": "Research-only. Backtested 2025-01 to 2026-07. Not investment advice."
+      "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
+      "require_bb_lower": true
     },
     "flat_low_vol": {
       "situation": "flat_low_vol",
@@ -68,17 +69,17 @@
       "momentum_col": "mom_5d",
       "vol_col": "vol_20d",
       "mode": "reversal",
-      "return_col": "daily_3d_close",
-      "top_n": 3,
+      "return_col": "daily_7d_close",
+      "top_n": 2,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
-      "min_mom_5d": -0.15,
-      "max_mom_5d": 0.1,
-      "min_rsi": 30,
-      "max_rsi": 65,
+      "min_mom_5d": -0.3,
+      "max_mom_5d": -0.02,
+      "min_rsi": 0,
+      "max_rsi": 30,
       "min_vol_ratio": 0.8,
-      "max_vol_ratio": 3.0,
-      "max_vol_20d": 0.08,
+      "max_vol_ratio": 5.0,
+      "max_vol_20d": 0.15,
       "min_price": 2000,
       "weights": {
         "momentum": 0.4,
@@ -89,7 +90,8 @@
       "backtest_total_return_pct": 35.5,
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
-      "disclaimer": "Research-only. Backtested 2025-01 to 2026-07. Not investment advice."
+      "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
+      "require_bb_lower": true
     },
     "down_high_vol": {
       "situation": "down_high_vol",
@@ -97,17 +99,17 @@
       "momentum_col": "mom_5d",
       "vol_col": "vol_20d",
       "mode": "reversal",
-      "return_col": "daily_3d_close",
-      "top_n": 3,
+      "return_col": "daily_7d_close",
+      "top_n": 2,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
-      "min_mom_5d": -0.25,
-      "max_mom_5d": 0.05,
-      "min_rsi": 25,
-      "max_rsi": 60,
+      "min_mom_5d": -0.3,
+      "max_mom_5d": -0.02,
+      "min_rsi": 0,
+      "max_rsi": 30,
       "min_vol_ratio": 0.8,
       "max_vol_ratio": 5.0,
-      "max_vol_20d": 0.12,
+      "max_vol_20d": 0.15,
       "min_price": 2000,
       "weights": {
         "momentum": 0.45,
@@ -118,25 +120,26 @@
       "backtest_total_return_pct": 35.5,
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
-      "disclaimer": "Reversal in down_high_vol. Oversold bounce capture. Backtested basis: 3d fwd +0.71%, 60% win."
+      "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
+      "require_bb_lower": true
     },
     "up_high_vol": {
       "situation": "up_high_vol",
       "scoring_mode": "multi",
       "momentum_col": "mom_5d",
       "vol_col": "vol_20d",
-      "mode": "momentum",
-      "return_col": "daily_3d_close",
-      "top_n": 3,
+      "mode": "reversal",
+      "return_col": "daily_7d_close",
+      "top_n": 2,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
-      "min_mom_5d": 0.0,
-      "max_mom_5d": 0.2,
-      "min_rsi": 40,
-      "max_rsi": 75,
+      "min_mom_5d": -0.3,
+      "max_mom_5d": -0.02,
+      "min_rsi": 0,
+      "max_rsi": 30,
       "min_vol_ratio": 0.8,
       "max_vol_ratio": 5.0,
-      "max_vol_20d": 0.12,
+      "max_vol_20d": 0.15,
       "min_price": 2000,
       "weights": {
         "momentum": 0.5,
@@ -147,7 +150,8 @@
       "backtest_total_return_pct": 35.5,
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
-      "disclaimer": "Momentum in up_high_vol. Strong trend continuation. Backtested basis: 3d fwd +0.82%, 73% win."
+      "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
+      "require_bb_lower": true
     },
     "flat_high_vol": {
       "situation": "flat_high_vol",
@@ -155,17 +159,17 @@
       "momentum_col": "mom_5d",
       "vol_col": "vol_20d",
       "mode": "reversal",
-      "return_col": "daily_3d_close",
-      "top_n": 3,
+      "return_col": "daily_7d_close",
+      "top_n": 2,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
-      "min_mom_5d": -0.2,
-      "max_mom_5d": 0.1,
-      "min_rsi": 28,
-      "max_rsi": 65,
+      "min_mom_5d": -0.3,
+      "max_mom_5d": -0.02,
+      "min_rsi": 0,
+      "max_rsi": 30,
       "min_vol_ratio": 0.8,
       "max_vol_ratio": 5.0,
-      "max_vol_20d": 0.12,
+      "max_vol_20d": 0.15,
       "min_price": 2000,
       "weights": {
         "momentum": 0.4,
@@ -176,21 +180,22 @@
       "backtest_total_return_pct": 35.5,
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
-      "disclaimer": "Reversal in flat_high_vol. Range bounce. Backtested basis: 3d fwd +0.30%, 58% win."
+      "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
+      "require_bb_lower": true
     }
   },
-  "rejected_situations": {
-    "down_low_vol": "no_trade"
-  },
+  "rejected_situations": {},
   "validation": {
-    "backtest_period": "2025-01-01 to 2026-07-16",
-    "backtest_return_pct": 35.5,
-    "backtest_sharpe": 0.69,
-    "backtest_mdd_pct": -31.9,
-    "backtest_win_rate_pct": 46,
-    "backtest_profit_factor": 1.19,
-    "note": "Multi-factor daily with 3-day hold, 5% stop loss, practical universe 400."
+    "backtest_period": "2022-02-11 to 2026-07-29",
+    "backtest_return_pct": 74.4,
+    "backtest_sharpe": 1.6,
+    "backtest_mdd_pct": -32.7,
+    "backtest_win_rate_pct": 54.4,
+    "backtest_profit_factor": 1.28,
+    "walkforward_oos_pnl_krw": 1419631,
+    "walkforward_oos_positive_windows": "10/15",
+    "note": "v2 reversal strategy: oversold(bottom-5% mom_5d) + RSI<30 + below BB lower + market regime filter(down/high-vol). 7d hold, top-2 by dollar volume. Walk-forward validated."
   },
   "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
-  "policy_update_note": "2026-07-27: Expanded approved situations to include high-vol regimes (down/flat/up). Only down_low_vol remains rejected (3d fwd -0.27%, 50.8% win)."
+  "policy_update_note": "2026-07-30: v2 reversal strategy deployed. Entry: oversold + RSI<30 + BB-lower break. Exit: 7-day hold, no TP/SL (time exit only). Replaced momentum strategy that was -362만원/4.5yr."
 }

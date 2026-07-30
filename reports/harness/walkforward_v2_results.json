@@ -1,0 +1,501 @@
+{
+  "generated_at": "2026-07-30T04:36:09.885614+00:00",
+  "method": "rolling 6m IS + 3m OOS, no re-optimization",
+  "results": {
+    "BEST: BB+RSI30+regime, 7d, top2": {
+      "oos_total_pnl": 1419631.0,
+      "oos_total_trades": 807,
+      "oos_avg_wr": 51.9,
+      "positive_windows": 10,
+      "total_windows": 15,
+      "window_details": [
+        {
+          "window": 1,
+          "oos_pnl": -412321.0,
+          "oos_trades": 59,
+          "oos_wr": 37.3
+        },
+        {
+          "window": 2,
+          "oos_pnl": 94046.0,
+          "oos_trades": 37,
+          "oos_wr": 56.8
+        },
+        {
+          "window": 3,
+          "oos_pnl": -125982.0,
+          "oos_trades": 38,
+          "oos_wr": 47.4
+        },
+        {
+          "window": 4,
+          "oos_pnl": 76448.0,
+          "oos_trades": 53,
+          "oos_wr": 47.2
+        },
+        {
+          "window": 5,
+          "oos_pnl": 477426.0,
+          "oos_trades": 48,
+          "oos_wr": 52.1
+        },
+        {
+          "window": 6,
+          "oos_pnl": 193160.0,
+          "oos_trades": 62,
+          "oos_wr": 54.8
+        },
+        {
+          "window": 7,
+          "oos_pnl": 297282.0,
+          "oos_trades": 70,
+          "oos_wr": 47.1
+        },
+        {
+          "window": 8,
+          "oos_pnl": -378442.0,
+          "oos_trades": 74,
+          "oos_wr": 47.3
+        },
+        {
+          "window": 9,
+          "oos_pnl": -168302.0,
+          "oos_trades": 64,
+          "oos_wr": 46.9
+        },
+        {
+          "window": 10,
+          "oos_pnl": 436694.0,
+          "oos_trades": 63,
+          "oos_wr": 61.9
+        },
+        {
+          "window": 11,
+          "oos_pnl": 98721.0,
+          "oos_trades": 45,
+          "oos_wr": 57.8
+        },
+        {
+          "window": 12,
+          "oos_pnl": 82409.0,
+          "oos_trades": 53,
+          "oos_wr": 49.1
+        },
+        {
+          "window": 13,
+          "oos_pnl": 288878.0,
+          "oos_trades": 64,
+          "oos_wr": 57.8
+        },
+        {
+          "window": 14,
+          "oos_pnl": 494991.0,
+          "oos_trades": 37,
+          "oos_wr": 73.0
+        },
+        {
+          "window": 15,
+          "oos_pnl": -35376.0,
+          "oos_trades": 40,
+          "oos_wr": 42.5
+        }
+      ]
+    },
+    "BB+RSI30+regime, 7d, top2, SL8%": {
+      "oos_total_pnl": 654343.0,
+      "oos_total_trades": 807,
+      "oos_avg_wr": 46.3,
+      "positive_windows": 9,
+      "total_windows": 15,
+      "window_details": [
+        {
+          "window": 1,
+          "oos_pnl": -203366.0,
+          "oos_trades": 59,
+          "oos_wr": 37.3
+        },
+        {
+          "window": 2,
+          "oos_pnl": 56259.0,
+          "oos_trades": 37,
+          "oos_wr": 54.1
+        },
+        {
+          "window": 3,
+          "oos_pnl": -29913.0,
+          "oos_trades": 38,
+          "oos_wr": 47.4
+        },
+        {
+          "window": 4,
+          "oos_pnl": 113528.0,
+          "oos_trades": 53,
+          "oos_wr": 47.2
+        },
+        {
+          "window": 5,
+          "oos_pnl": 373797.0,
+          "oos_trades": 48,
+          "oos_wr": 47.9
+        },
+        {
+          "window": 6,
+          "oos_pnl": 107860.0,
+          "oos_trades": 62,
+          "oos_wr": 51.6
+        },
+        {
+          "window": 7,
+          "oos_pnl": 214891.0,
+          "oos_trades": 70,
+          "oos_wr": 44.3
+        },
+        {
+          "window": 8,
+          "oos_pnl": -365723.0,
+          "oos_trades": 74,
+          "oos_wr": 39.2
+        },
+        {
+          "window": 9,
+          "oos_pnl": -151975.0,
+          "oos_trades": 64,
+          "oos_wr": 42.2
+        },
+        {
+          "window": 10,
+          "oos_pnl": 440628.0,
+          "oos_trades": 63,
+          "oos_wr": 60.3
+        },
+        {
+          "window": 11,
+          "oos_pnl": -109221.0,
+          "oos_trades": 45,
+          "oos_wr": 40.0
+        },
+        {
+          "window": 12,
+          "oos_pnl": 87170.0,
+          "oos_trades": 53,
+          "oos_wr": 49.1
+        },
+        {
+          "window": 13,
+          "oos_pnl": 120787.0,
+          "oos_trades": 64,
+          "oos_wr": 51.6
+        },
+        {
+          "window": 14,
+          "oos_pnl": 289543.0,
+          "oos_trades": 37,
+          "oos_wr": 56.8
+        },
+        {
+          "window": 15,
+          "oos_pnl": -289922.0,
+          "oos_trades": 40,
+          "oos_wr": 25.0
+        }
+      ]
+    },
+    "BB+RSI30, 7d, top2 (no regime)": {
+      "oos_total_pnl": 1479292.0,
+      "oos_total_trades": 919,
+      "oos_avg_wr": 51.2,
+      "positive_windows": 10,
+      "total_windows": 15,
+      "window_details": [
+        {
+          "window": 1,
+          "oos_pnl": -452748.0,
+          "oos_trades": 63,
+          "oos_wr": 34.9
+        },
+        {
+          "window": 2,
+          "oos_pnl": 116547.0,
+          "oos_trades": 43,
+          "oos_wr": 55.8
+        },
+        {
+          "window": 3,
+          "oos_pnl": -271966.0,
+          "oos_trades": 64,
+          "oos_wr": 50.0
+        },
+        {
+          "window": 4,
+          "oos_pnl": 126295.0,
+          "oos_trades": 78,
+          "oos_wr": 41.0
+        },
+        {
+          "window": 5,
+          "oos_pnl": 500648.0,
+          "oos_trades": 62,
+          "oos_wr": 50.0
+        },
+        {
+          "window": 6,
+          "oos_pnl": 207353.0,
+          "oos_trades": 85,
+          "oos_wr": 49.4
+        },
+        {
+          "window": 7,
+          "oos_pnl": 305489.0,
+          "oos_trades": 71,
+          "oos_wr": 47.9
+        },
+        {
+          "window": 8,
+          "oos_pnl": -315540.0,
+          "oos_trades": 76,
+          "oos_wr": 48.7
+        },
+        {
+          "window": 9,
+          "oos_pnl": -168302.0,
+          "oos_trades": 64,
+          "oos_wr": 46.9
+        },
+        {
+          "window": 10,
+          "oos_pnl": 445060.0,
+          "oos_trades": 65,
+          "oos_wr": 61.5
+        },
+        {
+          "window": 11,
+          "oos_pnl": 151179.0,
+          "oos_trades": 47,
+          "oos_wr": 59.6
+        },
+        {
+          "window": 12,
+          "oos_pnl": 86784.0,
+          "oos_trades": 60,
+          "oos_wr": 48.3
+        },
+        {
+          "window": 13,
+          "oos_pnl": 288878.0,
+          "oos_trades": 64,
+          "oos_wr": 57.8
+        },
+        {
+          "window": 14,
+          "oos_pnl": 494991.0,
+          "oos_trades": 37,
+          "oos_wr": 73.0
+        },
+        {
+          "window": 15,
+          "oos_pnl": -35376.0,
+          "oos_trades": 40,
+          "oos_wr": 42.5
+        }
+      ]
+    },
+    "BB+RSI25+regime, 7d, top2": {
+      "oos_total_pnl": 1426926.0,
+      "oos_total_trades": 636,
+      "oos_avg_wr": 53.6,
+      "positive_windows": 11,
+      "total_windows": 15,
+      "window_details": [
+        {
+          "window": 1,
+          "oos_pnl": -458606.0,
+          "oos_trades": 46,
+          "oos_wr": 32.6
+        },
+        {
+          "window": 2,
+          "oos_pnl": 248522.0,
+          "oos_trades": 25,
+          "oos_wr": 76.0
+        },
+        {
+          "window": 3,
+          "oos_pnl": -159399.0,
+          "oos_trades": 30,
+          "oos_wr": 40.0
+        },
+        {
+          "window": 4,
+          "oos_pnl": 120054.0,
+          "oos_trades": 47,
+          "oos_wr": 55.3
+        },
+        {
+          "window": 5,
+          "oos_pnl": 268625.0,
+          "oos_trades": 41,
+          "oos_wr": 53.7
+        },
+        {
+          "window": 6,
+          "oos_pnl": 42057.0,
+          "oos_trades": 49,
+          "oos_wr": 49.0
+        },
+        {
+          "window": 7,
+          "oos_pnl": 303746.0,
+          "oos_trades": 58,
+          "oos_wr": 48.3
+        },
+        {
+          "window": 8,
+          "oos_pnl": -172929.0,
+          "oos_trades": 57,
+          "oos_wr": 52.6
+        },
+        {
+          "window": 9,
+          "oos_pnl": -88205.0,
+          "oos_trades": 49,
+          "oos_wr": 46.9
+        },
+        {
+          "window": 10,
+          "oos_pnl": 355022.0,
+          "oos_trades": 43,
+          "oos_wr": 60.5
+        },
+        {
+          "window": 11,
+          "oos_pnl": 83251.0,
+          "oos_trades": 42,
+          "oos_wr": 59.5
+        },
+        {
+          "window": 12,
+          "oos_pnl": 16212.0,
+          "oos_trades": 46,
+          "oos_wr": 34.8
+        },
+        {
+          "window": 13,
+          "oos_pnl": 416521.0,
+          "oos_trades": 49,
+          "oos_wr": 63.3
+        },
+        {
+          "window": 14,
+          "oos_pnl": 397379.0,
+          "oos_trades": 22,
+          "oos_wr": 81.8
+        },
+        {
+          "window": 15,
+          "oos_pnl": 54677.0,
+          "oos_trades": 32,
+          "oos_wr": 50.0
+        }
+      ]
+    },
+    "BB+RSI30+regime, 5d, top2": {
+      "oos_total_pnl": 1098785.0,
+      "oos_total_trades": 807,
+      "oos_avg_wr": 50.8,
+      "positive_windows": 11,
+      "total_windows": 15,
+      "window_details": [
+        {
+          "window": 1,
+          "oos_pnl": -269776.0,
+          "oos_trades": 59,
+          "oos_wr": 47.5
+        },
+        {
+          "window": 2,
+          "oos_pnl": 138861.0,
+          "oos_trades": 37,
+          "oos_wr": 62.2
+        },
+        {
+          "window": 3,
+          "oos_pnl": -128571.0,
+          "oos_trades": 38,
+          "oos_wr": 44.7
+        },
+        {
+          "window": 4,
+          "oos_pnl": 159013.0,
+          "oos_trades": 53,
+          "oos_wr": 54.7
+        },
+        {
+          "window": 5,
+          "oos_pnl": 357010.0,
+          "oos_trades": 48,
+          "oos_wr": 52.1
+        },
+        {
+          "window": 6,
+          "oos_pnl": 242864.0,
+          "oos_trades": 62,
+          "oos_wr": 58.1
+        },
+        {
+          "window": 7,
+          "oos_pnl": 264558.0,
+          "oos_trades": 70,
+          "oos_wr": 51.4
+        },
+        {
+          "window": 8,
+          "oos_pnl": -376107.0,
+          "oos_trades": 74,
+          "oos_wr": 43.2
+        },
+        {
+          "window": 9,
+          "oos_pnl": -216595.0,
+          "oos_trades": 64,
+          "oos_wr": 46.9
+        },
+        {
+          "window": 10,
+          "oos_pnl": 448619.0,
+          "oos_trades": 63,
+          "oos_wr": 52.4
+        },
+        {
+          "window": 11,
+          "oos_pnl": 22951.0,
+          "oos_trades": 45,
+          "oos_wr": 51.1
+        },
+        {
+          "window": 12,
+          "oos_pnl": 30659.0,
+          "oos_trades": 53,
+          "oos_wr": 50.9
+        },
+        {
+          "window": 13,
+          "oos_pnl": 53582.0,
+          "oos_trades": 64,
+          "oos_wr": 53.1
+        },
+        {
+          "window": 14,
+          "oos_pnl": 351391.0,
+          "oos_trades": 37,
+          "oos_wr": 48.6
+        },
+        {
+          "window": 15,
+          "oos_pnl": 20327.0,
+          "oos_trades": 40,
+          "oos_wr": 45.0
+        }
+      ]
+    }
+  }
+}

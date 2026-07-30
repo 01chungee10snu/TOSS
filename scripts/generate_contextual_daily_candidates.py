@@ -48,6 +48,10 @@ def prepare_features(panel: pd.DataFrame) -> pd.DataFrame:
     data["vol_ratio"] = g["Volume"].transform(
         lambda s: s.shift(1) / s.shift(1).rolling(20).mean().replace(0, pd.NA)
     )
+    # Bollinger Band lower band (20d, 2σ)
+    data["sma_20"] = g["Close"].transform(lambda s: s.shift(1).rolling(20).mean())
+    data["bb_std"] = g["Close"].transform(lambda s: s.shift(1).rolling(20).std())
+    data["bb_lower"] = data["sma_20"] - 2 * data["bb_std"]
 
     market = data.pivot_table(index="Date", columns="code", values="Close").sort_index()
     market_eq = market.pct_change(fill_method=None).mean(axis=1, skipna=True).fillna(0)
@@ -167,6 +171,10 @@ def generate(policy: dict[str, Any], panel: pd.DataFrame, as_of: str | None = No
         eligible = eligible[eligible[params["momentum_col"]] >= params["min_abs_momentum"]].copy()
     else:
         eligible = eligible[eligible[params["momentum_col"]] <= -params["min_abs_momentum"]].copy()
+    # Reversal-optimized: filter to BB-lower-break when mode=reversal
+    if is_multi and params.get("mode") == "reversal" and params.get("require_bb_lower", False):
+        if "bb_lower" in eligible.columns:
+            eligible = eligible[eligible["Close"] < eligible["bb_lower"]].copy()
     picks = eligible.sort_values("score", ascending=False).head(int(params["top_n"]))
     max_total = float(risk.get("max_total_notional_krw", 1_000_000))
     max_per = float(risk.get("max_notional_krw_per_position", 100_000))

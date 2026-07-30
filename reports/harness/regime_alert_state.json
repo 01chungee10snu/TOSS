@@ -1,16 +1,16 @@
 {
   "last_regime": {
-    "bearish_confirmed": false,
+    "bearish_confirmed": true,
     "bullish_confirmed": false,
     "daily_regime": "down_high_vol",
     "emergency_block": false,
-    "generated_at_utc": "2026-07-30T03:33:46.967619+00:00",
-    "market_day_return": -0.004528934861615874,
-    "market_regime": "",
-    "news_severity": "low",
+    "generated_at_utc": "2026-07-30T04:33:55.592150+00:00",
+    "market_day_return": -0.009616997483925083,
+    "market_regime": "risk_off",
+    "news_severity": "high",
     "ordinary_buy_authorized": true,
     "size_multiplier": 0.35,
-    "verdict": "NO_TRADE"
+    "verdict": "INVERSE_BUY"
   },
-  "updated_at": "2026-07-30T12:40:41.298118+09:00"
+  "updated_at": "2026-07-30T13:34:52.494414+09:00"
 }
