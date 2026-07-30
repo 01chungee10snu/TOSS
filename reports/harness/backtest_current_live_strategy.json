@@ -1,0 +1,29 @@
+{
+  "generated_at_utc": "2026-07-30T03:01:50.093395+00:00",
+  "config": {
+    "tp_pct": 0.04,
+    "sl_pct": 0.03,
+    "trailing_pct": 0.03,
+    "max_hold_days": 1,
+    "round_trip_bps": 24.5,
+    "max_positions": 3,
+    "max_notional_per_pos": 250000,
+    "fast_veto_range": 0.25,
+    "fast_veto_vol": 0.15,
+    "risk_on_relax": 1.5
+  },
+  "summary": {
+    "total_trades": 3100,
+    "normal_trades": 3100,
+    "inverse_trades": 0,
+    "win_rate_pct": 35.3,
+    "total_pnl_krw": -3624685.0,
+    "avg_return_pct": -0.47,
+    "profit_factor": 0.61,
+    "max_drawdown_krw": -3641218.0,
+    "max_drawdown_pct": -71988.1,
+    "sharpe": -4.51,
+    "normal_pnl": -3624685.0,
+    "inverse_pnl": 0
+  }
+}

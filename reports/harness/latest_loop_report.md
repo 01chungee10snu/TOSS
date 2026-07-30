@@ -1,40 +1,40 @@
 # TOSS ttak autotrading loop report
 
-- generated_at_utc: 2026-07-30T02:33:38.379846+00:00
-- overall_status: BLOCKED_FAST_VETO
+- generated_at_utc: 2026-07-30T03:33:46.967619+00:00
+- overall_status: LIVE_SUBMIT_BLOCKED
 
 ## Quant
-- status: NO_TRADE
+- status: ACTIONABLE_CANDIDATES
 - panel_exists: True
 - policy_exists: True
 - policy_json: /Users/01chungee10/Github/TOSS/config/generated_policies/daily_multifactor_v1_practical400.json
 - candidate_json: /Users/01chungee10/Github/TOSS/reports/trade_candidates/candidates_2026-07-29_daily_multifactor_v1_practical400.json
-- candidate_status: NO_TRADE
+- candidate_status: CANDIDATES
 - candidate_situation: down_high_vol
 - strategy_type: None
-- order_count: 0
-- inverse_sleeve: applied=False reason=inverse_sleeve_not_needed:intraday_decision:LONG_BUY
+- order_count: 2
+- inverse_sleeve: applied=False reason=symbol_specific_ordinary_buy_authorized
 
 ## Fast veto
-- status: BLOCKED_FAST_VETO
+- status: READY
 - policy_json: /Users/01chungee10/Github/TOSS/config/generated_policies/daily_multifactor_v1_practical400.json
-- thresholds: {'max_gap_pct': 0.08, 'max_intraday_range_pct': 0.15, 'min_dollar_volume_krw': 10000000.0, 'max_prev_volatility_20d': 0.1}
-- reasons: ['excessive_intraday_range', 'excessive_prev_volatility_20d']
+- thresholds: {'max_gap_pct': 0.08, 'max_intraday_range_pct': 0.25, 'min_dollar_volume_krw': 10000000.0, 'max_prev_volatility_20d': 0.15}
+- reasons: []
 - checked_symbols: ['322000', '475150', '388210']
-- vetoed_symbols: ['322000', '475150', '388210']
-- allowed_count: 0 / 3
-- reasons_by_symbol: {'322000': ['excessive_intraday_range'], '475150': ['excessive_intraday_range', 'excessive_prev_volatility_20d'], '388210': ['excessive_intraday_range']}
+- vetoed_symbols: []
+- allowed_count: 3 / 3
+- reasons_by_symbol: {}
 
 ## Symbol issue authorization
 - status: WATCH
 - require_positive: False
-- checked_symbols: []
-- verdicts_by_symbol: {}
-- buy/watch/review/veto: 0/0/0/0
-- news/disclosure events: 0/0
+- checked_symbols: ['322000', '388210', '475150']
+- verdicts_by_symbol: {'322000': 'WATCH', '475150': 'WATCH', '388210': 'WATCH'}
+- buy/watch/review/veto: 0/3/0/0
+- news/disclosure events: 3/0
 - collector_errors: {}
 - disclosure_errors: {}
-- market_overlay: {'ordinary_buy_authorized': False, 'authorized_symbols': [], 'size_multiplier': 1.0, 'emergency_block': False, 'emergency_threshold': -0.03, 'market_day_return': 0.011629857422420953, 'market_regime': 'risk_on', 'news_severity': 'high', 'reason': 'risk_on_full_size'}
+- market_overlay: {'ordinary_buy_authorized': True, 'authorized_symbols': ['475150', '388210'], 'size_multiplier': 0.35, 'emergency_block': False, 'emergency_threshold': -0.03, 'market_day_return': -0.004528934861615874, 'market_regime': '', 'news_severity': 'low', 'reason': 'risk_off_reduced_size'}
 
 ## Position exit
 - enabled: True
@@ -50,26 +50,26 @@
 - equity_guard_threshold_pct: 0.06
 - equity_guard_cooldown_seconds: 691200
 - equity_guard_cooldown_unit: days
-- equity_guard_drawdown_pct: -0.034590656737934045
+- equity_guard_drawdown_pct: -0.0395879688445433
 - equity_guard_block_new_buys: False
 - equity_guard_liquidation_required: False
 - report_path: /Users/01chungee10/Github/TOSS/reports/harness/latest_position_exit_report.json
 
 ## Qual
-- status: SKIPPED_NO_CANDIDATES
+- status: READY
 - connector_exists: True
 - opendart_api_key_present: False
 - require_opendart: False
 - news_events_path: /Users/01chungee10/Github/TOSS/reports/harness/manual_news_events.json
 - news_events_count: 0
 - news_events_error: None
-- reasons: ['no_candidate_symbols']
-- checked_symbols: []
-- pending_symbols: []
+- reasons: []
+- checked_symbols: ['475150', '388210']
+- pending_symbols: ['475150', '388210']
 - blocked_symbols: []
 - review_required_symbols: []
-- event_counts: {}
-- source_statuses: {}
+- event_counts: {'news_events': {'block': 0, 'review': 0, 'info': 0}, 'opendart': {}}
+- source_statuses: {'news_events': 'READY', 'opendart': 'SKIPPED_SOURCE_UNAVAILABLE'}
 
 ## Live readiness
 - status: LIVE_READY
@@ -79,15 +79,15 @@
 - missing: []
 
 ## Live submit
-- status: LIVE_SUBMIT_NO_ORDERS
+- status: LIVE_SUBMIT_BLOCKED
 - dry_run: False
 - submit_enabled: True
-- order_count: 0
-- attempted_count: 0
+- order_count: 2
+- attempted_count: 2
 - submitted_count: 0
-- blocked_count: 0
+- blocked_count: 2
 - violations: []
-- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260730T023338Z.json
+- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260730T033344Z.json
 - ledger_path: /Users/01chungee10/Github/TOSS/reports/harness/live_order_ledger.jsonl
 
 ## Notes
