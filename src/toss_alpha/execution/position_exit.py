@@ -7,6 +7,7 @@ safety gates.
 from __future__ import annotations
 
 from contextlib import contextmanager
+import copy
 from dataclasses import asdict
 from datetime import date, datetime, timezone
 import fcntl
@@ -408,7 +409,10 @@ def build_position_exit_orders(
     today = datetime.now(KST).date()
     orders: list[dict[str, Any]] = []
     reviews: list[dict[str, Any]] = []
-    updated_tracker = dict(tracker_data)
+    # Deep copy: we mutate inner dicts (setdefault, etc.) so shallow dict()
+    # copy would alias the original tracker_data, causing the save-skip check
+    # (updated_tracker != tracker_data) to always be False.
+    updated_tracker = copy.deepcopy(tracker_data)
 
     for position in positions:
         symbol = str(position.symbol).zfill(6)
@@ -455,6 +459,7 @@ def build_position_exit_orders(
             updated_tracker[symbol] = pos_state
         prev_peak = pos_state.get("peak_price")
         first_seen = pos_state.get("first_seen_date")
+        first_seen_preexisting = first_seen is not None  # came from tracker, not just created
         lifecycle_id = str(pos_state.get("lifecycle_id") or "")
         if not lifecycle_id:
             lifecycle_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
@@ -474,11 +479,13 @@ def build_position_exit_orders(
                 updated_tracker[symbol] = dict(updated_tracker.get(symbol, pos_state), peak_price=peak_candidate)
                 pos_state = updated_tracker[symbol]
                 prev_peak = peak_candidate
-            # First-seen date init.
+            # First-seen timestamp init. Store full ISO timestamp (not just date)
+            # so the fresh-position grace period measures actual hold time.
             if first_seen is None:
-                updated_tracker[symbol]["first_seen_date"] = today.isoformat()
+                _now_ts = datetime.now(timezone.utc).isoformat()
+                updated_tracker[symbol]["first_seen_date"] = _now_ts
                 pos_state = updated_tracker[symbol]
-                first_seen = today.isoformat()
+                first_seen = _now_ts
         updated_tracker.setdefault(symbol, {})["quantity"] = quantity
         updated_tracker[symbol]["avg_price"] = avg_price
 
@@ -500,7 +507,7 @@ def build_position_exit_orders(
                 # churn the account with buy-sell-buy cycles.
                 fresh_position_min_hours = _env_float(source, "TOSS_FRESH_POSITION_MIN_HOLD_HOURS", 4.0)
                 _skip_fresh_exit = False
-                if first_seen is not None and fresh_position_min_hours > 0:
+                if first_seen_preexisting and first_seen is not None and fresh_position_min_hours > 0:
                     try:
                         from datetime import datetime as _dt
                         _first = _dt.fromisoformat(str(first_seen).replace("Z", "+00:00"))
@@ -523,7 +530,7 @@ def build_position_exit_orders(
             # truncate directional gains.
             inverse_recovery_min_hours = _env_float(source, "TOSS_INVERSE_RECOVERY_MIN_HOURS", 2.0)
             _skip_recovery = False
-            if first_seen is not None and inverse_recovery_min_hours > 0:
+            if first_seen_preexisting and first_seen is not None and inverse_recovery_min_hours > 0:
                 try:
                     from datetime import datetime as _dt
                     _first = _dt.fromisoformat(str(first_seen).replace("Z", "+00:00"))
@@ -537,10 +544,9 @@ def build_position_exit_orders(
                     pass
             if not _skip_recovery:
                 reasons.append("inverse_regime_recovery")
-                # Record exit date so inverse_sleeve can block same-day re-entry.
-                # This breaks the buy-sell-buy loop when intraday verdict oscillates
-                # between INVERSE_BUY and LONG_BUY within a single session.
-                updated_tracker.setdefault(symbol, {})["last_regime_recovery_date"] = today.isoformat()
+                # Record exit timestamp so inverse_sleeve can block same-day re-entry.
+                # Store full ISO timestamp in UTC for accurate cooldown calculation.
+                updated_tracker.setdefault(symbol, {})["last_regime_recovery_date"] = datetime.now(timezone.utc).isoformat()
         if avg_price is not None and current is not None:
             avg = float(avg_price)
             if is_inverse_hedge:

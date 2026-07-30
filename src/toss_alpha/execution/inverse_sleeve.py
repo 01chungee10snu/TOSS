@@ -116,7 +116,20 @@ def maybe_apply_inverse_sleeve(
     cooldown_env = env or {}
     cooldown_hours = float(cooldown_env.get("TOSS_INVERSE_REENTRY_COOLDOWN_HOURS", "24"))
     if cooldown_hours > 0:
-        tracker_path = out_dir / "live_position_tracker.json"
+        # Position tracker lives in the harness report dir, not out_dir.
+        # The caller passes out_dir=CANDIDATE_DIR but tracker is in REPORT_DIR.
+        # Fall back to both paths for safety.
+        _tracker_candidates = [
+            out_dir / "live_position_tracker.json",
+            out_dir.parent / "harness" / "live_position_tracker.json",
+        ]
+        tracker_path = None
+        for p in _tracker_candidates:
+            if p.exists():
+                tracker_path = p
+                break
+        if tracker_path is None:
+            tracker_path = _tracker_candidates[-1]
         try:
             tracker = json.loads(tracker_path.read_text(encoding="utf-8")) if tracker_path.exists() else {}
             sym_state = tracker.get(settings.etf_code, {})
