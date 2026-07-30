@@ -12,9 +12,11 @@ def evaluate_fast_veto(
     panel: pd.DataFrame,
     as_of: str,
     max_gap_pct: float = 0.08,
-    max_intraday_range_pct: float = 0.15,
+    max_intraday_range_pct: float = 0.25,
     min_dollar_volume_krw: float = 10_000_000.0,
-    max_prev_volatility_20d: float = 0.10,
+    max_prev_volatility_20d: float = 0.15,
+    market_regime: str = "",
+    risk_on_relax_factor: float = 1.5,
 ) -> dict[str, Any]:
     orders = candidate_payload.get("orders", []) if isinstance(candidate_payload, dict) else []
     if not orders:
@@ -26,6 +28,12 @@ def evaluate_fast_veto(
             "reasons_by_symbol": {},
             "checked_symbols": [],
         }
+
+    # Risk-on regime: relax volatility/range thresholds further
+    if market_regime == "risk_on" and risk_on_relax_factor > 1.0:
+        max_gap_pct *= risk_on_relax_factor
+        max_intraday_range_pct *= risk_on_relax_factor
+        max_prev_volatility_20d *= risk_on_relax_factor
 
     data = panel.copy()
     data["Date"] = pd.to_datetime(data["Date"])

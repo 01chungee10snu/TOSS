@@ -1,16 +1,16 @@
 {
   "last_regime": {
-    "bearish_confirmed": true,
-    "bullish_confirmed": false,
-    "daily_regime": "flat_high_vol",
-    "emergency_block": true,
-    "generated_at_utc": "2026-07-29T01:49:01.920891+00:00",
-    "market_day_return": -0.03464854977789389,
-    "market_regime": "risk_off",
-    "news_severity": "low",
+    "bearish_confirmed": false,
+    "bullish_confirmed": true,
+    "daily_regime": "down_high_vol",
+    "emergency_block": false,
+    "generated_at_utc": "2026-07-30T02:33:38.379846+00:00",
+    "market_day_return": 0.011629857422420953,
+    "market_regime": "risk_on",
+    "news_severity": "high",
     "ordinary_buy_authorized": false,
-    "size_multiplier": 0.0,
-    "verdict": "HOLD"
+    "size_multiplier": 1.0,
+    "verdict": "LONG_BUY"
   },
-  "updated_at": "2026-07-29T10:51:08.019699+09:00"
+  "updated_at": "2026-07-30T11:35:22.226689+09:00"
 }

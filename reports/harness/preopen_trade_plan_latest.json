@@ -1,177 +1,238 @@
 {
-  "generated_at_kst": "2026-07-20T09:01:09+09:00",
-  "as_of": "2026-07-20",
-  "mode": "READ_ONLY_PREOPEN_PLAN",
-  "market_state_prior": "PANIC_RISK",
-  "conclusion": "방어가 우선입니다. 전일 미국 S&P500·나스닥·필라델피아 반도체지수가 동반 하락했고 VIX·WTI가 상승했으며, 계좌 낙폭이 -5% 신규 BUY 금지선에 근접했습니다. 09:15 전에는 일반주식과 인버스를 모두 신규 매수하지 않으며, 이후에도 신선한 KIS 호가·반등·시장 폭·수급 확인 전에는 BUY하지 않습니다.",
-  "allowed_before_0915": "NO_TRADE",
-  "order_action_performed": false,
+  "generated_at_kst": "2026-07-30T09:03:00+09:00",
+  "as_of": "2026-07-30",
+  "market_day": "Thursday",
+  "krx_trading_day": true,
+  "market_state_prior": "RISK_OFF_BIAS",
+  "prior": "RISK_OFF_BIAS",
+  "prior_rationale": "전일(7/29) 코스피 -5.98% 급락, 미국 FOMC 금리동결 이후 S&P -1.52%, Nasdaq -1.74%, Dow -2.19% 추가 하락. VIX 20.66(+13.45%) 급등, WTI +6.13% 상승, USD/KRW ~1,465 고원. 반도체 전약세 지속. 다만 VIX 30 미만·미국 하락폭 2%대로 패닉 수준은 아님. 극단 과매도 상태이므로 기술적 반등 가능성과 추가 하락 위험이 공존 → RISK_OFF_BIAS.",
   "source_timestamps": {
-    "current_issue_generated_at_kst": "2026-07-20T08:59:49.177318+09:00",
-    "kis_account_observed_at_kst": "2026-07-20T08:59:54.470411+09:00",
-    "external_market_retrieved_window_kst": "2026-07-20T08:59:00+09:00~2026-07-20T09:00:51+09:00",
-    "us_cash_close_observed_at_utc": "2026-07-17T20:00:00+00:00",
-    "us_futures_latest_observed_at_utc": "2026-07-19T23:50:46+00:00",
-    "usdkrw_latest_observed_at_utc": "2026-07-20T00:00:51+00:00",
-    "news_retrieved_at_kst": "2026-07-20T09:00:20+09:00"
-  },
-  "prior": {
-    "latest_loop_report": {
-      "path": "/Users/01chungee10/Github/TOSS/reports/harness/latest_loop_report.json",
-      "generated_at_utc": "2026-07-17T06:48:30.119999+00:00",
-      "overall_status": "NO_TRADE",
-      "daily_regime": "down_high_vol",
-      "intraday_verdict": "HOLD",
-      "intraday_reason": "risk_off_confirmed_inverse_already_held",
-      "ordinary_buy_authorized": false,
-      "emergency_block": true,
-      "submitted_count": 0
+    "kospi_close_0729": {
+      "source": "Yahoo Finance ^KS11",
+      "value": "5,663.24 (-5.98%)",
+      "observed_at": "2026-07-29 KST close"
     },
-    "latest_position_exit_report": {
-      "path": "/Users/01chungee10/Github/TOSS/reports/harness/latest_position_exit_report.json",
-      "generated_at_utc": "2026-07-17T06:48:27.266822+00:00",
-      "position": "114800 44주",
-      "avg_price": 1107.0,
-      "last_price_then": 1108.0,
-      "action": "HOLD",
-      "sell_order_count": 0,
-      "drawdown_pct_then": -0.049182390800495135
+    "sp500_close_0729": {
+      "source": "Yahoo Finance ^GSPC",
+      "value": "7,316.15 (-1.52%)",
+      "observed_at": "2026-07-29 US close"
     },
-    "latest_settlement": {
-      "path": "/Users/01chungee10/Github/TOSS/reports/harness/settlements/market_close_settlement_20260717.json",
-      "generated_at_kst": "2026-07-17T16:25:28.357800+09:00",
-      "total_equity_krw": 415571.0,
-      "cash_krw": 415377.0,
-      "daily_realized_matched_fifo_krw": 0.0,
-      "daily_unrealized_snapshot_krw": 44.0,
-      "daily_fill_count": 0,
-      "weekly_realized_matched_fifo_krw": 360.0,
-      "weekly_unmatched_sell_qty": 352.0,
-      "pnl_caveat": "주간 원가 미매칭 매도 352주가 있어 주간 전체 손익은 확정 판정하지 않습니다."
+    "nasdaq_close_0729": {
+      "source": "Yahoo Finance ^IXIC",
+      "value": "24,442.94 (-1.74%)",
+      "observed_at": "2026-07-29 US close"
     },
-    "current_issue": {
-      "path": "/Users/01chungee10/Github/TOSS/reports/harness/current_issues/current_issue_risk_report_20260720.json",
-      "generated_at_kst": "2026-07-20T08:59:49.177318+09:00",
-      "severity": "low",
-      "buy_gate": "allow",
-      "considered_headline_count": 0,
-      "stale_headline_count": 37,
-      "interpretation": "기본 키워드 게이트의 12시간 고려 기사가 0건이므로 low/allow를 적극적 매수 근거로 사용하지 않습니다. 별도 1일 뉴스 검색에서 반도체 조정, 외국인 2조원 매도, 원달러 1480원대 및 유가 상승 우려가 확인되어 보수적으로 판정합니다."
+    "dow_close_0729": {
+      "source": "Yahoo Finance ^DJI",
+      "value": "51,594.14 (-2.19%)",
+      "observed_at": "2026-07-29 US close"
+    },
+    "sox_close_0727": {
+      "source": "indexergo.com / NasdaqOMX SOX",
+      "value": "11,035.68 (전일종가 기준)",
+      "observed_at": "2026-07-27"
+    },
+    "vix_close_0729": {
+      "source": "Yahoo Finance ^VIX",
+      "value": "20.66 (+13.45%)",
+      "observed_at": "2026-07-29 US close"
+    },
+    "us10y_close_0729": {
+      "source": "Yahoo Finance ^TNX",
+      "value": "4.622% (+0.39%)",
+      "observed_at": "2026-07-29 US close"
+    },
+    "wti_close_0729": {
+      "source": "investing.com Crude Oil WTI Futures",
+      "value": "$81.90 (+6.13%)",
+      "observed_at": "2026-07-29"
+    },
+    "usdkrw": {
+      "source": "investing.com USD/KRW",
+      "value": "~1,465.15",
+      "observed_at": "2026-07-30 Asia session"
+    },
+    "nikkei": {
+      "source": "Yahoo Finance ^N225",
+      "value": "61,434.19 (-1.49%)",
+      "observed_at": "2026-07-29 close"
+    },
+    "hangseng": {
+      "source": "Yahoo Finance ^HSI",
+      "value": "25,807.92 (+1.96%)",
+      "observed_at": "2026-07-29 close"
     }
   },
-  "account_risk": {
-    "source": "KIS read-only account/position/quote endpoints",
-    "observed_at_kst": "2026-07-20T08:59:54.470411+09:00",
-    "total_equity_krw": 415571.0,
-    "cash_krw": 415377.0,
-    "peak_equity_krw": 437067.0,
-    "drawdown_pct": -0.049182390800495135,
-    "risk_band": "DD_GE_4_LT_5",
-    "size_multiplier": 0.5,
-    "new_buy_blocked_by_drawdown": false,
-    "near_next_block_threshold": true,
-    "held_positions": [
+  "local_artifacts_reviewed": {
+    "latest_loop_report": {
+      "path": "reports/harness/latest_loop_report.json",
+      "generated_at_utc": "2026-07-29T06:48:42Z",
+      "overall_status": "LIVE_SUBMIT_BLOCKED",
+      "intraday_verdict": "HOLD",
+      "market_regime": "risk_off",
+      "market_day_return_069500": -0.0634,
+      "inverse_day_return_114800": 0.0614
+    },
+    "latest_position_exit_report": {
+      "path": "reports/harness/latest_position_exit_report.json",
+      "generated_at_utc": "2026-07-29T06:48:39Z",
+      "sell_order_count": 1,
+      "position_114800": {
+        "quantity": 151,
+        "sellable_quantity": 151,
+        "avg_price": 1316.0,
+        "current_price": 1314.0,
+        "peak_price": 1408.0,
+        "market_value": 198414.0,
+        "unrealized_pnl": -302.0,
+        "exit_reason": "inverse_profit_lock_3.00%",
+        "action": "SELL (BLOCKED - after market close)"
+      }
+    },
+    "settlement_0729": {
+      "path": "reports/harness/settlements/market_close_settlement_20260729.json",
+      "daily_realized_fifo": -577.0,
+      "daily_unrealized": -302.0,
+      "daily_fill_count": 20
+    },
+    "current_issue_0730": {
+      "path": "reports/harness/current_issues/current_issue_risk_report_20260730.json",
+      "generated_at_kst": "2026-07-30T08:50:05+09:00",
+      "severity": "low",
+      "risk_score": 0.0,
+      "buy_gate": "allow",
+      "matched_headlines": 0,
+      "stale_headlines": 38,
+      "note": "모든 헤드라인이 lookback 12h를 초과해 stale 처리됨. 장전 새벽 수집이라 FOMC 직후 속보가 창에 걸치지 않은 것으로 판단됨."
+    },
+    "equity_guard": {
+      "path": "reports/harness/live_equity_guard_state.json",
+      "peak_equity": 414823.0,
+      "last_equity": 403830.0,
+      "drawdown_pct": -0.0265,
+      "cooldown_active": false,
+      "status": "READY"
+    },
+    "performance_gate": {
+      "path": "reports/harness/live_performance_gate.json",
+      "status": "PROBATION_CONTINUE",
+      "cumulative_realized_fifo": -1470.0,
+      "settlement_days": 8,
+      "fill_count": 25,
+      "loss_budget_krw": 12308.58,
+      "block_new_buys": false
+    }
+  },
+  "account_snapshot": {
+    "source": "KIS readonly artifacts (2026-07-29T06:48 UTC, 장전 fresh probe 시도했으나 token timeout)",
+    "total_equity_krw": 403830,
+    "cash_krw": 410286,
+    "peak_equity_krw": 414823,
+    "drawdown_from_peak_pct": -2.65,
+    "positions": [
       {
         "symbol": "114800",
         "name": "KODEX 인버스",
-        "quantity": 44.0,
-        "sellable_quantity": 44.0,
-        "avg_price": 1107.0,
-        "last_indicative_price_krw": 1108.0,
-        "market_value_krw": 48752.0,
-        "unrealized_pnl_krw": 44.0,
-        "quote_caveat": "09:00 직전 조회값으로 개장 후 신선한 호가로 간주하지 않습니다."
+        "quantity": 151,
+        "avg_price": 1316.0,
+        "last_known_price": 1314.0,
+        "market_value_krw": 198414,
+        "unrealized_pnl_krw": -302,
+        "role": "inverse_hedge"
       }
     ],
-    "thresholds": [
-      {"from_drawdown_pct": -0.04, "rule": "신규 BUY 크기 50%"},
-      {"from_drawdown_pct": -0.05, "rule": "신규 BUY 금지"},
-      {"from_drawdown_pct": -0.06, "rule": "전면 BUY 차단 및 SELL 우선"}
-    ],
-    "note": "현재 낙폭은 약 -4.92%로 -5% BUY 금지선에 매우 가깝습니다. 장중 equity가 -5%에 닿으면 신규 BUY를 차단하고, -6%부터 전면 BUY 차단 및 검증된 SELL을 우선해야 합니다."
-  },
-  "external_market": {
-    "provider": "Yahoo Finance chart API query2",
-    "values": [
-      {"name": "S&P 500", "symbol": "^GSPC", "value": 7457.68994140625, "reference": 7533.77, "change_pct": -1.010, "observed_at_utc": "2026-07-17T20:00:00+00:00"},
-      {"name": "Nasdaq Composite", "symbol": "^IXIC", "value": 25520.244140625, "reference": 25881.9, "change_pct": -1.397, "observed_at_utc": "2026-07-17T20:00:00+00:00"},
-      {"name": "Philadelphia Semiconductor", "symbol": "^SOX", "value": 11673.888671875, "reference": 11867.5, "change_pct": -1.631, "observed_at_utc": "2026-07-17T20:00:00+00:00"},
-      {"name": "S&P 500 futures", "symbol": "ES=F", "value": 7498.25, "reference": 7497.75, "change_pct": 0.007, "observed_at_utc": "2026-07-19T23:50:46+00:00"},
-      {"name": "Nasdaq 100 futures", "symbol": "NQ=F", "value": 28834.5, "reference": 28773.25, "change_pct": 0.213, "observed_at_utc": "2026-07-19T23:50:46+00:00"},
-      {"name": "USD/KRW", "symbol": "KRW=X", "value": 1488.47998046875, "reference": 1487.46, "change_pct": 0.069, "observed_at_utc": "2026-07-20T00:00:51+00:00"},
-      {"name": "US 10Y yield", "symbol": "^TNX", "value": 4.540999889373779, "reference": 4.569, "change_pct": -0.613, "observed_at_utc": "2026-07-17T18:55:00+00:00"},
-      {"name": "WTI", "symbol": "CL=F", "value": 83.94000244140625, "reference": 81.78, "change_pct": 2.641, "observed_at_utc": "2026-07-19T23:50:35+00:00"},
-      {"name": "VIX", "symbol": "^VIX", "value": 18.770000457763672, "reference": 16.73, "change_pct": 12.194, "observed_at_utc": "2026-07-17T20:15:00+00:00"}
-    ],
-    "interpretation": "미국 현물 3대 위험 지표의 동반 약세와 VIX·WTI 상승, 높은 원달러 수준이 위험 요인입니다. ES/NQ 선물의 소폭 반등은 완충 요인이지만 전일 충격을 상쇄할 정도로 보지 않습니다."
-  },
-  "news_evidence": {
-    "source": "Google News RSS targeted when:1d queries",
-    "retrieved_at_kst": "2026-07-20T09:00:20+09:00",
-    "headlines": [
-      {"title": "[AI MY 증시전망] AI 조정 vs 펀더멘털…코스피, 반도체 반등 여부 주목 - 뉴스핌", "published_at_utc": "2026-07-19T23:57:00+00:00"},
-      {"title": "[0720개장체크] 美 증시, 중국 AI 모델 추격 우려 속 반도체 등 기술주 부진 - 인포스탁데일리", "published_at_utc": "2026-07-19T23:09:30+00:00"},
-      {"title": "외국인 ‘2조 팔자’ vs 개인 ‘1.4조 사자’⋯삼성전자ㆍSK하이닉스 두고 수급 공방 - 이투데이", "published_at_utc": "2026-07-19T21:00:00+00:00"},
-      {"title": "국제유가 급등 여파…원·달러 환율 1480원대 재진입 - 쿠키뉴스", "published_at_utc": "2026-07-19T02:33:13+00:00"}
-    ],
-    "caveat": "RSS 제목 기반 시장 맥락이며 기사 본문 검증이나 종목별 BUY 권한을 대신하지 않습니다."
+    "kis_probe_status": "TOKEN_REFRESH_TIMEOUT_AT_0901_KST — 캐시된 7/29 클로즈 아티팩트로 대체. 개장 후 1m 모니터에서 fresh 재확보 예정."
   },
   "scenarios": [
     {
-      "name": "PANIC_CONTINUATION",
-      "conditions": ["069500이 개장 후 15분 저점 반등에 실패", "069500이 VWAP 아래", "시장 폭 악화", "외국인·프로그램 동반 순매도", "신선한 KIS 호가 확인"],
-      "plan": "일반주식 BUY를 금지합니다. 보유 114800은 추격매수 없이 기존 exit/watchdog 규칙으로만 관리합니다. 계좌 DD -5% 도달 시 신규 BUY를 차단하고 -6% 도달 시 전면 BUY 차단·SELL 우선으로 전환합니다."
+      "name": "A_계속_급락",
+      "probability": "중간",
+      "trigger": "069500 시초가 전일종가 대비 -1% 이상 시작, 09:15 반등 실패, 외국인 순매도 지속",
+      "069500_direction": "하락",
+      "114800_direction": "상승(인버스 헤지 수익 확대)",
+      "action": "114800 보유 유지. 신규 인버스 추격 금지(과매수 리스크). 일반주식 BUY 전면 금지.",
+      "account_risk": "인버스 헤지가 equity 방어. drawdown 추가 확대 시 -4%→크기 축소 단계 진입."
     },
     {
-      "name": "FAILED_PANIC_REBOUND",
-      "conditions": ["09:15 이후 069500이 저점 회복", "VWAP 재돌파 후 유지", "시장 폭 개선", "외국인 또는 프로그램 수급 개선", "114800 강세 둔화"],
-      "plan": "즉시 매수하지 않습니다. 일반주식은 신선한 종목별 KIS 호가와 회사별 긍정 근거가 모두 있을 때만 검토하며, DD가 -5% 미만으로 유지될 때도 크기는 기준의 50%입니다."
+      "name": "B_기술적_반등",
+      "probability": "중간",
+      "trigger": "069500 시초가 갭하락 후 09:15 이전 전일종가 방향 회복 시도, VWAP 상회",
+      "069500_direction": "반등(시초가 대비)",
+      "114800_direction": "조정(인버스 하락)",
+      "action": "114800 profit-lock SELL 모니터. 반등 확인 후에만 일반주식 검토(신선한 호가 필수). 09:15 이전 일반주식 BUY 금지 유지.",
+      "account_risk": "반등 시 인버스 헤지 평가손실 확대 가능. 단, 실현손익은 profit-lock 가격(1,365 이상)에서만 SELL."
     },
     {
-      "name": "INVERSE_CONFIRMATION_AFTER_0915",
-      "conditions": ["09:15 이후 069500 약세와 114800 강세가 같은 시각 호가로 확인", "069500 VWAP 하회", "시장 폭과 외국인·프로그램 수급이 동반 악화"],
-      "plan": "시초가 추격은 금지합니다. 이미 114800을 보유하므로 신규 인버스보다 기존 포지션 위험관리와 현금 방어를 우선합니다."
-    },
-    {
-      "name": "CONFLICT_OR_STALE",
-      "conditions": ["069500/114800 방향 불일치", "VWAP·시장 폭·수급 불일치", "호가 5분 초과 또는 bid/ask 결측", "current-issue 또는 계좌 조회 불명확"],
-      "plan": "NO_TRADE로 유지합니다."
+      "name": "C_박스권_불확실",
+      "probability": "중간-낮음",
+      "trigger": "069500 ±1% 내 움직임, 방향성 불명확",
+      "069500_direction": "횡보",
+      "114800_direction": "횡보",
+      "action": "관망. 신규 주문 없음. 15분 반등/하락 확인 후 방향 판단.",
+      "account_risk": "제한적."
     }
   ],
-  "open_checks": [
-    "069500과 114800의 같은 시각 신선한 KIS last·best bid·best ask·spread와 방향을 확인합니다.",
-    "09:15까지 개장 후 15분 저점 반등 실패 여부와 당일 저점 회복 여부를 확인합니다.",
-    "069500 및 주요 보유·후보의 VWAP 상·하 위치와 재돌파 유지 여부를 확인합니다.",
-    "상승/하락 종목 수와 상승 비율 등 시장 폭을 확인합니다.",
-    "외국인 현물·선물 및 프로그램 순매수/순매도 방향을 확인합니다.",
-    "호가 관측 시각과 bid/ask 결측 여부를 확인하고 5분 초과 또는 비정상이면 fail-closed 합니다.",
-    "계좌 equity를 재조회하여 peak 대비 -5% 및 -6% 진입 여부를 확인합니다."
-  ],
-  "hard_rules": [
-    "전일 급락 뒤 114800 시초가 추격매수를 금지합니다.",
-    "09:15 이전 신규 인버스 BUY를 금지합니다.",
-    "신선한 가격 확인 전 일반주식 BUY를 금지합니다.",
-    "장전 정보는 가설일 뿐 주문 신호가 아니며 이 작업에서 주문·취소를 수행하지 않습니다.",
-    "SELL 위험축소는 BUY 전용 게이트로 막지 않되 실제 실행은 별도 watchdog과 sellable quantity 검증을 거쳐야 합니다."
-  ],
+  "open_checks": {
+    "direction_069500_114800": {
+      "instruction": "개장 직후 069500(KODEX 200)과 114800(KODEX 인버스) 시초가 확인. 069500 하락·114800 상승 = 시나리오 A, 역방향 = 시나리오 B.",
+      "priority": 1
+    },
+    "first_15min_rebound_failure": {
+      "instruction": "09:00~09:15 069500가 전일종가 회복 시도 후 실패(전일종가 미회복 채 하락 전환) 여부 확인. 실패 시 시나리오 A 확률 상승.",
+      "priority": 1
+    },
+    "vwap": {
+      "instruction": "09:15 이후 069500 VWAP 대비 위치 확인. VWAP 하회 = 약세, 상회 = 반등 시그널.",
+      "priority": 2
+    },
+    "market_breadth": {
+      "instruction": "코스피/코스닥 상승·하락 종목수, 거래량 상위 종목 확인. 하락 종목 압도적 다수 = risk-off 지속.",
+      "priority": 2
+    },
+    "foreign_program_flow": {
+      "instruction": "외국인·프로그램 수급(순매도/순매수) 확인. 외국인 대규모 순매도 지속 = 추가 하락 위험.",
+      "priority": 2
+    },
+    "quote_freshness": {
+      "instruction": "KIS 실시간 호가 신선도 확인(호가 스프레드, 체결강도, 미체결 잔량). 비정상 스프레드·저유동 = 주문 보류.",
+      "priority": 1
+    },
+    "kospi200_futures_overseas": {
+      "instruction": "코스피200 야간선물(시카고) 움직임 및 아시아 장중 선물 방향 확인.",
+      "priority": 2
+    }
+  },
+  "account_risk": {
+    "current_drawdown_pct": -2.65,
+    "threshold_4pct_size_half": "미도달 (현재 -2.65%)",
+    "threshold_5pct_block_new_buy": "미도달",
+    "threshold_6pct_full_block_sell_priority": "미도달",
+    "equity_guard_status": "READY (cooldown inactive)",
+    "note": "현재 drawdown -2.65%로 모든 단계적 차단 임계치 미도달. 단, 전일 -5.98% 급락을 감안하면 당일 추가 하락 시 -4% 도달 가능성 존재. 인버스 114800 헤지 보유로 equity 방어 중."
+  },
+  "allowed_before_0915": "NO_TRADE",
   "blocked_reasons": [
-    "pre_0915_no_trade_window",
-    "prior_korea_panic_regime",
-    "us_cash_indices_and_sox_declined",
-    "vix_and_wti_increased",
-    "targeted_news_semiconductor_and_foreign_flow_risk",
-    "current_issue_default_query_has_zero_fresh_considered_headlines",
-    "account_drawdown_ge_4pct_size_reduction_and_near_5pct_buy_block",
-    "fresh_krx_open_quote_not_yet_bound_to_decision",
-    "open_15m_rebound_vwap_breadth_flow_not_confirmed"
+    "preopen_strict_no_trade_rule: 09:15 이전 신규 주문(일반주식 BUY 및 인버스 추격 BUY) 전면 금지",
+    "prior_day_crash_inverse_chase_ban: 전일 -5.98% 급락 후 인버스 시초가 추격 금지",
+    "fresh_quote_required_before_ordinary_buy: 신선한 KIS 호가 확인 전 일반주식 BUY 금지",
+    "market_state_risk_off_bias: 미국 FOMC 후 급락·VIX 20.66·유가 급등·반도체 약세로 risk-off 바이어스",
+    "kis_token_refresh_timeout: 장전 fresh account probe 시도 시 token 갱신 timeout, 캐시 아티팩트로 대체"
+  ],
+  "enforcement_principles": [
+    "전일 급락 후 인버스 시초가 추격 금지",
+    "09:15 이전 신규 인버스 금지",
+    "신선한 가격 확인 전 일반주식 BUY 금지",
+    "계좌 고점 대비 -4%→크기 50%, -5%→신규 BUY 금지, -6%→전면 BUY 차단·SELL 우선",
+    "장전 정보는 가설이며 주문 신호가 아님. 실제 주문·취소 절대 수행하지 않음"
   ],
   "artifact_paths": {
-    "json": "/Users/01chungee10/Github/TOSS/reports/harness/preopen_trade_plan_latest.json",
-    "markdown": "/Users/01chungee10/Github/TOSS/reports/harness/preopen_trade_plan_latest.md",
-    "current_issue": "/Users/01chungee10/Github/TOSS/reports/harness/current_issues/current_issue_risk_report_20260720.json",
-    "latest_loop_report": "/Users/01chungee10/Github/TOSS/reports/harness/latest_loop_report.json",
-    "latest_position_exit_report": "/Users/01chungee10/Github/TOSS/reports/harness/latest_position_exit_report.json",
-    "latest_settlement": "/Users/01chungee10/Github/TOSS/reports/harness/settlements/market_close_settlement_20260717.json",
-    "equity_guard_state": "/Users/01chungee10/Github/TOSS/reports/harness/live_equity_guard_state.json"
+    "json": "reports/harness/preopen_trade_plan_latest.json",
+    "md": "reports/harness/preopen_trade_plan_latest.md",
+    "latest_loop_report": "reports/harness/latest_loop_report.json",
+    "latest_position_exit_report": "reports/harness/latest_position_exit_report.json",
+    "current_issue_0730": "reports/harness/current_issues/current_issue_risk_report_20260730.json",
+    "settlement_0729": "reports/harness/settlements/market_close_settlement_20260729.json",
+    "equity_guard_state": "reports/harness/live_equity_guard_state.json",
+    "performance_gate": "reports/harness/live_performance_gate.json"
   }
 }

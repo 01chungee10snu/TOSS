@@ -59,9 +59,9 @@ def load_fast_veto_thresholds(path: Path) -> dict[str, float]:
     thresholds = ((policy.get("fast_veto_overlay") or {}).get("thresholds")) or {}
     return {
         "max_gap_pct": float(thresholds.get("max_gap_pct", 0.08)),
-        "max_intraday_range_pct": float(thresholds.get("max_intraday_range_pct", 0.15)),
+        "max_intraday_range_pct": float(thresholds.get("max_intraday_range_pct", 0.25)),
         "min_dollar_volume_krw": float(thresholds.get("min_dollar_volume_krw", 10_000_000.0)),
-        "max_prev_volatility_20d": float(thresholds.get("max_prev_volatility_20d", 0.10)),
+        "max_prev_volatility_20d": float(thresholds.get("max_prev_volatility_20d", 0.15)),
     }
 
 
@@ -492,11 +492,16 @@ def fast_phase(candidate_payload: dict[str, Any] | None = None) -> dict[str, Any
     as_of = str(candidate_payload.get("as_of") or panel["Date"].max().date())
     thresholds = load_fast_veto_thresholds(POLICY_JSON) if POLICY_JSON.exists() else {
         "max_gap_pct": 0.08,
-        "max_intraday_range_pct": 0.15,
+        "max_intraday_range_pct": 0.25,
         "min_dollar_volume_krw": 10_000_000.0,
-        "max_prev_volatility_20d": 0.10,
+        "max_prev_volatility_20d": 0.15,
     }
-    gate = evaluate_fast_veto(candidate_payload=candidate_payload, panel=panel, as_of=as_of, **thresholds)
+    # Pass market_regime from intraday decision for risk-on relaxation
+    intraday_dec = candidate_payload.get("intraday_decision") or {}
+    intraday_overlay = candidate_payload.get("market_overlay") or {}
+    market_regime = intraday_dec.get("market_regime") or intraday_overlay.get("market_regime") or ""
+    risk_on_relax = float(os.getenv("TOSS_FAST_VETO_RISK_ON_RELAX", "1.5"))
+    gate = evaluate_fast_veto(candidate_payload=candidate_payload, panel=panel, as_of=as_of, market_regime=market_regime, risk_on_relax_factor=risk_on_relax, **thresholds)
     effective = dict(candidate_payload)
     effective["orders"] = list(gate.get("allowed_orders", []))
     if candidate_payload.get("status") == "CANDIDATES" and not effective["orders"]:
