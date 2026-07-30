@@ -493,7 +493,27 @@ def build_position_exit_orders(
             # the ordinary-long liquidation rule to it creates a buy-then-sell
             # loop while the same risk signal remains active.
             if not is_inverse_hedge:
-                reasons.append("regime_risk_off")
+                # [2026-07-30] Fresh-position grace period: a position bought
+                # minutes ago shouldn't be liquidated by regime_risk_off if
+                # the daily loop approved it.  Require a minimum hold time
+                # (default 4 hours) so intraday regime oscillation doesn't
+                # churn the account with buy-sell-buy cycles.
+                fresh_position_min_hours = _env_float(source, "TOSS_FRESH_POSITION_MIN_HOLD_HOURS", 4.0)
+                _skip_fresh_exit = False
+                if first_seen is not None and fresh_position_min_hours > 0:
+                    try:
+                        from datetime import datetime as _dt
+                        _first = _dt.fromisoformat(str(first_seen).replace("Z", "+00:00"))
+                        _now = as_of or _dt.now(timezone.utc)
+                        if _first.tzinfo is None:
+                            _first = _first.replace(tzinfo=timezone.utc)
+                        _elapsed_hours = (_now - _first).total_seconds() / 3600.0
+                        if _elapsed_hours < fresh_position_min_hours:
+                            _skip_fresh_exit = True
+                    except (ValueError, TypeError):
+                        pass
+                if not _skip_fresh_exit:
+                    reasons.append("regime_risk_off")
         elif risk_off_exit and market_regime is not None and is_inverse_hedge:
             # Once independently classified market risk clears, unwind the
             # hedge through the same guarded SELL path.
@@ -517,6 +537,10 @@ def build_position_exit_orders(
                     pass
             if not _skip_recovery:
                 reasons.append("inverse_regime_recovery")
+                # Record exit date so inverse_sleeve can block same-day re-entry.
+                # This breaks the buy-sell-buy loop when intraday verdict oscillates
+                # between INVERSE_BUY and LONG_BUY within a single session.
+                updated_tracker.setdefault(symbol, {})["last_regime_recovery_date"] = today.isoformat()
         if avg_price is not None and current is not None:
             avg = float(avg_price)
             if is_inverse_hedge:
@@ -652,9 +676,21 @@ def build_position_exit_orders(
             }
         )
 
-    # Clean tracker: remove symbols no longer held, persist updated state.
+    # Clean tracker: remove symbols no longer held, but preserve cooldown
+    # metadata for inverse/leveraged symbols so the re-entry cooldown works.
     held_symbols = {str(p.symbol).zfill(6) for p in positions}
-    cleaned_tracker = {k: v for k, v in updated_tracker.items() if k in held_symbols}
+    cooldown_symbols = {
+        str(source.get("TOSS_INVERSE_ETF_CODE", DEFAULT_ETF_CODE)).strip().zfill(6),
+        *LEVERAGED_INVERSE_ETF_CODES,
+        DEFAULT_ETF_CODE,
+    }
+    cleaned_tracker = {}
+    for k, v in updated_tracker.items():
+        if k in held_symbols:
+            cleaned_tracker[k] = v
+        elif k in cooldown_symbols and isinstance(v, dict) and v.get("last_regime_recovery_date"):
+            # Preserve only the cooldown metadata; drop peak/avg/etc.
+            cleaned_tracker[k] = {"last_regime_recovery_date": v["last_regime_recovery_date"]}
     if tracker_path is not None and cleaned_tracker != tracker_data:
         _save_position_tracker(tracker_path, cleaned_tracker)
 

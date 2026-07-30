@@ -1,6 +1,6 @@
 # TOSS ttak autotrading loop report
 
-- generated_at_utc: 2026-07-30T04:33:55.592150+00:00
+- generated_at_utc: 2026-07-30T06:48:14.627686+00:00
 - overall_status: LIVE_SUBMIT_BLOCKED
 
 ## Quant
@@ -12,7 +12,7 @@
 - candidate_status: CANDIDATES
 - candidate_situation: down_high_vol
 - strategy_type: None
-- order_count: 2
+- order_count: 1
 - inverse_sleeve: applied=False reason=symbol_specific_ordinary_buy_authorized
 
 ## Fast veto
@@ -20,31 +20,31 @@
 - policy_json: /Users/01chungee10/Github/TOSS/config/generated_policies/daily_multifactor_v1_practical400.json
 - thresholds: {'max_gap_pct': 0.08, 'max_intraday_range_pct': 0.25, 'min_dollar_volume_krw': 10000000.0, 'max_prev_volatility_20d': 0.15}
 - reasons: []
-- checked_symbols: ['322000', '475150', '388210']
+- checked_symbols: ['005290', '000270']
 - vetoed_symbols: []
-- allowed_count: 3 / 3
+- allowed_count: 2 / 2
 - reasons_by_symbol: {}
 
 ## Symbol issue authorization
 - status: WATCH
 - require_positive: False
-- checked_symbols: ['322000', '388210', '475150']
-- verdicts_by_symbol: {'322000': 'WATCH', '475150': 'WATCH', '388210': 'WATCH'}
-- buy/watch/review/veto: 0/3/0/0
-- news/disclosure events: 3/0
+- checked_symbols: ['000270', '005290']
+- verdicts_by_symbol: {'005290': 'WATCH', '000270': 'WATCH'}
+- buy/watch/review/veto: 0/2/0/0
+- news/disclosure events: 2/0
 - collector_errors: {}
 - disclosure_errors: {}
-- market_overlay: {'ordinary_buy_authorized': True, 'authorized_symbols': ['475150', '388210'], 'size_multiplier': 0.35, 'emergency_block': False, 'emergency_threshold': -0.03, 'market_day_return': -0.009616997483925083, 'market_regime': 'risk_off', 'news_severity': 'high', 'reason': 'risk_off_reduced_size'}
+- market_overlay: {'ordinary_buy_authorized': True, 'authorized_symbols': ['005290'], 'size_multiplier': 0.35, 'emergency_block': False, 'emergency_threshold': -0.03, 'market_day_return': -0.020016773832820745, 'market_regime': 'risk_off', 'news_severity': 'low', 'reason': 'risk_off_reduced_size'}
 
 ## Position exit
 - enabled: True
 - status_reason: None
 - positions_checked: 0
 - sell_order_count: 0
-- stop_loss_pct: 0.03
-- take_profit_pct: 0.04
-- trailing_stop_pct: 0.03
-- max_holding_trading_days: 1
+- stop_loss_pct: 0.0
+- take_profit_pct: 0.0
+- trailing_stop_pct: 0.0
+- max_holding_trading_days: 7
 - max_positions_limit: None
 - equity_guard: READY
 - equity_guard_threshold_pct: 0.06
@@ -64,8 +64,8 @@
 - news_events_count: 0
 - news_events_error: None
 - reasons: []
-- checked_symbols: ['475150', '388210']
-- pending_symbols: ['475150', '388210']
+- checked_symbols: ['005290']
+- pending_symbols: ['005290']
 - blocked_symbols: []
 - review_required_symbols: []
 - event_counts: {'news_events': {'block': 0, 'review': 0, 'info': 0}, 'opendart': {}}
@@ -82,12 +82,12 @@
 - status: LIVE_SUBMIT_BLOCKED
 - dry_run: False
 - submit_enabled: True
-- order_count: 2
-- attempted_count: 2
+- order_count: 1
+- attempted_count: 1
 - submitted_count: 0
-- blocked_count: 2
-- violations: []
-- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260730T043352Z.json
+- blocked_count: 1
+- violations: ['after_korea_regular_market_last_buy_1520_kst']
+- artifact_path: /Users/01chungee10/Github/TOSS/reports/harness/live_submit_20260730T064813Z.json
 - ledger_path: /Users/01chungee10/Github/TOSS/reports/harness/live_order_ledger.jsonl
 
 ## Notes

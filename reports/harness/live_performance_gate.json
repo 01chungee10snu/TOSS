@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-07-30T04:33:47.600194+00:00",
+  "generated_at_utc": "2026-07-30T07:25:23.365595+00:00",
   "policy_id": "daily_multifactor_v1_practical400",
   "deployed_since": "2026-07-20",
   "status": "PROBATION_CONTINUE",
@@ -8,15 +8,15 @@
   "preserve_sell_exits": true,
   "reasons": [],
   "sample": {
-    "settlement_days": 8,
-    "fill_count": 25,
-    "consecutive_losing_fill_days": 1,
-    "latest_settlement_date": "2026-07-29"
+    "settlement_days": 9,
+    "fill_count": 34,
+    "consecutive_losing_fill_days": 2,
+    "latest_settlement_date": "2026-07-30"
   },
   "live_performance": {
     "baseline_equity_krw": 410286.0,
-    "latest_equity_krw": 403830.0,
-    "cumulative_realized_matched_fifo_krw": -1470.0,
+    "latest_equity_krw": 398401.0,
+    "cumulative_realized_matched_fifo_krw": -4298.0,
     "unmatched_sell_qty": 0.0,
     "inherited_deployment_day_unmatched_sell_qty": 1.0,
     "loss_budget_krw": 12308.58

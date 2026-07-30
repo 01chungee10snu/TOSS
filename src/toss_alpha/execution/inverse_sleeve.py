@@ -110,6 +110,35 @@ def maybe_apply_inverse_sleeve(
         audit["reason"] = blocked["reason"]
         return blocked, audit
 
+    # Same-day re-entry block: if the inverse sleeve was exited via regime
+    # recovery earlier today, don't buy back into a verdict that may flip
+    # again within minutes. This breaks the buy-sell-buy loop.
+    cooldown_env = env or {}
+    cooldown_hours = float(cooldown_env.get("TOSS_INVERSE_REENTRY_COOLDOWN_HOURS", "24"))
+    if cooldown_hours > 0:
+        tracker_path = out_dir / "live_position_tracker.json"
+        try:
+            tracker = json.loads(tracker_path.read_text(encoding="utf-8")) if tracker_path.exists() else {}
+            sym_state = tracker.get(settings.etf_code, {})
+            last_exit = sym_state.get("last_regime_recovery_date")
+            if last_exit:
+                from datetime import datetime as _dt, timezone as _tz
+                exit_dt = _dt.fromisoformat(str(last_exit).replace("Z", "+00:00"))
+                now_dt = _dt.now(_tz.utc)
+                if exit_dt.tzinfo is None:
+                    exit_dt = exit_dt.replace(tzinfo=_tz.utc)
+                elapsed_hours = (now_dt - exit_dt).total_seconds() / 3600.0
+                if elapsed_hours < cooldown_hours:
+                    blocked = dict(candidate_payload)
+                    blocked["status"] = "NO_TRADE"
+                    blocked["reason"] = f"inverse_sleeve_cooldown:{elapsed_hours:.1f}h<{cooldown_hours:.0f}h_since_regime_recovery"
+                    blocked["orders"] = []
+                    audit["reason"] = blocked["reason"]
+                    audit["cooldown_remaining_hours"] = cooldown_hours - elapsed_hours
+                    return blocked, audit
+        except (json.JSONDecodeError, ValueError, OSError):
+            pass  # fail-open if tracker unreadable
+
     as_of = str(candidate_payload.get("as_of") or candidate_payload.get("generated_for") or "")[:10] or None
     try:
         quote = dict(realtime_quote) if realtime_quote is not None else (price_provider or fetch_yfinance_daily_quote)(settings.yf_ticker, as_of)
