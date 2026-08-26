@@ -36,9 +36,11 @@ class KisReadOnlyClient:
     balance_path: str = "/uapi/domestic-stock/v1/trading/inquire-balance"
     quote_path: str = "/uapi/domestic-stock/v1/quotations/inquire-price"
     orderbook_path: str = "/uapi/domestic-stock/v1/quotations/inquire-asking-price-exp-ccn"
+    daily_price_path: str = "/uapi/domestic-stock/v1/quotations/inquire-daily-price"
     balance_tr_id: str | None = None
     quote_tr_id: str | None = None
     orderbook_tr_id: str | None = None
+    daily_price_tr_id: str | None = None
 
     def token(self) -> str:
         def fetch_token() -> dict[str, Any]:
@@ -75,6 +77,9 @@ class KisReadOnlyClient:
 
     def _default_orderbook_tr_id(self) -> str:
         return "FHKST01010200"
+
+    def _default_daily_price_tr_id(self) -> str:
+        return "FHKST01010400"
 
     def _headers(self, *, tr_id: str | None = None) -> dict[str, str]:
         return {
@@ -202,6 +207,32 @@ class KisReadOnlyClient:
             self.orderbook_path,
             params=params,
             tr_id=self.orderbook_tr_id or self._default_orderbook_tr_id(),
+        )
+
+    def daily_prices(
+        self,
+        symbol: str,
+        *,
+        period_div_code: str = "D",
+        adjusted: bool = True,
+    ) -> dict[str, Any]:
+        """Return recent KIS daily prices for a stock/ETF (read-only).
+
+        KIS currently returns up to the recent 30 periods for this endpoint.
+        The payload is used for liquidity evidence such as trailing average
+        traded value; it never calls an order endpoint.
+        """
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": str(symbol).strip().zfill(6),
+            "FID_PERIOD_DIV_CODE": str(period_div_code or "D").upper(),
+            "FID_ORG_ADJ_PRC": "1" if adjusted else "0",
+        }
+        return self._request(
+            "GET",
+            self.daily_price_path,
+            params=params,
+            tr_id=self.daily_price_tr_id or self._default_daily_price_tr_id(),
         )
 
     def quote_snapshot(self, symbol: str) -> Quote:

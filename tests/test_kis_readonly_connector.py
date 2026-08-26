@@ -53,7 +53,7 @@ def test_kis_connector_builds_authorization_and_app_headers(monkeypatch):
 
 def test_kis_connector_exposes_only_readonly_methods():
     client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
-    for name in ["token", "balance", "balance_all", "account_snapshot", "position_snapshots", "quote", "orderbook", "quote_snapshot"]:
+    for name in ["token", "balance", "balance_all", "account_snapshot", "position_snapshots", "quote", "orderbook", "daily_prices", "quote_snapshot"]:
         assert callable(getattr(client, name))
     for forbidden in ["orders", "place_order", "buy", "sell"]:
         assert not hasattr(client, forbidden)
@@ -201,6 +201,31 @@ def test_kis_orderbook_uses_readonly_orderbook_endpoint(monkeypatch):
     assert calls[0]["params"] == {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": "005930"}
 
 
+def test_kis_daily_prices_uses_readonly_recent_daily_price_endpoint(monkeypatch):
+    calls = []
+    monkeypatch.setattr(KisReadOnlyClient, "token", lambda self: "token")
+
+    def fake_request(method, url, headers=None, params=None, timeout=None):
+        calls.append({"method": method, "url": url, "headers": headers, "params": params})
+        return FakeResponse(payload={"output": [{"stck_bsop_date": "20260825", "stck_clpr": "70000", "acml_vol": "1000"}]})
+
+    monkeypatch.setattr("requests.request", fake_request)
+    client = KisReadOnlyClient(app_key="app", app_secret="sec", cano="12345678")
+
+    result = client.daily_prices("5930")
+
+    assert result["ok"] is True
+    assert calls[0]["method"] == "GET"
+    assert calls[0]["url"].endswith("/uapi/domestic-stock/v1/quotations/inquire-daily-price")
+    assert calls[0]["headers"]["tr_id"] == "FHKST01010400"
+    assert calls[0]["params"] == {
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_INPUT_ISCD": "005930",
+        "FID_PERIOD_DIV_CODE": "D",
+        "FID_ORG_ADJ_PRC": "1",
+    }
+
+
 def test_kis_quote_snapshot_keeps_missing_orderbook_fail_closed(monkeypatch):
     monkeypatch.setattr(
         KisReadOnlyClient,
@@ -222,6 +247,9 @@ def test_kis_quote_snapshot_keeps_missing_orderbook_fail_closed(monkeypatch):
 
 
 def test_kis_business_error_under_http_200_raises(monkeypatch):
+    # This test verifies connector business-error handling, not rate-limit retry.
+    # Disable the shared KIS backoff so an EGW00133 fixture does not sleep 65s.
+    monkeypatch.setenv("KIS_RATE_LIMIT_ENABLED", "false")
     monkeypatch.setattr(KisReadOnlyClient, "token", lambda self: "token")
     monkeypatch.setattr(
         "requests.request",

@@ -26,6 +26,9 @@ reports/harness/live_equity_guard_state*
 reports/harness/live_position_tracker.json
 reports/harness/live_position_tracker.json.lock
 reports/harness/toss-ttak-loop.lock
+reports/harness/executable_etf_paper_latest.json
+reports/harness/executable_etf_forward_state.json
+reports/harness/executable_etf_forward_history.jsonl
 reports/harness/forward_tracking/
 reports/harness/sentiment_forward/
 reports/harness/settlements/
@@ -34,6 +37,9 @@ reports/harness/current_issues/
 reports/harness/kis_*.json
 reports/harness/kis_*.jsonl
 reports/harness/kis_*.lock
+# KIS credential/token backups can append suffixes after .json (e.g. .bak.<timestamp>)
+reports/harness/kis_*.json.bak.*
+reports/harness/kis_*token*
 reports/harness/intraday_realtime_guard_*
 reports/harness/rebound_*
 reports/harness/profit_research_walkforward_stress_*
