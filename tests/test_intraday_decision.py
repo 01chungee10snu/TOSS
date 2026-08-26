@@ -45,6 +45,27 @@ def test_high_news_is_overridden_by_strong_two_proxy_intraday_strength():
     assert decision["metrics"]["market_override_confirmed"] is True
 
 
+def test_high_news_override_keeps_one_percent_market_day_floor():
+    below_floor = evaluate_intraday_decision(
+        daily_regime="down_high_vol",
+        news_severity="high",
+        market_quotes=quotes(market_last=100.9, market_open=100.5, inverse_last=99.4),
+        now=NOW,
+    )
+    at_floor = evaluate_intraday_decision(
+        daily_regime="down_high_vol",
+        news_severity="high",
+        market_quotes=quotes(market_last=101.0, market_open=100.5, inverse_last=99.4),
+        now=NOW,
+    )
+
+    assert below_floor["verdict"] == "NO_TRADE"
+    assert below_floor["signal_conflict"] is True
+    assert below_floor["metrics"]["market_override_confirmed"] is False
+    assert at_floor["verdict"] == "LONG_BUY"
+    assert at_floor["metrics"]["market_override_confirmed"] is True
+
+
 def test_critical_news_requires_stronger_override_than_high_news():
     too_weak = evaluate_intraday_decision(
         daily_regime="down_high_vol",
