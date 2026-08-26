@@ -38,6 +38,10 @@ TRAILING_PCT = 0.03
 MAX_HOLD_DAYS = 1
 ROUND_TRIP_BPS = 24.5
 COST_RATE = ROUND_TRIP_BPS / 10_000
+# Explicit reference capital for portfolio-level risk metrics.  The strategy
+# itself still uses fixed per-position notionals, so an exhausted-capital flag
+# is reported if cumulative losses would consume this reference capital.
+INITIAL_CAPITAL_KRW = 1_000_000.0
 
 # ── Relaxed fast veto thresholds ──────────────────────────────────
 MAX_INTRADAY_RANGE = 0.25
@@ -54,8 +58,8 @@ def load_data():
 def compute_factors(df: pd.DataFrame) -> pd.DataFrame:
     df = df.sort_values(["code", "Date"]).reset_index(drop=True)
     df["prev_close"] = df.groupby("code")["Close"].shift(1)
-    df["ret_daily"] = df.groupby("code")["Close"].pct_change()
-    df["mom_5d"] = df.groupby("code")["Close"].pct_change(5)
+    df["ret_daily"] = df.groupby("code")["Close"].pct_change(fill_method=None)
+    df["mom_5d"] = df.groupby("code")["Close"].pct_change(5, fill_method=None)
     df["vol_20d"] = df.groupby("code")["ret_daily"].transform(lambda s: s.rolling(20).std())
     df["intraday_range"] = (df["High"] - df["Low"]) / df["prev_close"]
     df["gap"] = abs(df["Open"] / df["prev_close"] - 1.0)
@@ -185,6 +189,64 @@ def apply_fast_veto(cands: pd.DataFrame, day_data: pd.DataFrame, market_regime: 
         & (cands["gap"] <= gap_thresh)
     )
     return cands[mask].copy()
+
+
+def calculate_portfolio_risk_metrics(
+    daily_pnl: pd.Series,
+    initial_capital: float = INITIAL_CAPITAL_KRW,
+) -> dict:
+    """Calculate drawdown and Sharpe from an explicit equity curve.
+
+    The backtest uses fixed notionals rather than capital-aware position sizing.
+    If losses exhaust the reference capital, percentage drawdown is therefore
+    capped at the economically meaningful floor of -100% and the condition is
+    surfaced separately.
+    """
+    daily_pnl = daily_pnl.astype(float)
+    if daily_pnl.empty:
+        return {
+            "equity_curve": pd.Series(dtype=float),
+            "max_drawdown_krw": 0.0,
+            "max_drawdown_pct": 0.0,
+            "raw_max_drawdown_pct_before_cap": 0.0,
+            "capital_exhausted": False,
+            "min_equity_krw": float(initial_capital),
+            "sharpe": 0.0,
+        }
+
+    equity_curve = float(initial_capital) + daily_pnl.cumsum()
+    peak = equity_curve.cummax().clip(lower=float(initial_capital))
+    dd = equity_curve - peak
+    dd_pct = equity_curve / peak - 1.0
+    max_dd = float(dd.min())
+    raw_max_dd_pct = float(dd_pct.min() * 100)
+    capital_exhausted = bool((equity_curve <= 0).any())
+    max_dd_pct = max(raw_max_dd_pct, -100.0)
+    min_equity = float(equity_curve.min())
+
+    metric_pnl = daily_pnl
+    metric_equity = equity_curve
+    if capital_exhausted:
+        first_exhaustion = equity_curve[equity_curve <= 0].index[0]
+        metric_pnl = daily_pnl.loc[:first_exhaustion]
+        metric_equity = equity_curve.loc[:first_exhaustion]
+
+    start_equity = metric_equity.shift(1).fillna(float(initial_capital))
+    daily_ret = (metric_pnl / start_equity).replace([np.inf, -np.inf], np.nan).dropna()
+    sharpe = (
+        float(daily_ret.mean() / daily_ret.std() * np.sqrt(252))
+        if len(daily_ret) > 1 and daily_ret.std() > 0
+        else 0.0
+    )
+    return {
+        "equity_curve": equity_curve,
+        "max_drawdown_krw": max_dd,
+        "max_drawdown_pct": max_dd_pct,
+        "raw_max_drawdown_pct_before_cap": raw_max_dd_pct,
+        "capital_exhausted": capital_exhausted,
+        "min_equity_krw": min_equity,
+        "sharpe": sharpe,
+    }
 
 
 def simulate_exit(entry_price: float, row: pd.Series, hold_day: int) -> tuple[float, str]:
@@ -333,9 +395,20 @@ def run_backtest():
     # Sort by date
     trade_df = trade_df.sort_values("date").reset_index(drop=True)
 
-    # Daily P&L aggregation
-    daily_pnl = trade_df.groupby("date")["pnl_krw"].sum()
-    cum_equity = daily_pnl.cumsum()
+    # Daily P&L aggregation. Include no-trade days so portfolio-level risk
+    # metrics are measured on the full trading calendar, not only trade days.
+    daily_index = pd.Index(
+        [str(pd.Timestamp(d).date()) for d in tradeable_dates],
+        name="date",
+    )
+    daily_pnl = (
+        trade_df.groupby("date")["pnl_krw"]
+        .sum()
+        .reindex(daily_index, fill_value=0.0)
+        .astype(float)
+    )
+    risk_metrics = calculate_portfolio_risk_metrics(daily_pnl, INITIAL_CAPITAL_KRW)
+    equity_curve = risk_metrics["equity_curve"]
 
     total_trades = len(trade_df)
     wins = trade_df[trade_df["pnl_krw"] > 0]
@@ -346,15 +419,12 @@ def run_backtest():
     avg_loss = losses["pnl_krw"].mean() if len(losses) > 0 else 0
     profit_factor = wins["pnl_krw"].sum() / abs(losses["pnl_krw"].sum()) if len(losses) > 0 and losses["pnl_krw"].sum() != 0 else float("inf")
 
-    # Max drawdown
-    peak = cum_equity.cummax()
-    dd = cum_equity - peak
-    max_dd = dd.min() if len(dd) > 0 else 0
-    max_dd_pct = (dd / (peak + 1e-8) * 100).min() if len(dd) > 0 else 0
-
-    # Sharpe (daily, annualized)
-    daily_ret = daily_pnl / 1_000_000  # normalize to ~1M portfolio
-    sharpe = daily_ret.mean() / (daily_ret.std() + 1e-8) * np.sqrt(252) if daily_ret.std() > 0 else 0
+    max_dd = risk_metrics["max_drawdown_krw"]
+    max_dd_pct = risk_metrics["max_drawdown_pct"]
+    raw_max_dd_pct = risk_metrics["raw_max_drawdown_pct_before_cap"]
+    capital_exhausted = risk_metrics["capital_exhausted"]
+    min_equity = risk_metrics["min_equity_krw"]
+    sharpe = risk_metrics["sharpe"]
 
     # Average return per trade
     avg_ret = trade_df["return_pct"].mean()
@@ -394,7 +464,10 @@ def run_backtest():
     print(f"Profit Factor: {profit_factor:.2f}")
     print(f"평균 승리: {avg_win:+,.0f}원 / 평균 손실: {avg_loss:+,.0f}원")
     print(f"Max Drawdown: {max_dd:+,.0f}원 ({max_dd_pct:+.1f}%)")
-    print(f"Sharpe (연환산): {sharpe:.2f}")
+    print(f"기준자본: {INITIAL_CAPITAL_KRW:,.0f}원 / 최저 equity: {min_equity:+,.0f}원")
+    if capital_exhausted:
+        print("⚠️ 기준자본 소진: 고정 notional 시뮬레이션이 파산 이후에도 거래를 계속하므로 MDD%는 -100%로 제한")
+    print(f"Sharpe (연환산, 기준자본 소진 전 equity return): {sharpe:.2f}")
     print()
     print(f"일반 전략 손익: {normal_pnl:+,.0f}원")
     print(f"인버스 전략 손익: {inv_pnl:+,.0f}원")
@@ -417,6 +490,7 @@ def run_backtest():
             "tp_pct": TP_PCT, "sl_pct": SL_PCT, "trailing_pct": TRAILING_PCT,
             "max_hold_days": MAX_HOLD_DAYS, "round_trip_bps": ROUND_TRIP_BPS,
             "max_positions": MAX_POSITIONS, "max_notional_per_pos": MAX_NOTIONAL_PER_POS,
+            "initial_capital_krw": INITIAL_CAPITAL_KRW,
             "fast_veto_range": MAX_INTRADAY_RANGE, "fast_veto_vol": MAX_PREV_VOLATILITY,
             "risk_on_relax": RISK_ON_RELAX,
         },
@@ -430,6 +504,9 @@ def run_backtest():
             "profit_factor": round(profit_factor, 2),
             "max_drawdown_krw": round(max_dd, 0),
             "max_drawdown_pct": round(max_dd_pct, 1),
+            "raw_max_drawdown_pct_before_cap": round(raw_max_dd_pct, 1),
+            "capital_exhausted": capital_exhausted,
+            "min_equity_krw": round(min_equity, 0),
             "sharpe": round(sharpe, 2),
             "normal_pnl": round(normal_pnl, 0),
             "inverse_pnl": round(inv_pnl, 0),

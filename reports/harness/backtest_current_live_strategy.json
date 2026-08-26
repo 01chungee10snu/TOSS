@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-30T03:01:50.093395+00:00",
+  "generated_at_utc": "2026-08-26T12:20:38.775219+00:00",
   "config": {
     "tp_pct": 0.04,
     "sl_pct": 0.03,
@@ -8,22 +8,26 @@
     "round_trip_bps": 24.5,
     "max_positions": 3,
     "max_notional_per_pos": 250000,
+    "initial_capital_krw": 1000000.0,
     "fast_veto_range": 0.25,
     "fast_veto_vol": 0.15,
     "risk_on_relax": 1.5
   },
   "summary": {
-    "total_trades": 3100,
-    "normal_trades": 3100,
+    "total_trades": 3051,
+    "normal_trades": 3051,
     "inverse_trades": 0,
-    "win_rate_pct": 35.3,
-    "total_pnl_krw": -3624685.0,
-    "avg_return_pct": -0.47,
+    "win_rate_pct": 34.2,
+    "total_pnl_krw": -3689361.0,
+    "avg_return_pct": -0.48,
     "profit_factor": 0.61,
-    "max_drawdown_krw": -3641218.0,
-    "max_drawdown_pct": -71988.1,
-    "sharpe": -4.51,
-    "normal_pnl": -3624685.0,
+    "max_drawdown_krw": -3794702.0,
+    "max_drawdown_pct": -100.0,
+    "raw_max_drawdown_pct_before_cap": -371.0,
+    "capital_exhausted": true,
+    "min_equity_krw": -2771861.0,
+    "sharpe": -1.26,
+    "normal_pnl": -3689361.0,
     "inverse_pnl": 0
   }
 }
