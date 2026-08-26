@@ -1,0 +1,184 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "strategy_tournament.py"
+
+
+def load_module():
+    spec = importlib.util.spec_from_file_location("strategy_tournament_test", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _write_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def seed_tournament_reports(m, tmp_path: Path) -> None:
+    m.ROOT = tmp_path
+    m.REPORTS = tmp_path / "reports"
+    m.VALIDATION = m.REPORTS / "validation"
+    m.VALIDATION.mkdir(parents=True, exist_ok=True)
+
+    _write_json(
+        m.VALIDATION / "executable_etf_portfolio_latest.json",
+        {
+            "strategies": {
+                "kodex200_60_bondplus_40": {"069500": 0.6, "214980": 0.4},
+                "kodex_kospi_50_bond_50": {"226490": 0.5, "153130": 0.5},
+            },
+            "promotions": {
+                "kodex200_60_bondplus_40": {
+                    "paper_candidate_passed": True,
+                    "live_promotion_passed": False,
+                    "live_block_reason": "forward_paper_and_orderbook_depth_evidence_missing",
+                    "positive_year_share": 0.67,
+                    "stress_75bp": {
+                        "cagr_pct": 8.45,
+                        "total_return_pct": 152.98,
+                        "sharpe_zero_rf": 0.8488,
+                        "max_drawdown_pct": -17.98,
+                        "per_trade_notional_cost_bps": 75,
+                        "rebalances": 138,
+                    },
+                },
+                "kodex_kospi_50_bond_50": {
+                    "paper_candidate_passed": True,
+                    "live_promotion_passed": False,
+                    "live_block_reason": "forward_paper_and_orderbook_depth_evidence_missing",
+                    "positive_year_share": 0.75,
+                    "stress_75bp": {
+                        "cagr_pct": 8.16,
+                        "total_return_pct": 136.28,
+                        "sharpe_zero_rf": 0.8633,
+                        "max_drawdown_pct": -19.52,
+                        "per_trade_notional_cost_bps": 75,
+                        "rebalances": 133,
+                    },
+                },
+            },
+        },
+    )
+    _write_json(
+        m.REPORTS / "harness" / "executable_etf_paper_latest.json",
+        {
+            "target_weights": {"226490": 0.5, "153130": 0.5},
+            "forward_paper_gate": {"passed": False},
+        },
+    )
+    _write_json(
+        m.VALIDATION / "pit_validation_20260812T044559Z.json",
+        {
+            "walkforward_results": [
+                {
+                    "strategy": "reversal_oversold",
+                    "cost_bps": 31,
+                    "oos_windows": 14,
+                    "positive_windows": 1,
+                    "avg_oos_return_pct": -13.4,
+                    "avg_oos_sharpe": -2.4679,
+                    "total_oos_trades": 524,
+                    "windows": [{"max_drawdown_pct": -20.0}],
+                }
+            ]
+        },
+    )
+    _write_json(
+        m.VALIDATION / "hml_cma_quarterly_v2_20260826T122735Z.json",
+        {
+            "data_quality": {"survivorship_bias_resolved": False},
+            "hml_cma_composite": {
+                "75bp": {
+                    "cagr_pct": 67.75,
+                    "total_return_pct": 100.97,
+                    "sharpe_ratio": 1.656,
+                    "max_drawdown_pct": -27.66,
+                    "cost_bps": 75,
+                    "rebalances": 6,
+                    "trading_days": 340,
+                    "yearly_returns_pct": {"2025": 58.41, "2026": 28.07},
+                }
+            },
+        },
+    )
+    _write_json(
+        m.REPORTS / "harness" / "backtest_current_live_strategy.json",
+        {
+            "config": {"initial_capital_krw": 1_000_000, "round_trip_bps": 31},
+            "summary": {
+                "total_pnl_krw": -3_000_000,
+                "sharpe": -1.2,
+                "profit_factor": 0.6,
+                "max_drawdown_pct": -100.0,
+                "capital_exhausted": True,
+                "total_trades": 3000,
+            },
+        },
+    )
+
+
+def test_performance_score_rewards_better_risk_adjusted_profile():
+    m = load_module()
+    better = m.performance_score(cagr_pct=10.0, sharpe=1.0, max_drawdown_pct=-15.0)
+    worse = m.performance_score(cagr_pct=3.0, sharpe=0.2, max_drawdown_pct=-30.0)
+    assert better > worse
+
+
+def test_sort_prioritizes_promotion_state_before_raw_performance():
+    m = load_module()
+    paper = m.candidate(
+        strategy_id="paper",
+        family="x",
+        status="PAPER_CANDIDATE",
+        evidence_grade="B",
+        source="x",
+        cagr_pct=8.0,
+        sharpe=0.8,
+        max_drawdown_pct=-20.0,
+    )
+    flashy_research = m.candidate(
+        strategy_id="flashy",
+        family="y",
+        status="RESEARCH_ONLY",
+        evidence_grade="D",
+        source="y",
+        cagr_pct=70.0,
+        sharpe=1.7,
+        max_drawdown_pct=-25.0,
+    )
+    ranked = m.sort_candidates([flashy_research, paper])
+    assert ranked[0]["strategy_id"] == "paper"
+
+
+def test_repository_tournament_keeps_live_closed_and_etf_on_top(tmp_path):
+    m = load_module()
+    seed_tournament_reports(m, tmp_path)
+    report = m.build_tournament()
+
+    assert report["decision"] == "NO_NEW_LIVE_PROMOTION"
+    assert report["live_eligible_count"] == 0
+    assert report["leaderboard"][0]["family"] == "executable_etf"
+    assert report["paper_candidate_count"] >= 1
+
+    by_id = {row["strategy_id"]: row for row in report["leaderboard"]}
+    assert by_id["current_live_strategy"]["status"] == "REJECTED"
+    assert by_id["reversal_oversold"]["status"] == "REJECTED"
+    assert by_id["hml_cma_composite"]["status"] == "RESEARCH_ONLY"
+    assert by_id["hml_cma_composite"]["evidence_grade"] == "D"
+
+
+def test_current_forward_paper_target_is_identified_by_weights(tmp_path):
+    m = load_module()
+    seed_tournament_reports(m, tmp_path)
+    report = m.build_tournament()
+    row = next(x for x in report["leaderboard"] if x["strategy_id"] == "kodex_kospi_50_bond_50")
+    assert any("current forward-paper target" in note for note in row["notes"])
