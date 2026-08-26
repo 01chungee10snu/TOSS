@@ -129,7 +129,10 @@ def main() -> int:
         print(f"- 계좌 가드: {_kr_status(str(equity.get('status')))}")
         print(f"- 현재 평가자산: {_fmt_money(equity.get('current_equity'))}")
         print(f"- 고점 대비 하락률: {float(equity.get('drawdown_pct') or 0.0):.2%}")
-        print(f"- 신규매수 차단 여부: {bool(equity.get('block_new_buys'))}")
+        print(f"- 신규매수 차단 여부: {bool(pos.get('block_new_buys') or equity.get('block_new_buys'))}")
+        buy_block_reasons = list(pos.get("buy_block_reasons") or [])
+        if buy_block_reasons:
+            print(f"- 신규매수 차단 사유: {', '.join(str(reason) for reason in buy_block_reasons)}")
     print("")
 
     print("## 체결/미체결 관리")
