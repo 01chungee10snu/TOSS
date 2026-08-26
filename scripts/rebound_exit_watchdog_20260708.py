@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
-"""2026-07-08 manual rebound sleeve exit watchdog.
+"""Historical 2026-07-08 rebound-sleeve exit watchdog.
 
-Silent watchdog by default. Prints only when it submits/blocks an exit or hits an error.
-It monitors the four explicitly authorized rebound BUY candidates and submits guarded
-LIMIT SELL orders for stop/take-profit/trailing/time-exit conditions.
+Exit-rule helpers are retained for offline audit and research. The script
+entrypoint is permanently quarantined and cannot call broker APIs or submit an
+order.
 """
 from __future__ import annotations
 
 import json
 import math
 import os
-import subprocess
-import sys
 from datetime import datetime, time, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from toss_alpha.connectors.kis_readonly import KisReadOnlyClient
-from toss_alpha.execution.live_ready import live_readiness
-from toss_alpha.execution.live_submit import korea_regular_market_violation, run_live_submit_phase
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIR = ROOT / "reports" / "harness"
@@ -260,89 +256,11 @@ def human_violation(violation: str) -> str:
 
 
 def main() -> int:
-    now = datetime.now(timezone.utc)
-    now_kst = now.astimezone(KST)
-    state = load_state()
-
-    if now_kst.date().isoformat() != "2026-07-08":
-        return 0
-    market_violation = korea_regular_market_violation(now)
-    if market_violation:
-        # Silent outside regular market except after configured watch day starts.
-        if now_kst.time() >= time(9, 0):
-            print(f"감시 중단: {market_violation}")
-        return 0
-
-    c = client()
-    bal = balance_payload(c)
-    positions = positions_by_symbol(bal)
-    if not positions:
-        save_state(state)
-        return 0
-
-    quotes = {sym: quote_last(c, sym) for sym in positions}
-    orders = decide_orders(now_kst, positions, quotes, state)
-    save_state(state)
-    if not orders:
-        return 0
-
-    payload = {
-        "generated_at_utc": now.isoformat(),
-        "as_of": "2026-07-08",
-        "status": "CANDIDATES",
-        "policy_id": "manual_rebound_exit_watchdog_20260708",
-        "strategy_type": "manual_rebound_exit_watchdog",
-        "orders": orders,
-        "state_path": str(STATE_PATH),
-    }
-    CANDIDATE_OUT.parent.mkdir(parents=True, exist_ok=True)
-    CANDIDATE_OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-
-    env = dict(os.environ)
-    env.update({
-        "PYTHONPATH": "src",
-        "KIS_ACNT_PRDT_CD": "01",
-        "KIS_ACCOUNT_PRODUCT_CODE": "01",
-        "TOSS_RISK_LIVE_TRADING_ENABLED": "true",
-        "KIS_LIVE_TRADING_ENABLED": "true",
-        "TOSS_LIVE_SUBMIT_ENABLED": "true",
-        "TOSS_LIVE_SUBMIT_DRY_RUN": "false",
-        "TOSS_LIVE_SUBMIT_CONFIRMATION": "I UNDERSTAND THIS IS A REAL ORDER",
-        "TOSS_MAX_ORDER_KRW": "1000000",
-        "TOSS_MAX_POSITION_PCT": "1.0",
-        "TOSS_ALLOW_QUAL_DATA_BLOCKED": "true",
-        "TOSS_LIVE_STRATEGY_ID": "manual_rebound_exit_watchdog_20260708",
-    })
-
-    # Use in-process call so we keep exact artifact return values.
-    old_env = os.environ.copy()
-    try:
-        os.environ.clear(); os.environ.update(env)
-        live = live_readiness()
-        qual = {"status": "PASS_MANUAL_EXIT_WATCHDOG", "reason": "authorized rebound sleeve exit watchdog"}
-        result = run_live_submit_phase(candidate_payload=payload, qual=qual, live=live, report_dir=REPORT_DIR, now=now)
-    finally:
-        os.environ.clear(); os.environ.update(old_env)
-
-    print("🚨 손절·익절 감시 알림")
-    print(f"- 시각: {now_kst.strftime('%H:%M:%S')}")
-    print(f"- 결과: {human_status(result)}")
-    for order, row in zip(orders, result.get("results", [])):
-        body = row.get("json") or {}
-        reason = human_reason(str(order.get("reason") or ""))
-        msg = body.get("msg1") or body.get("msg_cd") or ""
-        violations = row.get("violations") or []
-        print(f"- 종목: {order.get('name')} `{order.get('symbol')}`")
-        print(f"- 신호: {reason}")
-        print(f"- 주문: {order.get('quantity')}주 SELL, 제한가 {int(order.get('limit_price') or 0):,}원")
-        if row.get("status") == "SUBMITTED":
-            output = body.get("output") or {}
-            print(f"- 접수: 성공, 주문번호 `{output.get('ODNO')}`")
-        elif msg:
-            print(f"- 브로커 메시지: {msg}")
-        if violations:
-            print("- 차단 사유: " + ", ".join(human_violation(v) for v in violations))
-    print(f"- 상세파일: {result.get('artifact_path')}")
+    """Historical 2026-07-08 exit watchdog; permanently live-quarantined."""
+    print(
+        "LEGACY_LIVE_QUARANTINED: rebound_exit_watchdog_20260708 is retained "
+        "for offline research only; no broker API or order submission is executed."
+    )
     return 0
 
 
