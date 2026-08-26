@@ -110,11 +110,11 @@ def maybe_apply_inverse_sleeve(
         audit["reason"] = blocked["reason"]
         return blocked, audit
 
-    # Same-day re-entry block: if the inverse sleeve was exited via regime
-    # recovery earlier today, don't buy back into a verdict that may flip
-    # again within minutes. This breaks the buy-sell-buy loop.
+    # Short re-entry block after any inverse exit. Two hours is long enough to
+    # break minute-scale oscillation while still allowing a same-day re-entry
+    # when independently refreshed risk-off evidence persists.
     cooldown_env = env or {}
-    cooldown_hours = float(cooldown_env.get("TOSS_INVERSE_REENTRY_COOLDOWN_HOURS", "24"))
+    cooldown_hours = float(cooldown_env.get("TOSS_INVERSE_REENTRY_COOLDOWN_HOURS", "2"))
     if cooldown_hours > 0:
         # Position tracker lives in the harness report dir, not out_dir.
         # The caller passes out_dir=CANDIDATE_DIR but tracker is in REPORT_DIR.
@@ -133,7 +133,7 @@ def maybe_apply_inverse_sleeve(
         try:
             tracker = json.loads(tracker_path.read_text(encoding="utf-8")) if tracker_path.exists() else {}
             sym_state = tracker.get(settings.etf_code, {})
-            last_exit = sym_state.get("last_regime_recovery_date")
+            last_exit = sym_state.get("last_inverse_exit_date") or sym_state.get("last_regime_recovery_date")
             if last_exit:
                 from datetime import datetime as _dt, timezone as _tz
                 exit_dt = _dt.fromisoformat(str(last_exit).replace("Z", "+00:00"))
@@ -144,7 +144,7 @@ def maybe_apply_inverse_sleeve(
                 if elapsed_hours < cooldown_hours:
                     blocked = dict(candidate_payload)
                     blocked["status"] = "NO_TRADE"
-                    blocked["reason"] = f"inverse_sleeve_cooldown:{elapsed_hours:.1f}h<{cooldown_hours:.0f}h_since_regime_recovery"
+                    blocked["reason"] = f"inverse_sleeve_cooldown:{elapsed_hours:.1f}h<{cooldown_hours:g}h_since_inverse_exit"
                     blocked["orders"] = []
                     audit["reason"] = blocked["reason"]
                     audit["cooldown_remaining_hours"] = cooldown_hours - elapsed_hours

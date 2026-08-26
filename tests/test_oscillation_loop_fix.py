@@ -71,7 +71,7 @@ def test_inverse_cooldown_blocks_reentry_after_regime_recovery(tmp_path):
         out_dir=tmp_path,
         env={
             "TOSS_INVERSE_SLEEVE_ENABLED": "true",
-            "TOSS_INVERSE_REENTRY_COOLDOWN_HOURS": "24",
+            "TOSS_INVERSE_REENTRY_COOLDOWN_HOURS": "2",
         },
     )
 
@@ -111,6 +111,7 @@ def test_fresh_position_grace_blocks_immediate_regime_risk_off(tmp_path):
             "TOSS_FRESH_POSITION_MIN_HOLD_HOURS": "4",
         },
         market_regime="risk_off",
+        as_of="2026-08-27",
         report_dir=tmp_path,
     )
 
@@ -200,6 +201,54 @@ def test_cooldown_metadata_preserved_after_position_cleanup(tmp_path):
     assert "114800" in tracker
     assert "last_regime_recovery_date" in tracker["114800"]
     print(f"✓ Cooldown metadata preserved after cleanup: {tracker['114800']}")
+
+
+def test_inverse_stop_loss_exit_also_starts_short_cooldown(tmp_path):
+    """A price stop must not be immediately reversed into another inverse BUY."""
+    tracker_path = tmp_path / "live_position_tracker.json"
+    tracker_path.write_text(json.dumps({
+        "114800": {
+            "first_seen_date": (datetime.now(timezone.utc) - timedelta(hours=3)).isoformat(),
+            "peak_price": 1000,
+            "avg_price": 1000,
+            "quantity": 10,
+        }
+    }))
+    position = PositionSnapshot(
+        symbol="114800",
+        quantity=10,
+        sellable_quantity=10,
+        avg_price=1000,
+        market_value=9700,
+        source="kis",
+    )
+    orders, _ = build_position_exit_orders(
+        [position],
+        env={"TOSS_INVERSE_STOP_LOSS_PCT": "0.03"},
+        report_dir=tmp_path,
+    )
+    assert len(orders) == 1
+    assert "inverse_stop_loss" in orders[0]["reason"]
+    tracker = json.loads(tracker_path.read_text())
+    assert tracker["114800"].get("last_inverse_exit_date")
+
+    candidate = {
+        "status": "CANDIDATES",
+        "policy_id": "test",
+        "situation": "risk_off",
+        "intraday_decision": {"verdict": "INVERSE_BUY"},
+        "orders": [],
+    }
+    transformed, _ = maybe_apply_inverse_sleeve(
+        candidate,
+        out_dir=tmp_path,
+        env={
+            "TOSS_INVERSE_SLEEVE_ENABLED": "true",
+            "TOSS_INVERSE_REENTRY_COOLDOWN_HOURS": "2",
+        },
+    )
+    assert transformed["status"] == "NO_TRADE"
+    assert "since_inverse_exit" in transformed["reason"]
 
 
 if __name__ == "__main__":

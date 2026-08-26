@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json as _json
 import time as _time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 from toss_alpha.data.schema import AccountSnapshot, PositionSnapshot, Quote
@@ -11,6 +11,7 @@ from toss_alpha.execution.position_exit import (
     block_buys_for_position_quote_errors,
     build_position_exit_orders,
     evaluate_account_equity_guard,
+    _tracker_local_date,
     merge_exit_orders,
     position_quote_invalid_reason,
     position_exit_market_regime,
@@ -236,6 +237,46 @@ def test_live_performance_gate_blocks_buys_and_preserves_existing_sells(tmp_path
     assert audit["block_new_buys"] is True
     assert audit["buy_block_reasons"] == ["live_performance_gate_active"]
     assert audit["live_performance_gate"]["status"] == "BLOCK_NEW_BUYS"
+
+
+def test_research_validation_hold_blocks_buys_and_preserves_existing_sells(tmp_path, monkeypatch):
+    from toss_alpha.execution import position_exit as module
+
+    config = SimpleNamespace(
+        provider="kis", app_key="app", app_secret="secret", cano="12345678",
+        account_product_code="01", kis_mock_trading=False,
+        base_url="https://example.invalid", timeout=1,
+    )
+    monkeypatch.setattr(module.LiveExecutionConfig, "from_env", staticmethod(lambda _env: config))
+
+    class FakeClient:
+        def __init__(self, **_kwargs):
+            pass
+
+        def position_snapshots(self):
+            return []
+
+        def account_snapshot(self):
+            return AccountSnapshot(account_id="demo", total_equity=100_000, cash=100_000, source="kis")
+
+    monkeypatch.setattr(module, "KisReadOnlyClient", FakeClient)
+    payload = {
+        "status": "CANDIDATES",
+        "orders": [
+            {"symbol": "005930", "side": "BUY", "quantity": 1},
+            {"symbol": "000660", "side": "SELL", "quantity": 1},
+        ],
+    }
+
+    merged, audit = append_position_exit_orders(
+        payload,
+        report_dir=tmp_path,
+        env={"TOSS_POSITION_EXIT_ENABLED": "true", "TOSS_RESEARCH_BUY_HOLD": "true"},
+    )
+
+    assert [(order["symbol"], order["side"]) for order in merged["orders"]] == [("000660", "SELL")]
+    assert audit["block_new_buys"] is True
+    assert audit["buy_block_reasons"] == ["research_validation_hold"]
 
 
 def test_build_position_exit_orders_blocks_when_sellable_missing():
@@ -480,7 +521,8 @@ def test_time_exit_triggers_after_max_holding_days(tmp_path):
 def test_time_exit_does_not_trigger_within_holding_period(tmp_path):
     """Position held for fewer days than max should not trigger time_exit."""
     tracker_path = tmp_path / "live_position_tracker.json"
-    tracker_path.write_text(_json.dumps({"307930": {"peak_price": 6100.0, "first_seen_date": "2026-07-04"}}), encoding="utf-8")
+    recent_start = (datetime.now(timezone.utc) - timedelta(days=5)).date().isoformat()
+    tracker_path.write_text(_json.dumps({"307930": {"peak_price": 6100.0, "first_seen_date": recent_start}}), encoding="utf-8")
     positions = [
         PositionSnapshot(symbol="307930", quantity=9, sellable_quantity=9, avg_price=6000, market_value=9 * 6050, source="kis"),
     ]
@@ -668,6 +710,10 @@ def test_enforce_max_positions_allows_all_when_under_limit():
     assert "max_positions_trimmed_buys" not in result
 
 
+def test_tracker_timestamp_uses_kst_calendar_date():
+    assert _tracker_local_date("2026-08-26T21:30:00+00:00").isoformat() == "2026-08-27"
+
+
 def test_repurchase_resets_stale_peak_and_holding_age(tmp_path):
     tracker = tmp_path / "live_position_tracker.json"
     tracker.write_text(_json.dumps({
@@ -686,6 +732,7 @@ def test_repurchase_resets_stale_peak_and_holding_age(tmp_path):
     orders, audit = build_position_exit_orders(
         positions,
         env={"TOSS_POSITION_TRAILING_STOP_PCT": "0.05", "TOSS_POSITION_STOP_LOSS_PCT": "0.20"},
+        as_of="2026-08-27T06:30:00+09:00",
         report_dir=tmp_path,
     )
 

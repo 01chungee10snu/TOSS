@@ -150,6 +150,50 @@ def _trading_days_between(start: date, end: date, *, env: Mapping[str, str] | No
     return count
 
 
+def _parse_timestamp(value: Any) -> datetime | None:
+    """Parse a tracker/as-of timestamp; date-only strings intentionally return None."""
+    if isinstance(value, datetime):
+        parsed = value
+    else:
+        text = str(value or "").strip()
+        if not text or (len(text) <= 10 and "T" not in text and " " not in text):
+            return None
+        try:
+            parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=KST)
+    return parsed.astimezone(timezone.utc)
+
+
+def _effective_now(as_of: Any = None) -> datetime:
+    """Use a timestamped as-of when available; date-only live labels use wall clock."""
+    return _parse_timestamp(as_of) or datetime.now(timezone.utc)
+
+
+def _effective_today(as_of: Any = None) -> date:
+    """Resolve the KRX calendar date without confusing UTC tracker dates with KST."""
+    parsed = _parse_timestamp(as_of)
+    if parsed is not None:
+        return parsed.astimezone(KST).date()
+    text = str(as_of or "").strip()
+    if text:
+        try:
+            return date.fromisoformat(text[:10])
+        except ValueError:
+            pass
+    return datetime.now(KST).date()
+
+
+def _tracker_local_date(value: Any) -> date:
+    """Interpret full tracker timestamps in KST while preserving legacy date-only values."""
+    parsed = _parse_timestamp(value)
+    if parsed is not None:
+        return parsed.astimezone(KST).date()
+    return date.fromisoformat(str(value)[:10])
+
+
 def _env_cooldown_seconds(source: Mapping[str, str]) -> tuple[int, str]:
     """Resolve cooldown duration in seconds from env.
 
@@ -344,7 +388,7 @@ def build_position_exit_orders(
     inverse_stop_loss_pct = _env_float(
         source,
         "TOSS_INVERSE_STOP_LOSS_PCT",
-        _env_float(source, "TOSS_POSITION_STOP_LOSS_PCT", 0.025) if "TOSS_POSITION_STOP_LOSS_PCT" in source else 0.025,
+        _env_float(source, "TOSS_POSITION_STOP_LOSS_PCT", 0.03) if "TOSS_POSITION_STOP_LOSS_PCT" in source else 0.03,
     )
     inverse_profit_lock_activation_pct = _env_float(source, "TOSS_INVERSE_PROFIT_LOCK_ACTIVATION_PCT", 0.015)
     inverse_profit_floor_pct = _env_float(source, "TOSS_INVERSE_PROFIT_FLOOR_PCT", 0.002)
@@ -406,7 +450,7 @@ def build_position_exit_orders(
         tracker_data = {}
         _save_position_tracker(tracker_path, tracker_data)
 
-    today = datetime.now(KST).date()
+    today = _effective_today(as_of)
     orders: list[dict[str, Any]] = []
     reviews: list[dict[str, Any]] = []
     # Deep copy: we mutate inner dicts (setdefault, etc.) so shallow dict()
@@ -462,7 +506,7 @@ def build_position_exit_orders(
         first_seen_preexisting = first_seen is not None  # came from tracker, not just created
         lifecycle_id = str(pos_state.get("lifecycle_id") or "")
         if not lifecycle_id:
-            lifecycle_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+            lifecycle_id = _effective_now(as_of).strftime("%Y%m%dT%H%M%S%fZ")
             updated_tracker.setdefault(symbol, {})["lifecycle_id"] = lifecycle_id
         initial_quantity = float(pos_state.get("initial_quantity") or quantity)
         updated_tracker.setdefault(symbol, {})["initial_quantity"] = initial_quantity
@@ -482,7 +526,7 @@ def build_position_exit_orders(
             # First-seen timestamp init. Store full ISO timestamp (not just date)
             # so the fresh-position grace period measures actual hold time.
             if first_seen is None:
-                _now_ts = datetime.now(timezone.utc).isoformat()
+                _now_ts = _effective_now(as_of).isoformat()
                 updated_tracker[symbol]["first_seen_date"] = _now_ts
                 pos_state = updated_tracker[symbol]
                 first_seen = _now_ts
@@ -511,7 +555,7 @@ def build_position_exit_orders(
                     try:
                         from datetime import datetime as _dt
                         _first = _dt.fromisoformat(str(first_seen).replace("Z", "+00:00"))
-                        _now = as_of or _dt.now(timezone.utc)
+                        _now = _effective_now(as_of)
                         if _first.tzinfo is None:
                             _first = _first.replace(tzinfo=timezone.utc)
                         _elapsed_hours = (_now - _first).total_seconds() / 3600.0
@@ -534,7 +578,7 @@ def build_position_exit_orders(
                 try:
                     from datetime import datetime as _dt
                     _first = _dt.fromisoformat(str(first_seen).replace("Z", "+00:00"))
-                    _now = as_of or _dt.now(timezone.utc)
+                    _now = _effective_now(as_of)
                     if _first.tzinfo is None:
                         _first = _first.replace(tzinfo=timezone.utc)
                     _elapsed_hours = (_now - _first).total_seconds() / 3600.0
@@ -546,7 +590,9 @@ def build_position_exit_orders(
                 reasons.append("inverse_regime_recovery")
                 # Record exit timestamp so inverse_sleeve can block same-day re-entry.
                 # Store full ISO timestamp in UTC for accurate cooldown calculation.
-                updated_tracker.setdefault(symbol, {})["last_regime_recovery_date"] = datetime.now(timezone.utc).isoformat()
+                _exit_ts = _effective_now(as_of).isoformat()
+                updated_tracker.setdefault(symbol, {})["last_regime_recovery_date"] = _exit_ts
+                updated_tracker.setdefault(symbol, {})["last_inverse_exit_date"] = _exit_ts
         if avg_price is not None and current is not None:
             avg = float(avg_price)
             if is_inverse_hedge:
@@ -598,19 +644,25 @@ def build_position_exit_orders(
         # or its own stop-loss — never via ordinary max-hold.
         if max_holding_days > 0 and first_seen is not None and not is_inverse_hedge:
             try:
-                start_date = date.fromisoformat(str(first_seen)[:10])
+                start_date = _tracker_local_date(first_seen)
                 held_days = _trading_days_between(start_date, today, env=source)
                 if held_days >= max_holding_days:
                     reasons.append(f"time_exit_{max_holding_days}d")
             except (ValueError, TypeError):
                 pass  # skip if first_seen malformed
 
+        # Any inverse exit intent starts the re-entry cooldown. Restricting the
+        # marker to regime-recovery exits allowed stop-loss/profit/forced exits
+        # to be bought back minutes later by the recurring BUY loop.
+        if is_inverse_hedge and reasons:
+            updated_tracker.setdefault(symbol, {})["last_inverse_exit_date"] = _effective_now(as_of).isoformat()
+
         # Build review entry.
         peak_price = pos_state.get("peak_price")
         held_trading_days = None
         if first_seen:
             try:
-                held_trading_days = _trading_days_between(date.fromisoformat(str(first_seen)[:10]), today, env=source)
+                held_trading_days = _trading_days_between(_tracker_local_date(first_seen), today, env=source)
             except (ValueError, TypeError):
                 pass
         review = {
@@ -694,9 +746,15 @@ def build_position_exit_orders(
     for k, v in updated_tracker.items():
         if k in held_symbols:
             cleaned_tracker[k] = v
-        elif k in cooldown_symbols and isinstance(v, dict) and v.get("last_regime_recovery_date"):
-            # Preserve only the cooldown metadata; drop peak/avg/etc.
-            cleaned_tracker[k] = {"last_regime_recovery_date": v["last_regime_recovery_date"]}
+        elif k in cooldown_symbols and isinstance(v, dict) and (
+            v.get("last_inverse_exit_date") or v.get("last_regime_recovery_date")
+        ):
+            # Preserve only cooldown metadata; drop peak/avg/lifecycle fields.
+            cleaned_tracker[k] = {
+                key: v[key]
+                for key in ("last_inverse_exit_date", "last_regime_recovery_date")
+                if v.get(key)
+            }
     if tracker_path is not None and cleaned_tracker != tracker_data:
         _save_position_tracker(tracker_path, cleaned_tracker)
 
@@ -868,6 +926,9 @@ def append_position_exit_orders(
         audit["live_performance_gate"] = performance_gate
         base_payload = candidate_payload
         buy_block_reasons: list[str] = []
+        if _env_true(source.get("TOSS_RESEARCH_BUY_HOLD"), default=False):
+            base_payload = _without_buy_orders(base_payload, "research_validation_hold")
+            buy_block_reasons.append("research_validation_hold")
         if quote_errors:
             base_payload = block_buys_for_position_quote_errors(base_payload, quote_errors)
             buy_block_reasons.append("position_exit_quote_unavailable")
