@@ -94,38 +94,41 @@ def run_strategy(df, rsi_max, use_bb, regime_filter, hold, topn, sl_pct, label="
     valid = df.dropna(subset=["mom_5d", "dollar_volume", "rsi_14", "vol_20d", f"fwd_close_{hold}d", "mkt_ret"])
     valid = valid[valid["dollar_volume"] >= 5e8]
 
-    # Core filter: oversold
-    mask = valid["mom_5d"] <= valid["mom_5d"].quantile(0.05)
-
-    # RSI filter
-    if rsi_max < 100:
-        mask &= valid["rsi_14"] < rsi_max
-
-    # BB filter
-    if use_bb:
-        mask &= valid["Close"] < valid["bb_lower"]
-
-    # Regime filter
-    if regime_filter == "down_only":
-        mask &= valid["mkt_ret"] < 0
-    elif regime_filter == "down_or_highvol":
-        mask &= (valid["mkt_ret"] < 0.002) | (valid["mkt_vol"] > 0.015)
-    elif regime_filter == "crash":
-        mask &= valid["mkt_mom_5d"] < -0.02
-
-    candidates = valid[mask]
-    if candidates.empty:
+    all_dates = sorted(valid["Date"].unique())
+    if len(all_dates) <= 25:
         return None, []
-
-    all_dates = sorted(candidates["Date"].unique())
-    tradeable = [d for d in all_dates if d >= all_dates[25]]
+    tradeable = all_dates[25:]
 
     trades = []
     for date in tradeable:
-        day = candidates[candidates["Date"] == date]
+        day = valid[valid["Date"] == date]
         if day.empty:
             continue
-        picks = day.nlargest(topn, "dollar_volume")
+
+        # Core filter: oversold — compute quantile PER DATE (no look-ahead)
+        threshold = day["mom_5d"].quantile(0.05)
+        mask = day["mom_5d"] <= threshold
+
+        # RSI filter
+        if rsi_max < 100:
+            mask &= day["rsi_14"] < rsi_max
+
+        # BB filter
+        if use_bb:
+            mask &= day["Close"] < day["bb_lower"]
+
+        # Regime filter
+        if regime_filter == "down_only":
+            mask &= day["mkt_ret"] < 0
+        elif regime_filter == "down_or_highvol":
+            mask &= (day["mkt_ret"] < 0.002) | (day["mkt_vol"] > 0.015)
+        elif regime_filter == "crash":
+            mask &= day["mkt_mom_5d"] < -0.02
+
+        day_cands = day[mask]
+        if day_cands.empty:
+            continue
+        picks = day_cands.nlargest(topn, "dollar_volume")
         for _, row in picks.iterrows():
             entry = row["Close"]
             exit_price, reason, days_held = simulate_exit(entry, row, 0, sl_pct, hold)
