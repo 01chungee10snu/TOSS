@@ -53,6 +53,9 @@ reports/harness/fill_regime_research_*
 reports/harness/toss_strategy_research_*
 reports/validation/strategy_tournament_latest.*
 reports/validation/strategy_meta_allocator_latest.*
+reports/validation/contextual_train_only_holdout_latest.json
+reports/validation/contextual_train_only_holdout_daily_curve.csv
+reports/validation/contextual_train_only_holdout_monfri_curve.csv
 reports/validation/factor_pit_readiness_latest.json
 reports/harness/adaptive_regime_shadow_latest.json
 reports/harness/adaptive_regime_shadow_latest.md

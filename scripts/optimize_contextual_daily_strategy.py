@@ -113,15 +113,38 @@ def build_score(data: pd.DataFrame, momentum_col: str, vol_col: str, mode: str) 
     raise ValueError(mode)
 
 
-def objective_score(train: dict[str, Any], test: dict[str, Any]) -> float:
-    train_core = train["sharpe"] + train["cagr_pct"] / 100 + max(train["max_drawdown_pct"], -80) / 100
-    test_bonus = 0.35 * test["sharpe"] + 0.35 * (test["total_return_pct"] / 100)
-    return_gap_penalty = 0.30 * abs(train["total_return_pct"] - test["total_return_pct"]) / 100
-    sharpe_gap_penalty = 0.20 * abs(train["sharpe"] - test["sharpe"])
-    test_mdd_penalty = max(0.0, abs(min(test["max_drawdown_pct"], -20.0)) - 20.0) / 50
-    low_test_trades_penalty = 0.25 if test["total_trades"] < MIN_TRADES_TEST else 0.0
-    negative_test_penalty = 0.50 if test["total_return_pct"] <= 0 or test["sharpe"] <= 0 else 0.0
-    return train_core + test_bonus - return_gap_penalty - sharpe_gap_penalty - test_mdd_penalty - low_test_trades_penalty - negative_test_penalty
+def objective_score(train: dict[str, Any], test: dict[str, Any] | None = None) -> float:
+    """Train-only model-selection objective.
+
+    ``test`` is accepted for backward compatibility but intentionally ignored.
+    The 2025 holdout must never influence parameter selection.
+    """
+    del test
+    return (
+        float(train["sharpe"])
+        + float(train["cagr_pct"]) / 100.0
+        + max(float(train["max_drawdown_pct"]), -80.0) / 100.0
+    )
+
+
+def train_approval_passed(row: dict[str, Any]) -> bool:
+    """Whether a situation is eligible using train data only."""
+    return bool(
+        float(row["train_total_return_pct"]) > 0.0
+        and float(row["train_sharpe"]) > 0.0
+        and float(row["train_max_drawdown_pct"]) > -20.0
+        and int(row["train_total_trades"]) >= MIN_TRADES_TRAIN
+    )
+
+
+def holdout_diagnostic_passed(row: dict[str, Any]) -> bool:
+    """Post-selection diagnostic only; never used to choose the policy."""
+    return bool(
+        float(row["test_total_return_pct"]) > 0.0
+        and float(row["test_sharpe"]) > 0.0
+        and float(row["test_max_drawdown_pct"]) > -20.0
+        and int(row["test_total_trades"]) >= MIN_TRADES_TEST
+    )
 
 
 def simulate(data: pd.DataFrame, params: dict[str, Any], situation: str | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -192,16 +215,19 @@ def main() -> None:
             if train["total_trades"] < MIN_TRADES_TRAIN:
                 continue
             test = perf(daily, test_mask)
-            objective = objective_score(train, test)
+            objective = objective_score(train)
             row = {
                 "situation": situation,
                 **params,
                 "objective": round(objective, 4),
+                "selection_uses_holdout": False,
                 "train_test_return_gap_pct": round(abs(train["total_return_pct"] - test["total_return_pct"]), 2),
                 "train_test_sharpe_gap": round(abs(train["sharpe"] - test["sharpe"]), 3),
                 **{f"train_{k}": v for k, v in train.items()},
                 **{f"test_{k}": v for k, v in test.items()},
             }
+            row["train_approval_passed"] = train_approval_passed(row)
+            row["holdout_diagnostic_passed"] = holdout_diagnostic_passed(row)
             rows.append(row)
             if best is None or objective > best["objective"]:
                 best = row
@@ -213,17 +239,12 @@ def main() -> None:
     approved_by_situation = {
         situation: row
         for situation, row in selected_by_situation.items()
-        if row["train_total_return_pct"] > 0
-        and row["test_total_return_pct"] > 0
-        and row["test_sharpe"] > 0
-        and row["test_max_drawdown_pct"] > -20
-        and row["test_total_trades"] >= MIN_TRADES_TEST
-        and row["train_test_return_gap_pct"] <= 20
+        if train_approval_passed(row)
     }
     approved_df = pd.DataFrame(approved_by_situation.values()).sort_values("objective", ascending=False) if approved_by_situation else pd.DataFrame()
 
-    # Simulate combined contextual policy: trade only situations that pass both train and test gates.
-    # Other regimes are cash. This intentionally favors "do nothing" over overfit negative regimes.
+    # Simulate the policy selected and approved using train data only.
+    # The 2025 holdout is evaluated only after this policy is frozen.
     all_dates = pd.DataFrame({"Date": sorted(data["Date"].dropna().unique())})
     combined_daily_parts = []
     combined_picks_parts = []
@@ -270,7 +291,7 @@ def main() -> None:
         "mode": "paper_or_manual_draft_only",
         "live_trading_enabled": False,
         "universe_source": str(PANEL_CSV),
-        "selection": "per market situation, use previous-close features only; produce same-day or next-day manual candidates depending on return_col",
+        "selection": "train-only parameter selection and train-only situation approval; 2025 holdout is reporting-only; features use previous-close information",
         "cost_assumption_round_trip_bps": ROUND_TRIP_COST * 10_000,
         "risk_gates": {
             "max_positions": 10,
@@ -281,11 +302,11 @@ def main() -> None:
         },
         "situations": approved_by_situation,
         "rejected_situations_best_trials": selected_by_situation,
-        "validation": {"train_end": str(TRAIN_END.date()), "test_start": str(TEST_START.date()), "combined_train": combined_train, "combined_test": combined_test, "combined_all": combined_all},
+        "validation": {"train_end": str(TRAIN_END.date()), "test_start": str(TEST_START.date()), "holdout_used_for_selection": False, "combined_train": combined_train, "combined_test": combined_test, "combined_all": combined_all},
         "disclaimer": "Research-only optimized policy. Not investment advice. Must paper trade before any real order.",
     }
     policy_path.write_text(json.dumps(policy, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
-    payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "grid_size": len(grid), "situations": situations, "approved_situations": approved_by_situation, "selected_by_situation_before_validation_gate": selected_by_situation, "combined_train": combined_train, "combined_test": combined_test, "combined_all": combined_all, "policy_path": str(policy_path), "outputs": {"all_trials": str(all_csv), "selected": str(selected_csv), "daily": str(daily_csv), "picks": str(picks_csv)}, "disclaimer": "Research-only contextual optimization; not investment advice; live orders not submitted."}
+    payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "grid_size": len(grid), "situations": situations, "holdout_used_for_selection": False, "approved_situations": approved_by_situation, "selected_by_situation_train_only": selected_by_situation, "combined_train": combined_train, "combined_test": combined_test, "combined_all": combined_all, "policy_path": str(policy_path), "outputs": {"all_trials": str(all_csv), "selected": str(selected_csv), "daily": str(daily_csv), "picks": str(picks_csv)}, "disclaimer": "Research-only contextual optimization; 2025 holdout is reporting-only; not investment advice; live orders not submitted."}
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
 
     lines = [
@@ -298,7 +319,7 @@ def main() -> None:
         f"- Train: <= {TRAIN_END.date()}, test: >= {TEST_START.date()}",
         f"- Grid size: {len(grid)} parameter combinations per situation",
         "- Situations: sample-market 20D momentum up/flat/down × high/low volatility",
-        "- Objective: train core score + test bonus - train/test gap penalty - weak-test penalty, with minimum train trades",
+        "- Objective: train-only Sharpe + CAGR + drawdown score; 2025 holdout never influences selection or approval",
         "- Live execution: disabled; generated policy is paper/manual-draft only",
         "",
         "## Combined approved contextual policy performance",
@@ -306,14 +327,14 @@ def main() -> None:
         f"- Test: {combined_test}",
         f"- All: {combined_all}",
         "",
-        "## Approved policy by situation",
+        "## Train-approved policy by situation",
     ]
     report_df = approved_df if not approved_df.empty else selected_df.head(0)
     for row in report_df.to_dict(orient="records"):
-        lines.append(f"- {row['situation']}: {row['mode']} {row['momentum_col']}/{row['vol_col']} -> {row['return_col']}, top_n={row['top_n']}, min_dv={row['min_dollar_volume']}, min_abs_mom={row['min_abs_momentum']}; train return {row['train_total_return_pct']}%, test return {row['test_total_return_pct']}%, return gap {row['train_test_return_gap_pct']}%, test MDD {row['test_max_drawdown_pct']}%, test Sharpe {row['test_sharpe']}")
+        lines.append(f"- {row['situation']}: {row['mode']} {row['momentum_col']}/{row['vol_col']} -> {row['return_col']}, top_n={row['top_n']}, min_dv={row['min_dollar_volume']}, min_abs_mom={row['min_abs_momentum']}; train return {row['train_total_return_pct']}%, holdout return {row['test_total_return_pct']}%, holdout MDD {row['test_max_drawdown_pct']}%, holdout Sharpe {row['test_sharpe']}, holdout_passed={row['holdout_diagnostic_passed']}")
     if approved_df.empty:
-        lines.append("- none: no situation passed the train/test approval gates")
-    lines.extend(["", "## Rejected best-by-train candidates",])
+        lines.append("- none: no situation passed the train-only approval gates")
+    lines.extend(["", "## Train-selected candidates not approved",])
     for row in selected_df.to_dict(orient="records"):
         lines.append(f"- {row['situation']}: train {row['train_total_return_pct']}%, test {row['test_total_return_pct']}%, return gap {row['train_test_return_gap_pct']}%, test MDD {row['test_max_drawdown_pct']}%, test Sharpe {row['test_sharpe']}")
     lines.extend(["", "## Outputs", f"- policy: {policy_path}", f"- all_trials: {all_csv}", f"- selected_by_situation: {selected_csv}", f"- combined_daily_curve: {daily_csv}", f"- combined_picks: {picks_csv}", f"- json: {json_path}"])

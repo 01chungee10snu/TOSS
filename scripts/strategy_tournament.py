@@ -316,6 +316,42 @@ def add_low_vol_value(candidates: list[dict[str, Any]]) -> None:
     ))
 
 
+def add_contextual_train_only_holdout(candidates: list[dict[str, Any]]) -> None:
+    path = VALIDATION / "contextual_train_only_holdout_latest.json"
+    if not path.exists():
+        return
+    data = load_json(path)
+    for strategy_id, key in [
+        ("contextual_daily_train_only_holdout", "daily_contextual"),
+        ("contextual_monfri_train_only_holdout", "monfri_contextual"),
+    ]:
+        section = data.get(key, {})
+        holdout = section.get("holdout", {})
+        verdict = section.get("holdout_verdict", {})
+        passed = bool(verdict.get("passed", False))
+        status = "RESEARCH_ONLY" if passed else "REJECTED"
+        candidates.append(candidate(
+            strategy_id=strategy_id,
+            family="contextual_stock_selection",
+            status=status,
+            evidence_grade="C",
+            source=str(path.relative_to(ROOT)),
+            cagr_pct=holdout.get("cagr_pct"),
+            total_return_pct=holdout.get("total_return_pct"),
+            sharpe=holdout.get("sharpe"),
+            max_drawdown_pct=holdout.get("max_drawdown_pct"),
+            cost_bps=31.0,
+            sample_size=holdout.get("total_trades"),
+            paper_candidate_passed=False,
+            known_lookahead=False,
+            notes=[
+                "2022-2024 train-only parameter selection and situation approval; 2025 is reporting-only holdout",
+                f"holdout_verdict_passed={passed}; reasons={verdict.get('reasons', [])}",
+                "fixed random500 universe: survivorship bias remains unresolved",
+            ],
+        ))
+
+
 def add_current_live(candidates: list[dict[str, Any]]) -> None:
     path = REPORTS / "harness" / "backtest_current_live_strategy.json"
     if not path.exists():
@@ -428,6 +464,7 @@ def build_tournament() -> dict[str, Any]:
     add_hml_cma(candidates)
     add_low_vol(candidates)
     add_low_vol_value(candidates)
+    add_contextual_train_only_holdout(candidates)
     add_current_live(candidates)
     add_v2_exploration(candidates, pit_map)
     add_inverse(candidates)
@@ -477,7 +514,7 @@ def build_tournament() -> dict[str, Any]:
             "Continue the existing forward-paper target without strategy switching; evaluate higher-ranked ETF variants in parallel research only.",
             "Collect order-book depth and completed monthly rebalance evidence before any live promotion.",
             "Rebuild HML/CMA on filing-date historical fundamentals and a historical universe before promotion.",
-            "Keep momentum/reversal/inverse/legacy-live allocation at zero until new OOS evidence turns positive.",
+            "Keep contextual/momentum/reversal/inverse/legacy-live allocation at zero until new independent OOS evidence turns positive.",
             "Refresh the evidence-aware meta allocator as new comparable daily return series and forward evidence become available; treat highly correlated ETF variants as one sleeve.",
         ],
         "leaderboard": ranked,

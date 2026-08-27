@@ -111,6 +111,31 @@ def seed_tournament_reports(m, tmp_path: Path) -> None:
         },
     )
     _write_json(
+        m.VALIDATION / "contextual_train_only_holdout_latest.json",
+        {
+            "daily_contextual": {
+                "holdout": {
+                    "cagr_pct": -40.76,
+                    "total_return_pct": -40.48,
+                    "sharpe": -1.96,
+                    "max_drawdown_pct": -47.65,
+                    "total_trades": 213,
+                },
+                "holdout_verdict": {"passed": False, "reasons": ["non_positive_holdout_return"]},
+            },
+            "monfri_contextual": {
+                "holdout": {
+                    "cagr_pct": -3.06,
+                    "total_return_pct": -2.99,
+                    "sharpe": -0.084,
+                    "max_drawdown_pct": -12.55,
+                    "total_trades": 173,
+                },
+                "holdout_verdict": {"passed": False, "reasons": ["non_positive_holdout_return"]},
+            },
+        },
+    )
+    _write_json(
         m.REPORTS / "harness" / "backtest_current_live_strategy.json",
         {
             "config": {"initial_capital_krw": 1_000_000, "round_trip_bps": 31},
@@ -174,6 +199,9 @@ def test_repository_tournament_keeps_live_closed_and_etf_on_top(tmp_path):
     assert by_id["reversal_oversold"]["status"] == "REJECTED"
     assert by_id["hml_cma_composite"]["status"] == "RESEARCH_ONLY"
     assert by_id["hml_cma_composite"]["evidence_grade"] == "D"
+    assert by_id["contextual_daily_train_only_holdout"]["status"] == "REJECTED"
+    assert by_id["contextual_monfri_train_only_holdout"]["status"] == "REJECTED"
+    assert by_id["contextual_daily_train_only_holdout"]["evidence_grade"] == "C"
 
 
 def test_current_forward_paper_target_is_identified_by_weights(tmp_path):
