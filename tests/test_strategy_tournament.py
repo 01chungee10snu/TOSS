@@ -111,6 +111,31 @@ def seed_tournament_reports(m, tmp_path: Path) -> None:
         },
     )
     _write_json(
+        m.REPORTS / "backtests" / "breakout_ensemble_v5_pit.json",
+        {
+            "best_overall_train_selected": "ensemble_consensus3|h10|k20",
+            "details": {
+                "ensemble_consensus3|h10|k20": {
+                    "train": {
+                        "episodes": 67,
+                        "cumulative_return": -0.6158,
+                        "sharpe": -1.2807,
+                        "max_drawdown": -0.6601,
+                    },
+                    "test": {
+                        "episodes": 36,
+                        "cumulative_return": -0.3295,
+                        "sharpe": -0.6562,
+                        "max_drawdown": -0.4361,
+                    },
+                }
+            },
+            "promotion": {
+                "verdict": "BLOCKED_RESEARCH_ONLY_UNRESOLVED_PIT_AND_CORPORATE_ACTIONS"
+            },
+        },
+    )
+    _write_json(
         m.VALIDATION / "contextual_train_only_holdout_latest.json",
         {
             "daily_contextual": {
@@ -202,6 +227,10 @@ def test_repository_tournament_keeps_live_closed_and_etf_on_top(tmp_path):
     assert by_id["contextual_daily_train_only_holdout"]["status"] == "REJECTED"
     assert by_id["contextual_monfri_train_only_holdout"]["status"] == "REJECTED"
     assert by_id["contextual_daily_train_only_holdout"]["evidence_grade"] == "C"
+    assert by_id["breakout_ensemble_v5_corrected"]["status"] == "REJECTED"
+    assert by_id["breakout_ensemble_v5_corrected"]["evidence_grade"] == "C"
+    assert by_id["breakout_ensemble_v5_corrected"]["total_return_pct"] < 0
+    assert any("older v2/v3 optimistic results are superseded" in note for note in by_id["breakout_ensemble_v5_corrected"]["notes"])
 
 
 def test_current_forward_paper_target_is_identified_by_weights(tmp_path):

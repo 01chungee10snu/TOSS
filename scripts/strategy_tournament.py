@@ -316,6 +316,51 @@ def add_low_vol_value(candidates: list[dict[str, Any]]) -> None:
     ))
 
 
+def add_breakout_ensemble_corrected(candidates: list[dict[str, Any]]) -> None:
+    """Register only the corrected v5 breakout/ML evidence, never optimistic v2/v3 results."""
+    path = REPORTS / "backtests" / "breakout_ensemble_v5_pit.json"
+    if not path.exists():
+        return
+    data = load_json(path)
+    config_id = str(data.get("best_overall_train_selected") or "")
+    detail = data.get("details", {}).get(config_id, {}) if config_id else {}
+    train = detail.get("train", {})
+    test = detail.get("test", {})
+    promotion = data.get("promotion", {})
+    verdict = str(promotion.get("verdict") or "")
+    test_return = safe_float(test.get("cumulative_return"))
+    test_sharpe = safe_float(test.get("sharpe"))
+    test_mdd = safe_float(test.get("max_drawdown"))
+    # v5 is the corrected evidence after the gpu_shift future-session leak was fixed.
+    passed = bool(
+        test_return is not None
+        and test_sharpe is not None
+        and test_return > 0
+        and test_sharpe > 0
+        and "BLOCKED" not in verdict.upper()
+    )
+    candidates.append(candidate(
+        strategy_id="breakout_ensemble_v5_corrected",
+        family="breakout_ml_ensemble",
+        status="RESEARCH_ONLY" if passed else "REJECTED",
+        evidence_grade="C",
+        source=str(path.relative_to(ROOT)),
+        total_return_pct=(test_return * 100.0 if test_return is not None else None),
+        sharpe=test_sharpe,
+        max_drawdown_pct=(test_mdd * 100.0 if test_mdd is not None else None),
+        sample_size=test.get("episodes"),
+        known_lookahead=False,
+        notes=[
+            f"corrected_config={config_id}",
+            f"train_return_pct={round(float(train.get('cumulative_return', 0.0)) * 100.0, 2)}; train_sharpe={train.get('sharpe')}",
+            "v5 fixed gpu_shift future-session leakage, purged train/test boundary, and aligned next-open execution",
+            "older v2/v3 optimistic results are superseded and must not be used for promotion",
+            f"promotion_verdict={verdict}",
+            "historical membership and corporate-action handling remain unresolved",
+        ],
+    ))
+
+
 def add_contextual_train_only_holdout(candidates: list[dict[str, Any]]) -> None:
     path = VALIDATION / "contextual_train_only_holdout_latest.json"
     if not path.exists():
@@ -464,6 +509,7 @@ def build_tournament() -> dict[str, Any]:
     add_hml_cma(candidates)
     add_low_vol(candidates)
     add_low_vol_value(candidates)
+    add_breakout_ensemble_corrected(candidates)
     add_contextual_train_only_holdout(candidates)
     add_current_live(candidates)
     add_v2_exploration(candidates, pit_map)
@@ -514,7 +560,7 @@ def build_tournament() -> dict[str, Any]:
             "Continue the existing forward-paper target without strategy switching; evaluate higher-ranked ETF variants in parallel research only.",
             "Collect order-book depth and completed monthly rebalance evidence before any live promotion.",
             "Rebuild HML/CMA on filing-date historical fundamentals and a historical universe before promotion.",
-            "Keep contextual/momentum/reversal/inverse/legacy-live allocation at zero until new independent OOS evidence turns positive.",
+            "Keep contextual/breakout/momentum/reversal/inverse/legacy-live allocation at zero until new independent OOS evidence turns positive.",
             "Refresh the evidence-aware meta allocator as new comparable daily return series and forward evidence become available; treat highly correlated ETF variants as one sleeve.",
         ],
         "leaderboard": ranked,
