@@ -316,6 +316,50 @@ def add_low_vol_value(candidates: list[dict[str, Any]]) -> None:
     ))
 
 
+def add_etf_trend_diversifier(candidates: list[dict[str, Any]]) -> None:
+    path = VALIDATION / "executable_etf_trend_sleeve_latest.json"
+    if not path.exists():
+        return
+    data = load_json(path)
+    selected = data.get("selected_train_only_variant")
+    if not selected:
+        return
+    selection_cost = int(data.get("selection_contract", {}).get("selection_cost_stress_bps", 75) or 75)
+    row = next(
+        (
+            x for x in data.get("results", [])
+            if x.get("variant") == selected and int(x.get("cost_bps", -1)) == selection_cost
+        ),
+        {},
+    )
+    holdout = row.get("holdout", {})
+    gate = data.get("holdout_independent_alpha_gate", {})
+    passed = bool(gate.get("passed", False))
+    baseline = data.get("static_50_50_holdout_metrics_at_selection_cost", {})
+    corr = data.get("selected_vs_static_50_50_correlation", {}).get("holdout", {})
+    candidates.append(candidate(
+        strategy_id="executable_etf_trend_diversifier",
+        family="etf_trend_diversifier",
+        status="RESEARCH_ONLY" if passed else "REJECTED",
+        evidence_grade="B",
+        source=str(path.relative_to(ROOT)),
+        cagr_pct=holdout.get("cagr_pct"),
+        total_return_pct=holdout.get("total_return_pct"),
+        sharpe=holdout.get("sharpe"),
+        max_drawdown_pct=holdout.get("max_drawdown_pct"),
+        cost_bps=selection_cost,
+        sample_size=holdout.get("days"),
+        paper_candidate_passed=False,
+        notes=[
+            f"train-only selected variant={selected}; holdout starts 2022; next-open whole-share execution",
+            f"independent_alpha_gate={passed}; reasons={gate.get('reasons', [])}",
+            f"holdout_corr_pearson={corr.get('pearson')}; downside={corr.get('downside')}",
+            f"static_50_50_holdout_return={baseline.get('total_return_pct')}; sharpe={baseline.get('sharpe')}",
+            "not eligible to replace the existing forward target or consume a separate alpha risk budget unless the strict independence gate passes",
+        ],
+    ))
+
+
 def add_breakout_ensemble_corrected(candidates: list[dict[str, Any]]) -> None:
     """Register only the corrected v5 breakout/ML evidence, never optimistic v2/v3 results."""
     path = REPORTS / "backtests" / "breakout_ensemble_v5_pit.json"
@@ -509,6 +553,7 @@ def build_tournament() -> dict[str, Any]:
     add_hml_cma(candidates)
     add_low_vol(candidates)
     add_low_vol_value(candidates)
+    add_etf_trend_diversifier(candidates)
     add_breakout_ensemble_corrected(candidates)
     add_contextual_train_only_holdout(candidates)
     add_current_live(candidates)
@@ -560,7 +605,7 @@ def build_tournament() -> dict[str, Any]:
             "Continue the existing forward-paper target without strategy switching; evaluate higher-ranked ETF variants in parallel research only.",
             "Collect order-book depth and completed monthly rebalance evidence before any live promotion.",
             "Rebuild HML/CMA on filing-date historical fundamentals and a historical universe before promotion.",
-            "Keep contextual/breakout/momentum/reversal/inverse/legacy-live allocation at zero until new independent OOS evidence turns positive.",
+            "Keep contextual/breakout/trend-diversifier/momentum/reversal/inverse/legacy-live allocation at zero until new independent OOS evidence turns positive and clears the meta-allocation independence gate.",
             "Refresh the evidence-aware meta allocator as new comparable daily return series and forward evidence become available; treat highly correlated ETF variants as one sleeve.",
         ],
         "leaderboard": ranked,

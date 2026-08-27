@@ -111,6 +111,40 @@ def seed_tournament_reports(m, tmp_path: Path) -> None:
         },
     )
     _write_json(
+        m.VALIDATION / "executable_etf_trend_sleeve_latest.json",
+        {
+            "selected_train_only_variant": "dual60_200_50_10",
+            "selection_contract": {"selection_cost_stress_bps": 75},
+            "results": [
+                {
+                    "variant": "dual60_200_50_10",
+                    "cost_bps": 75,
+                    "holdout": {
+                        "days": 1104,
+                        "total_return_pct": 57.94,
+                        "cagr_pct": 10.44,
+                        "sharpe": 0.9348,
+                        "max_drawdown_pct": -17.95,
+                    },
+                }
+            ],
+            "selected_vs_static_50_50_correlation": {
+                "holdout": {"pearson": 0.9413, "downside": 0.9233}
+            },
+            "static_50_50_holdout_metrics_at_selection_cost": {
+                "total_return_pct": 68.02,
+                "sharpe": 0.9465,
+            },
+            "holdout_independent_alpha_gate": {
+                "passed": False,
+                "reasons": [
+                    "insufficient_independence_from_static_etf_sleeve",
+                    "does_not_outperform_static_50_50_return",
+                ],
+            },
+        },
+    )
+    _write_json(
         m.REPORTS / "backtests" / "breakout_ensemble_v5_pit.json",
         {
             "best_overall_train_selected": "ensemble_consensus3|h10|k20",
@@ -231,6 +265,9 @@ def test_repository_tournament_keeps_live_closed_and_etf_on_top(tmp_path):
     assert by_id["breakout_ensemble_v5_corrected"]["evidence_grade"] == "C"
     assert by_id["breakout_ensemble_v5_corrected"]["total_return_pct"] < 0
     assert any("older v2/v3 optimistic results are superseded" in note for note in by_id["breakout_ensemble_v5_corrected"]["notes"])
+    assert by_id["executable_etf_trend_diversifier"]["status"] == "REJECTED"
+    assert by_id["executable_etf_trend_diversifier"]["evidence_grade"] == "B"
+    assert any("independent_alpha_gate=False" in note for note in by_id["executable_etf_trend_diversifier"]["notes"])
 
 
 def test_current_forward_paper_target_is_identified_by_weights(tmp_path):
