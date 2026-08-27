@@ -478,7 +478,7 @@ def build_tournament() -> dict[str, Any]:
             "Collect order-book depth and completed monthly rebalance evidence before any live promotion.",
             "Rebuild HML/CMA on filing-date historical fundamentals and a historical universe before promotion.",
             "Keep momentum/reversal/inverse/legacy-live allocation at zero until new OOS evidence turns positive.",
-            "After forward evidence, compute cross-strategy return correlations before building an ensemble allocator.",
+            "Refresh the evidence-aware meta allocator as new comparable daily return series and forward evidence become available; treat highly correlated ETF variants as one sleeve.",
         ],
         "leaderboard": ranked,
     }
