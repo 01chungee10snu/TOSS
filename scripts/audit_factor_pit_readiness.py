@@ -33,9 +33,20 @@ def build_readiness_report(
     source: str,
     opendart_key_present: bool,
 ) -> dict[str, Any]:
-    contract = validate_pit_contract(candidate, pit_panel)
+    hml_cma_contract = validate_pit_contract(
+        candidate,
+        pit_panel,
+        required_value_columns=("bps", "assets"),
+    )
+    profitability_contract = validate_pit_contract(
+        candidate,
+        pit_panel,
+        required_value_columns=("book_equity", "operating_income"),
+    )
     true_pit_source = source == "opendart_receipt_xbrl"
-    input_ready = bool(contract.eligible and true_pit_source)
+    hml_cma_ready = bool(hml_cma_contract.eligible and true_pit_source)
+    profitability_ready = bool(profitability_contract.eligible and true_pit_source)
+    input_ready = bool(hml_cma_ready and profitability_ready)
     return {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "purpose": "factor_true_pit_readiness_gate",
@@ -50,10 +61,17 @@ def build_readiness_report(
             "required_snapshot_semantics": "original_filing_or_revision_version_available_at_that_time",
             "single_account_latest_view_is_not_revision_safe": True,
         },
-        "contract": contract.to_dict(),
+        "contract": hml_cma_contract.to_dict(),
+        "contracts": {
+            "hml_cma": hml_cma_contract.to_dict(),
+            "profitability": profitability_contract.to_dict(),
+        },
         "promotion": {
             "status": "TRUE_PIT_INPUTS_READY" if input_ready else "BLOCKED_TRUE_PIT_INPUTS",
             "hml_cma_live_promotion_allowed": False,
+            "profitability_live_promotion_allowed": False,
+            "hml_cma_backtest_allowed": hml_cma_ready,
+            "profitability_backtest_allowed": profitability_ready,
             "factor_backtest_allowed": input_ready,
             "reason": (
                 "inputs_ready_but_strategy_requires_new_independent_oos_backtest"
@@ -63,14 +81,14 @@ def build_readiness_report(
         },
         "next_requirements": (
             [
-                "rerun HML/CMA using as-of revision-aware snapshots and the historical PIT universe",
+                "rerun HML/CMA with asset-growth CMA plus profitability proxy using as-of revision-aware snapshots and the historical PIT universe",
                 "use t-to-next-session execution and 31/50/75bp cost stress",
                 "keep strategy research-only until independent OOS evidence passes",
             ]
             if input_ready
             else [
                 "collect/build receipt-versioned OpenDART XBRL fundamentals with actual available_at dates",
-                "resolve missing or ambiguous BPS/revenue facts without unsafe fallbacks",
+                "resolve missing or ambiguous BPS/assets/operating-income facts without unsafe fallbacks",
                 "retain filing receipt identifiers and amendment versions",
                 "intersect every future rebalance snapshot with the historical PIT universe",
             ]
@@ -111,12 +129,16 @@ def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
 
-    contract = report["contract"]
+    hml_cma_contract = report["contracts"]["hml_cma"]
+    profitability_contract = report["contracts"]["profitability"]
     print(f"factor_pit_source={source}")
-    print(f"factor_pit_status={contract['status']}")
-    print(f"eligible={contract['eligible']}")
+    print(f"factor_pit_status={hml_cma_contract['status']}")
+    print(f"eligible={hml_cma_contract['eligible']}")
+    print(f"hml_cma_backtest_allowed={report['promotion']['hml_cma_backtest_allowed']}")
+    print(f"profitability_backtest_allowed={report['promotion']['profitability_backtest_allowed']}")
     print(f"factor_backtest_allowed={report['promotion']['factor_backtest_allowed']}")
-    print(f"reasons={','.join(contract['reasons'])}")
+    print(f"hml_cma_reasons={','.join(hml_cma_contract['reasons'])}")
+    print(f"profitability_reasons={','.join(profitability_contract['reasons'])}")
     print(f"opendart_api_key_present={report['opendart_collection']['api_key_present']}")
     print(f"output={OUT}")
     return 0

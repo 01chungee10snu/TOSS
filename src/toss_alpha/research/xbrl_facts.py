@@ -18,7 +18,7 @@ from typing import Any, Iterable
 from xml.etree import ElementTree as ET
 
 
-MONETARY_METRICS = {"assets", "book_equity", "revenue"}
+MONETARY_METRICS = {"assets", "book_equity", "revenue", "operating_income", "net_income"}
 INSTANT_METRICS = {"assets", "book_equity", "shares_outstanding"}
 
 # Priority is significant.  Parent-owner equity is preferred for consolidated
@@ -38,6 +38,17 @@ CONCEPT_ALIASES: dict[str, tuple[str, ...]] = {
         "RevenueFromContractsWithCustomers",
         "SalesRevenue",
         "Sales",
+    ),
+    "operating_income": (
+        "ProfitLossFromOperatingActivities",
+        "OperatingProfitLoss",
+        "OperatingIncomeLoss",
+    ),
+    "net_income": (
+        "ProfitLossAttributableToOwnersOfParent",
+        "ProfitLossAttributableToEquityHoldersOfParent",
+        "ProfitLoss",
+        "NetIncomeLoss",
     ),
     "shares_outstanding": (
         "NumberOfSharesOutstanding",
@@ -125,6 +136,8 @@ class ParsedFundamentals:
     assets: SelectedFact
     book_equity: SelectedFact
     revenue: SelectedFact
+    operating_income: SelectedFact
+    net_income: SelectedFact
     shares_outstanding: SelectedFact
     instance_count: int
     raw_fact_count: int
@@ -139,9 +152,9 @@ class ParsedFundamentals:
             return None
         return equity / shares
 
-    @property
-    def revenue_basis(self) -> str | None:
-        days = self.revenue.duration_days
+    @staticmethod
+    def _duration_basis(fact: SelectedFact) -> str | None:
+        days = fact.duration_days
         if days is None:
             return None
         if days <= 120:
@@ -153,13 +166,49 @@ class ParsedFundamentals:
         return "annual"
 
     @property
+    def revenue_basis(self) -> str | None:
+        return self._duration_basis(self.revenue)
+
+    @property
+    def profitability_basis(self) -> str | None:
+        return self._duration_basis(self.operating_income)
+
+    @property
+    def operating_profitability_proxy(self) -> float | None:
+        equity = self.book_equity.value
+        operating_income = self.operating_income.value
+        if equity is None or operating_income is None:
+            return None
+        if not math.isfinite(equity) or not math.isfinite(operating_income) or equity <= 0:
+            return None
+        return operating_income / equity
+
+    @property
+    def roe_proxy(self) -> float | None:
+        equity = self.book_equity.value
+        net_income = self.net_income.value
+        if equity is None or net_income is None:
+            return None
+        if not math.isfinite(equity) or not math.isfinite(net_income) or equity <= 0:
+            return None
+        return net_income / equity
+
+    @property
     def ready_for_hml_cma(self) -> bool:
         return (
-            self.book_equity.status == "SELECTED"
-            and self.revenue.status == "SELECTED"
+            self.assets.status == "SELECTED"
+            and self.book_equity.status == "SELECTED"
             and self.shares_outstanding.status == "SELECTED"
             and self.bps is not None
-            and self.revenue.value is not None
+            and self.assets.value is not None
+        )
+
+    @property
+    def ready_for_profitability(self) -> bool:
+        return (
+            self.book_equity.status == "SELECTED"
+            and self.operating_income.status == "SELECTED"
+            and self.operating_profitability_proxy is not None
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -169,10 +218,16 @@ class ParsedFundamentals:
             "assets": self.assets.to_dict(),
             "book_equity": self.book_equity.to_dict(),
             "revenue": self.revenue.to_dict(),
+            "operating_income": self.operating_income.to_dict(),
+            "net_income": self.net_income.to_dict(),
             "shares_outstanding": self.shares_outstanding.to_dict(),
             "bps": self.bps,
             "revenue_basis": self.revenue_basis,
+            "profitability_basis": self.profitability_basis,
+            "operating_profitability_proxy": self.operating_profitability_proxy,
+            "roe_proxy": self.roe_proxy,
             "ready_for_hml_cma": self.ready_for_hml_cma,
+            "ready_for_profitability": self.ready_for_profitability,
             "instance_count": self.instance_count,
             "raw_fact_count": self.raw_fact_count,
         }
@@ -197,6 +252,8 @@ def parse_xbrl_archive(
         assets=selected["assets"],
         book_equity=selected["book_equity"],
         revenue=selected["revenue"],
+        operating_income=selected["operating_income"],
+        net_income=selected["net_income"],
         shares_outstanding=selected["shares_outstanding"],
         instance_count=instance_count,
         raw_fact_count=len(facts),

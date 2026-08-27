@@ -1,9 +1,10 @@
-"""Strict true-PIT HML/CMA research backtest.
+"""Strict true-PIT domestic HML/CMA/profitability-proxy research backtest.
 
 Preconditions:
 - receipt-versioned OpenDART fundamentals pass the shared PIT contract;
 - historical price panel contains delisted names;
 - factor snapshot uses only filings available by each signal close;
+- CMA uses revision-aware total-asset growth, not a revenue-growth proxy;
 - rebalance executes at the next trading day's open;
 - 31/50/75bp round-trip cost stress is charged on actual turnover.
 
@@ -33,7 +34,14 @@ COST_LEVELS_BPS = (31, 50, 75)
 TOP_QUANTILE = 0.20
 MIN_CANDIDATES = 20
 MAX_NAMES = 30
-STRATEGIES = ("hml_only", "cma_only", "hml_cma_intersection", "hml_cma_composite")
+STRATEGIES = (
+    "hml_only",
+    "cma_only",
+    "profitability_proxy",
+    "hml_cma_intersection",
+    "hml_cma_composite",
+    "hml_cma_profitability_composite",
+)
 
 
 @dataclass
@@ -129,27 +137,51 @@ def select_factor_codes(
     snap = snapshot.copy()
     snap["code"] = snap["code"].astype(str).str.zfill(6)
     snap["bps"] = pd.to_numeric(snap.get("bps"), errors="coerce")
-    snap["revenue_yoy"] = pd.to_numeric(snap.get("revenue_yoy"), errors="coerce")
+    snap["asset_growth"] = pd.to_numeric(snap.get("asset_growth"), errors="coerce")
+    snap["operating_profitability_proxy"] = pd.to_numeric(snap.get("operating_profitability_proxy"), errors="coerce")
     snap["close"] = snap["code"].map({str(k).zfill(6): float(v) for k, v in close_prices.items()})
-    snap = snap.dropna(subset=["bps", "revenue_yoy", "close"])
-    snap = snap[(snap["bps"] > 0) & (snap["close"] > 0)]
+
+    needs_value = strategy in {"hml_only", "hml_cma_intersection", "hml_cma_composite", "hml_cma_profitability_composite"}
+    needs_investment = strategy in {"cma_only", "hml_cma_intersection", "hml_cma_composite", "hml_cma_profitability_composite"}
+    needs_profitability = strategy in {"profitability_proxy", "hml_cma_profitability_composite"}
+    required = []
+    if needs_value:
+        required.extend(["bps", "close"])
+    if needs_investment:
+        required.append("asset_growth")
+    if needs_profitability:
+        required.append("operating_profitability_proxy")
+    snap = snap.dropna(subset=required)
+    if needs_value:
+        snap = snap[(snap["bps"] > 0) & (snap["close"] > 0)]
     if len(snap) < int(min_candidates):
         return []
 
-    snap["bm"] = snap["bps"] / snap["close"]
-    snap["bm_rank"] = snap["bm"].rank(pct=True, method="average")
-    snap["growth_rank"] = snap["revenue_yoy"].rank(pct=True, method="average")
+    if needs_value:
+        snap["bm"] = snap["bps"] / snap["close"]
+        snap["bm_rank"] = snap["bm"].rank(pct=True, method="average")
+    if needs_investment:
+        snap["investment_rank"] = snap["asset_growth"].rank(pct=True, method="average")
+    if needs_profitability:
+        snap["profitability_rank"] = snap["operating_profitability_proxy"].rank(pct=True, method="average")
     n_select = max(1, min(int(max_names), int(np.ceil(len(snap) * TOP_QUANTILE))))
 
     if strategy == "hml_only":
         selected = snap.nlargest(n_select, "bm")
     elif strategy == "cma_only":
-        selected = snap.nsmallest(n_select, "revenue_yoy")
+        selected = snap.nsmallest(n_select, "asset_growth")
+    elif strategy == "profitability_proxy":
+        selected = snap.nlargest(n_select, "operating_profitability_proxy")
     elif strategy == "hml_cma_intersection":
         value_codes = set(snap.nlargest(n_select, "bm")["code"])
-        selected = snap[snap["code"].isin(value_codes)].nsmallest(n_select, "revenue_yoy")
+        selected = snap[snap["code"].isin(value_codes)].nsmallest(n_select, "asset_growth")
+    elif strategy == "hml_cma_composite":
+        snap["composite"] = 0.5 * snap["bm_rank"] + 0.5 * (1.0 - snap["investment_rank"])
+        selected = snap.nlargest(n_select, "composite")
     else:
-        snap["composite"] = 0.5 * snap["bm_rank"] + 0.5 * (1.0 - snap["growth_rank"])
+        snap["composite"] = (
+            snap["bm_rank"] + (1.0 - snap["investment_rank"]) + snap["profitability_rank"]
+        ) / 3.0
         selected = snap.nlargest(n_select, "composite")
     return selected["code"].astype(str).tolist()[: int(max_names)]
 
@@ -247,7 +279,11 @@ def main() -> int:
 
     fundamentals = pd.read_csv(args.fundamentals, dtype={"code": str, "rcept_no": str, "reprt_code": str})
     panel = pd.read_csv(args.panel, dtype={"code": str})
-    contract = validate_pit_contract(fundamentals, panel)
+    contract = validate_pit_contract(
+        fundamentals,
+        panel,
+        required_value_columns=("bps", "assets", "operating_profitability_proxy"),
+    )
     if not contract.eligible:
         print(f"BLOCKED_PIT_CONTRACT:{','.join(contract.reasons)}")
         return 3

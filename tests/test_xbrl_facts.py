@@ -17,7 +17,7 @@ NS = (
 )
 
 
-def _instance(*, equity=1_000_000, parent_equity=None, revenue=300_000, cumulative_revenue=None, shares=100_000, issued_only=False, forecast_revenue=None):
+def _instance(*, equity=1_000_000, parent_equity=None, revenue=300_000, operating_income=60_000, net_income=45_000, cumulative_revenue=None, shares=100_000, issued_only=False, forecast_revenue=None):
     parent = "" if parent_equity is None else f'<ifrs-full:EquityAttributableToOwnersOfParent contextRef="i" unitRef="krw">{parent_equity}</ifrs-full:EquityAttributableToOwnersOfParent>'
     share_fact = (
         f'<dart:NumberOfIssuedShares contextRef="i" unitRef="shares">{shares}</dart:NumberOfIssuedShares>'
@@ -38,6 +38,8 @@ def _instance(*, equity=1_000_000, parent_equity=None, revenue=300_000, cumulati
   <ifrs-full:Equity contextRef="i" unitRef="krw">{equity}</ifrs-full:Equity>
   {parent}
   <ifrs-full:Revenue contextRef="q" unitRef="krw">{revenue}</ifrs-full:Revenue>
+  <ifrs-full:ProfitLossFromOperatingActivities contextRef="q" unitRef="krw">{operating_income}</ifrs-full:ProfitLossFromOperatingActivities>
+  <ifrs-full:ProfitLossAttributableToOwnersOfParent contextRef="q" unitRef="krw">{net_income}</ifrs-full:ProfitLossAttributableToOwnersOfParent>
   {cumulative}
   {forecast}
   {share_fact}
@@ -64,6 +66,12 @@ def test_parser_prefers_parent_equity_and_standalone_quarter(tmp_path):
     assert parsed.revenue.value == 300_000
     assert parsed.revenue.duration_days == 92
     assert parsed.revenue_basis == "quarter"
+    assert parsed.operating_income.value == 60_000
+    assert parsed.net_income.value == 45_000
+    assert parsed.profitability_basis == "quarter"
+    assert round(float(parsed.operating_profitability_proxy), 6) == round(60_000 / 900_000, 6)
+    assert parsed.roe_proxy == 0.05
+    assert parsed.ready_for_profitability is True
     assert parsed.shares_outstanding.value == 100_000
     assert parsed.bps == 9.0
     assert parsed.ready_for_hml_cma is True
@@ -80,6 +88,31 @@ def test_parser_prefers_consolidated_instance_over_separate_when_other_scores_ma
     parsed = parse_xbrl_archive(archive, period_end="2025-09-30", reprt_code="11014")
     assert parsed.book_equity.value == 1_000_000
     assert parsed.book_equity.instance_path == "company_consolidated.xbrl"
+
+
+def test_hml_cma_readiness_does_not_require_revenue_growth_proxy(tmp_path):
+    payload = _instance().replace(
+        b'<ifrs-full:Revenue contextRef="q" unitRef="krw">300000</ifrs-full:Revenue>',
+        b'',
+    )
+    archive = _zip(tmp_path / "x.zip", {"consolidated.xbrl": payload})
+    parsed = parse_xbrl_archive(archive, period_end="2025-09-30", reprt_code="11014")
+    assert parsed.revenue.status == "MISSING"
+    assert parsed.assets.status == "SELECTED"
+    assert parsed.ready_for_hml_cma is True
+
+
+def test_profitability_facts_fail_closed_when_missing(tmp_path):
+    payload = _instance().replace(
+        b'<ifrs-full:ProfitLossFromOperatingActivities contextRef="q" unitRef="krw">60000</ifrs-full:ProfitLossFromOperatingActivities>',
+        b'',
+    )
+    archive = _zip(tmp_path / "x.zip", {"consolidated.xbrl": payload})
+    parsed = parse_xbrl_archive(archive, period_end="2025-09-30", reprt_code="11014")
+    assert parsed.operating_income.status == "MISSING"
+    assert parsed.operating_profitability_proxy is None
+    assert parsed.ready_for_profitability is False
+    assert parsed.ready_for_hml_cma is True
 
 
 def test_forecast_dimension_is_excluded(tmp_path):

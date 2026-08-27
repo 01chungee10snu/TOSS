@@ -1,4 +1,4 @@
-"""HML + CMA quarterly rebalancing backtest engine (v2 - PIT-timed).
+"""Legacy HML + revenue-growth proxy quarterly backtest (v2 - PIT-timed).
 
 Key fix vs v1: Instead of using Naver's current PBR snapshot (which embeds
 current market price = look-ahead bias), we compute time-aligned B/M ratio:
@@ -11,7 +11,8 @@ survivorship remain validation risks until filing-date data are used.
 
 Strategy:
   - HML (High Minus Low): Book-to-Market ratio. Long high B/M stocks.
-  - CMA (Conservative Minus Aggressive): Revenue growth proxy. Long low-growth stocks.
+  - Legacy 'CMA' label: revenue-growth proxy only; NOT canonical Fama-French CMA.
+    Canonical CMA requires total-asset growth and is implemented in the strict true-PIT pipeline.
   - Combined intersection: Must rank well on BOTH factors.
 
 Cost: 31bp, 50bp, 75bp round-trip.
@@ -330,7 +331,7 @@ def run_backtest(
 
 
 def main() -> None:
-    print("=== HML + CMA Quarterly Backtest (v2 PIT-timed, estimates excluded) ===")
+    print("=== Legacy HML + revenue-growth proxy backtest (v2 PIT-timed, estimates excluded) ===")
     fund = pd.read_csv(FUND_CSV)
     raw_estimates = int(estimate_mask(fund).sum())
     fund_prep = prepare_fundamentals(fund)
@@ -353,6 +354,8 @@ def main() -> None:
             "forecast_rows_excluded": raw_estimates,
             "q4_legacy_period_type_repaired": True,
             "revenue_growth_same_period_yoy": True,
+            "canonical_cma_asset_growth": False,
+            "legacy_cma_label_is_revenue_growth_proxy": True,
             "historical_filing_snapshot_pit": False,
             "survivorship_bias_resolved": False,
         },

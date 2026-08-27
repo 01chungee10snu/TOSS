@@ -33,6 +33,7 @@ def _true_pit_fundamentals() -> pd.DataFrame:
             "is_estimate": [False, False],
             "revision_safe": [True, True],
             "bps": [50000, 700],
+            "assets": [1_000, 200],
             "revenue": [100, 20],
         }
     )
@@ -113,6 +114,7 @@ def test_factor_snapshot_recomputes_yoy_only_after_prior_year_amendment_is_avail
             "revenue_basis": ["quarter", "quarter", "quarter"],
             "rcept_no": ["202405150001", "202505180001", "202505150001"],
             "bps": [100, 110, 120],
+            "assets": [1_000, 1_100, 1_250],
             "revenue": [100, 110, 150],
         }
     )
@@ -124,6 +126,10 @@ def test_factor_snapshot_recomputes_yoy_only_after_prior_year_amendment_is_avail
     assert round(float(after_prior_amendment.iloc[0]["revenue_yoy"]), 6) == round(150 / 110 - 1, 6)
     assert before_prior_amendment.iloc[0]["revenue_prior_rcept_no"] == "202405150001"
     assert after_prior_amendment.iloc[0]["revenue_prior_rcept_no"] == "202505180001"
+    assert before_prior_amendment.iloc[0]["asset_growth"] == 0.25
+    assert round(float(after_prior_amendment.iloc[0]["asset_growth"]), 6) == round(1250 / 1100 - 1, 6)
+    assert before_prior_amendment.iloc[0]["assets_prior_rcept_no"] == "202405150001"
+    assert after_prior_amendment.iloc[0]["assets_prior_rcept_no"] == "202505180001"
 
 
 def test_factor_snapshot_can_intersect_with_historical_tradeable_universe():
@@ -134,11 +140,13 @@ def test_factor_snapshot_can_intersect_with_historical_tradeable_universe():
     older["period_end"] = "2024-03-31"
     older["available_at"] = "2024-05-15"
     older["revenue"] = [80, 10]
+    older["assets"] = [800, 100]
     combined = pd.concat([older, fund], ignore_index=True)
 
     snap = pit_factor_snapshot(combined, "2025-05-16", universe_panel=_historical_panel())
     assert set(snap["code"]) == {"005930", "111111"}
     assert snap["revenue_yoy"].notna().all()
+    assert snap["asset_growth"].notna().all()
 
 
 def test_strict_snapshot_excludes_revision_unsafe_rows():

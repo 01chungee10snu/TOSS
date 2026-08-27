@@ -223,6 +223,50 @@ def add_pit_walkforward(candidates: list[dict[str, Any]]) -> dict[str, dict[str,
     return by_strategy
 
 
+def add_true_pit_domestic_factors(candidates: list[dict[str, Any]]) -> bool:
+    """Prefer strict receipt-versioned domestic factor evidence when available."""
+    path = VALIDATION / "hml_cma_true_pit_latest.json"
+    if not path.exists():
+        return False
+    data = load_json(path)
+    contract = data.get("pit_contract", {})
+    if not bool(contract.get("eligible", False)):
+        return False
+
+    added = False
+    for row in data.get("results", []):
+        if int(row.get("cost_bps", -1) or -1) != 75:
+            continue
+        strategy_id = str(row.get("strategy") or "").strip()
+        if not strategy_id:
+            continue
+        cagr = safe_float(row.get("cagr_pct"))
+        sharpe = safe_float(row.get("sharpe_ratio"))
+        status = "RESEARCH_ONLY" if (cagr or 0) > 0 and (sharpe or 0) > 0 else "REJECTED"
+        candidates.append(candidate(
+            strategy_id=strategy_id,
+            family="true_pit_domestic_factor",
+            status=status,
+            evidence_grade="C",
+            source=str(path.relative_to(ROOT)),
+            cagr_pct=cagr,
+            total_return_pct=row.get("total_return_pct"),
+            sharpe=sharpe,
+            max_drawdown_pct=row.get("max_drawdown_pct"),
+            cost_bps=row.get("cost_bps"),
+            positive_period_share=row.get("positive_year_share"),
+            sample_size=row.get("rebalances"),
+            notes=[
+                "receipt-versioned OpenDART XBRL with historical PIT universe",
+                "canonical CMA uses total-asset growth; profitability leg uses operating-income/book-equity proxy",
+                "month-end close signal -> next trading-day open; 75bp stress; fractional research sizing",
+                "strict PIT correctness does not by itself satisfy independent OOS or live-promotion requirements",
+            ],
+        ))
+        added = True
+    return added
+
+
 def add_hml_cma(candidates: list[dict[str, Any]]) -> None:
     path = latest("reports/validation/hml_cma_quarterly_v2_*.json")
     if path is None:
@@ -255,6 +299,7 @@ def add_hml_cma(candidates: list[dict[str, Any]]) -> None:
             notes=[
                 "forecast (E) rows excluded and legacy Q4 labels repaired",
                 "current-view Naver fundamentals: historical filing-snapshot PIT unresolved",
+                "legacy report CMA legs use a revenue-growth proxy, not canonical total-asset-growth CMA; strict true-PIT CMA supersedes this definition",
                 f"survivorship_bias_resolved={quality.get('survivorship_bias_resolved')}",
                 f"rebalances={row.get('rebalances')}; trading_days={row.get('trading_days')}",
             ],
@@ -550,7 +595,8 @@ def build_tournament() -> dict[str, Any]:
     candidates: list[dict[str, Any]] = []
     add_executable_etf(candidates)
     pit_map = add_pit_walkforward(candidates)
-    add_hml_cma(candidates)
+    if not add_true_pit_domestic_factors(candidates):
+        add_hml_cma(candidates)
     add_low_vol(candidates)
     add_low_vol_value(candidates)
     add_etf_trend_diversifier(candidates)
@@ -604,7 +650,7 @@ def build_tournament() -> dict[str, Any]:
         "next_actions": [
             "Continue the existing forward-paper target without strategy switching; evaluate higher-ranked ETF variants in parallel research only.",
             "Collect order-book depth and completed monthly rebalance evidence before any live promotion.",
-            "Rebuild HML/CMA on filing-date historical fundamentals and a historical universe before promotion.",
+            "Build domestic HML/canonical-CMA/profitability factors from receipt-versioned OpenDART fundamentals and a historical universe; keep them research-only until independent OOS evidence exists.",
             "Keep contextual/breakout/trend-diversifier/momentum/reversal/inverse/legacy-live allocation at zero until new independent OOS evidence turns positive and clears the meta-allocation independence gate.",
             "Refresh the evidence-aware meta allocator as new comparable daily return series and forward evidence become available; treat highly correlated ETF variants as one sleeve.",
         ],

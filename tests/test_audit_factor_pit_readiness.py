@@ -38,6 +38,9 @@ def _opendart() -> pd.DataFrame:
             "is_estimate": [False],
             "revision_safe": [True],
             "bps": [50000.0],
+            "assets": [1_000_000.0],
+            "book_equity": [500_000.0],
+            "operating_income": [50_000.0],
             "revenue": [100.0],
             "rcept_no": ["20250515000123"],
             "reprt_code": ["11013"],
@@ -57,7 +60,10 @@ def test_loader_prefers_opendart_receipt_versioned_file(tmp_path):
 
     assert source == "opendart_receipt_xbrl"
     assert report["promotion"]["factor_backtest_allowed"] is True
+    assert report["promotion"]["hml_cma_backtest_allowed"] is True
+    assert report["promotion"]["profitability_backtest_allowed"] is True
     assert report["promotion"]["hml_cma_live_promotion_allowed"] is False
+    assert report["promotion"]["profitability_live_promotion_allowed"] is False
 
 
 def test_loader_falls_back_to_naver_only_as_blocked_diagnostic(tmp_path):
@@ -79,6 +85,8 @@ def test_loader_falls_back_to_naver_only_as_blocked_diagnostic(tmp_path):
 
     assert source == "naver_current_view"
     assert report["promotion"]["factor_backtest_allowed"] is False
+    assert report["promotion"]["hml_cma_backtest_allowed"] is False
+    assert report["promotion"]["profitability_backtest_allowed"] is False
     assert report["promotion"]["status"] == "BLOCKED_TRUE_PIT_INPUTS"
 
 

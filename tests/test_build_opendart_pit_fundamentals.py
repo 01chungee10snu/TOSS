@@ -19,7 +19,7 @@ def load_module():
     return module
 
 
-def _xbrl(*, equity: int, revenue: int, shares: int = 100_000) -> bytes:
+def _xbrl(*, equity: int, revenue: int, operating_income: int = 60_000, net_income: int = 45_000, shares: int = 100_000) -> bytes:
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:ifrs-full="http://ifrs" xmlns:dart="http://dart" xmlns:iso4217="http://iso">
   <xbrli:unit id="krw"><xbrli:measure>iso4217:KRW</xbrli:measure></xbrli:unit>
@@ -29,6 +29,8 @@ def _xbrl(*, equity: int, revenue: int, shares: int = 100_000) -> bytes:
   <ifrs-full:Assets contextRef="i" unitRef="krw">2000000</ifrs-full:Assets>
   <ifrs-full:Equity contextRef="i" unitRef="krw">{equity}</ifrs-full:Equity>
   <ifrs-full:Revenue contextRef="q" unitRef="krw">{revenue}</ifrs-full:Revenue>
+  <ifrs-full:ProfitLossFromOperatingActivities contextRef="q" unitRef="krw">{operating_income}</ifrs-full:ProfitLossFromOperatingActivities>
+  <ifrs-full:ProfitLossAttributableToOwnersOfParent contextRef="q" unitRef="krw">{net_income}</ifrs-full:ProfitLossAttributableToOwnersOfParent>
   <dart:NumberOfSharesOutstanding contextRef="i" unitRef="shares">{shares}</dart:NumberOfSharesOutstanding>
 </xbrli:xbrl>'''.encode()
 
@@ -85,6 +87,10 @@ def test_builder_preserves_original_and_amendment_as_distinct_available_versions
     assert list(frame["book_equity"]) == [900_000, 950_000]
     assert list(frame["revenue"]) == [300_000, 320_000]
     assert list(frame["bps"]) == [9.0, 9.5]
+    assert list(frame["operating_income"]) == [60_000, 60_000]
+    assert list(frame["net_income"]) == [45_000, 45_000]
+    assert round(float(frame.iloc[0]["operating_profitability_proxy"]), 6) == round(60_000 / 900_000, 6)
+    assert list(frame["profitability_status"]) == ["READY", "READY"]
     assert list(frame["parse_status"]) == ["READY", "READY"]
     assert list(frame["is_amendment"]) == [False, True]
 
@@ -125,5 +131,7 @@ def test_builder_complete_revision_safe_rows_can_satisfy_pit_input_contract(tmp_
 
     audit = m.build_audit(frame, pit_panel=panel)
     assert audit["ready_rows"] == 1
+    assert audit["profitability_ready_rows"] == 1
     assert audit["latest_value_collapsing_performed"] is False
     assert audit["pit_contract"]["status"] == "TRUE_PIT_ELIGIBLE"
+    assert audit["profitability_pit_contract"]["status"] == "TRUE_PIT_ELIGIBLE"

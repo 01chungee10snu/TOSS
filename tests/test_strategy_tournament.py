@@ -270,6 +270,48 @@ def test_repository_tournament_keeps_live_closed_and_etf_on_top(tmp_path):
     assert any("independent_alpha_gate=False" in note for note in by_id["executable_etf_trend_diversifier"]["notes"])
 
 
+def test_strict_true_pit_domestic_factors_supersede_legacy_naver_factor_report(tmp_path):
+    m = load_module()
+    seed_tournament_reports(m, tmp_path)
+    _write_json(
+        m.VALIDATION / "hml_cma_true_pit_latest.json",
+        {
+            "pit_contract": {"eligible": True, "status": "TRUE_PIT_ELIGIBLE"},
+            "results": [
+                {
+                    "strategy": "hml_only",
+                    "cost_bps": 75,
+                    "cagr_pct": 9.1,
+                    "total_return_pct": 42.0,
+                    "sharpe_ratio": 0.9,
+                    "max_drawdown_pct": -18.0,
+                    "rebalances": 12,
+                    "positive_year_share": 0.75,
+                },
+                {
+                    "strategy": "profitability_proxy",
+                    "cost_bps": 75,
+                    "cagr_pct": 7.5,
+                    "total_return_pct": 33.0,
+                    "sharpe_ratio": 0.8,
+                    "max_drawdown_pct": -16.0,
+                    "rebalances": 12,
+                    "positive_year_share": 0.75,
+                },
+            ],
+        },
+    )
+
+    report = m.build_tournament()
+    by_id = {row["strategy_id"]: row for row in report["leaderboard"]}
+
+    assert by_id["hml_only"]["family"] == "true_pit_domestic_factor"
+    assert by_id["hml_only"]["evidence_grade"] == "C"
+    assert by_id["hml_only"]["source"] == "reports/validation/hml_cma_true_pit_latest.json"
+    assert by_id["profitability_proxy"]["status"] == "RESEARCH_ONLY"
+    assert "cma_only" not in by_id  # legacy Naver report is suppressed once strict PIT evidence is present
+
+
 def test_current_forward_paper_target_is_identified_by_weights(tmp_path):
     m = load_module()
     seed_tournament_reports(m, tmp_path)

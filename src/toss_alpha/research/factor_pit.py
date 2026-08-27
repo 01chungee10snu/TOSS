@@ -201,12 +201,12 @@ def pit_factor_snapshot(
     universe_panel: pd.DataFrame | None = None,
     require_revision_safe: bool = True,
 ) -> pd.DataFrame:
-    """Return an as-of factor snapshot with revision-aware same-period revenue YoY.
+    """Return an as-of factor snapshot with revision-aware prior-year comparisons.
 
     The current reporting period and its prior-year comparable are both chosen
-    using only filings available by ``as_of``.  A later amendment to the prior
-    year therefore changes YoY only after that amendment becomes public; it is
-    never backfilled into an earlier snapshot.
+    using only filings available by ``as_of``.  Later amendments therefore
+    affect revenue YoY and asset-growth CMA inputs only after they become public;
+    they are never backfilled into an earlier snapshot.
     """
     fund = normalize_fundamentals(fundamentals)
     cutoff = pd.Timestamp(as_of)
@@ -234,6 +234,10 @@ def pit_factor_snapshot(
     current["revenue_prior_year"] = float("nan")
     current["revenue_prior_available_at"] = pd.NaT
     current["revenue_prior_rcept_no"] = None
+    current["asset_growth"] = float("nan")
+    current["assets_prior_year"] = float("nan")
+    current["assets_prior_available_at"] = pd.NaT
+    current["assets_prior_rcept_no"] = None
 
     for idx, row in current.iterrows():
         prior_end = pd.Timestamp(row["period_end"]) - pd.DateOffset(years=1)
@@ -252,13 +256,21 @@ def pit_factor_snapshot(
         prior_row = prior.sort_values("available_at").iloc[-1]
         current_revenue = pd.to_numeric(pd.Series([row.get("revenue")]), errors="coerce").iloc[0]
         prior_revenue = pd.to_numeric(pd.Series([prior_row.get("revenue")]), errors="coerce").iloc[0]
-        if pd.isna(current_revenue) or pd.isna(prior_revenue) or float(prior_revenue) == 0:
-            continue
-        current.at[idx, "revenue_prior_year"] = float(prior_revenue)
-        current.at[idx, "revenue_yoy"] = float(current_revenue) / float(prior_revenue) - 1.0
-        current.at[idx, "revenue_prior_available_at"] = prior_row.get("available_at")
-        if "rcept_no" in prior_row.index:
-            current.at[idx, "revenue_prior_rcept_no"] = prior_row.get("rcept_no")
+        if pd.notna(current_revenue) and pd.notna(prior_revenue) and float(prior_revenue) != 0:
+            current.at[idx, "revenue_prior_year"] = float(prior_revenue)
+            current.at[idx, "revenue_yoy"] = float(current_revenue) / float(prior_revenue) - 1.0
+            current.at[idx, "revenue_prior_available_at"] = prior_row.get("available_at")
+            if "rcept_no" in prior_row.index:
+                current.at[idx, "revenue_prior_rcept_no"] = prior_row.get("rcept_no")
+
+        current_assets = pd.to_numeric(pd.Series([row.get("assets")]), errors="coerce").iloc[0]
+        prior_assets = pd.to_numeric(pd.Series([prior_row.get("assets")]), errors="coerce").iloc[0]
+        if pd.notna(current_assets) and pd.notna(prior_assets) and float(prior_assets) > 0:
+            current.at[idx, "assets_prior_year"] = float(prior_assets)
+            current.at[idx, "asset_growth"] = float(current_assets) / float(prior_assets) - 1.0
+            current.at[idx, "assets_prior_available_at"] = prior_row.get("available_at")
+            if "rcept_no" in prior_row.index:
+                current.at[idx, "assets_prior_rcept_no"] = prior_row.get("rcept_no")
 
     current = current.reset_index(drop=True)
     if universe_panel is not None:

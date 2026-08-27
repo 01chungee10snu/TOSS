@@ -75,9 +75,15 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
                     "assets": None,
                     "book_equity": None,
                     "revenue": None,
+                    "operating_income": None,
+                    "net_income": None,
                     "shares_outstanding": None,
                     "bps": None,
                     "revenue_basis": None,
+                    "profitability_basis": None,
+                    "operating_profitability_proxy": None,
+                    "roe_proxy": None,
+                    "profitability_status": "INCOMPLETE",
                 }
             )
             continue
@@ -97,9 +103,15 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
                     "assets": None,
                     "book_equity": None,
                     "revenue": None,
+                    "operating_income": None,
+                    "net_income": None,
                     "shares_outstanding": None,
                     "bps": None,
                     "revenue_basis": None,
+                    "profitability_basis": None,
+                    "operating_profitability_proxy": None,
+                    "roe_proxy": None,
+                    "profitability_status": "INCOMPLETE",
                 }
             )
             continue
@@ -108,6 +120,8 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
             "assets": parsed.assets,
             "book_equity": parsed.book_equity,
             "revenue": parsed.revenue,
+            "operating_income": parsed.operating_income,
+            "net_income": parsed.net_income,
             "shares_outstanding": parsed.shares_outstanding,
         }
         reasons = [
@@ -123,18 +137,30 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
                 "assets": parsed.assets.value,
                 "book_equity": parsed.book_equity.value,
                 "revenue": parsed.revenue.value,
+                "operating_income": parsed.operating_income.value,
+                "net_income": parsed.net_income.value,
                 "shares_outstanding": parsed.shares_outstanding.value,
                 "bps": parsed.bps,
                 "revenue_basis": parsed.revenue_basis,
+                "profitability_basis": parsed.profitability_basis,
+                "operating_profitability_proxy": parsed.operating_profitability_proxy,
+                "roe_proxy": parsed.roe_proxy,
+                "profitability_status": "READY" if parsed.ready_for_profitability else "INCOMPLETE",
                 "assets_concept": parsed.assets.concept,
                 "equity_concept": parsed.book_equity.concept,
                 "revenue_concept": parsed.revenue.concept,
+                "operating_income_concept": parsed.operating_income.concept,
+                "net_income_concept": parsed.net_income.concept,
                 "shares_concept": parsed.shares_outstanding.concept,
                 "assets_context_id": parsed.assets.context_id,
                 "equity_context_id": parsed.book_equity.context_id,
                 "revenue_context_id": parsed.revenue.context_id,
+                "operating_income_context_id": parsed.operating_income.context_id,
+                "net_income_context_id": parsed.net_income.context_id,
                 "shares_context_id": parsed.shares_outstanding.context_id,
                 "revenue_duration_days": parsed.revenue.duration_days,
+                "operating_income_duration_days": parsed.operating_income.duration_days,
+                "net_income_duration_days": parsed.net_income.duration_days,
                 "instance_count": parsed.instance_count,
                 "raw_fact_count": parsed.raw_fact_count,
             }
@@ -156,12 +182,22 @@ def build_audit(frame: pd.DataFrame, *, pit_panel: pd.DataFrame | None = None) -
         "codes": int(frame["code"].nunique()) if "code" in frame.columns else 0,
         "status_counts": {str(k): int(v) for k, v in status_counts.items()},
         "ready_rows": int((frame.get("parse_status") == "READY").sum()) if not frame.empty else 0,
+        "profitability_ready_rows": int((frame.get("profitability_status") == "READY").sum()) if not frame.empty else 0,
         "amendment_rows": int(frame.get("is_amendment", pd.Series(dtype=bool)).fillna(False).astype(bool).sum()),
         "revision_semantics": "each receipt/amendment preserved as separate available_at version",
         "latest_value_collapsing_performed": False,
     }
     if pit_panel is not None and not frame.empty:
-        report["pit_contract"] = validate_pit_contract(frame, pit_panel).to_dict()
+        report["pit_contract"] = validate_pit_contract(
+            frame,
+            pit_panel,
+            required_value_columns=("bps", "assets"),
+        ).to_dict()
+        report["profitability_pit_contract"] = validate_pit_contract(
+            frame,
+            pit_panel,
+            required_value_columns=("book_equity", "operating_income"),
+        ).to_dict()
     return report
 
 

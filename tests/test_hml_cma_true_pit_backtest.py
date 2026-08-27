@@ -23,7 +23,10 @@ def _fundamentals() -> pd.DataFrame:
     for idx, code in enumerate(["000001", "000002", "000003", "000004"], start=1):
         prior_revenue = 100.0
         current_revenue = [150.0, 120.0, 90.0, 80.0][idx - 1]
+        prior_assets = 100.0
+        current_assets = [150.0, 120.0, 90.0, 80.0][idx - 1]
         bps = [10.0, 20.0, 30.0, 40.0][idx - 1]
+        profitability = [0.10, 0.20, 0.30, 0.40][idx - 1]
         common = {
             "code": code,
             "source": "opendart_receipt_xbrl",
@@ -32,9 +35,10 @@ def _fundamentals() -> pd.DataFrame:
             "reprt_code": "11013",
             "revenue_basis": "quarter",
             "bps": bps,
+            "operating_profitability_proxy": profitability,
         }
-        rows.append(common | {"period_end": "2024-03-31", "available_at": "2024-05-15", "revenue": prior_revenue, "rcept_no": f"20240515{idx:04d}"})
-        rows.append(common | {"period_end": "2025-03-31", "available_at": "2025-05-15", "revenue": current_revenue, "rcept_no": f"20250515{idx:04d}"})
+        rows.append(common | {"period_end": "2024-03-31", "available_at": "2024-05-15", "assets": prior_assets, "revenue": prior_revenue, "rcept_no": f"20240515{idx:04d}"})
+        rows.append(common | {"period_end": "2025-03-31", "available_at": "2025-05-15", "assets": current_assets, "revenue": current_revenue, "rcept_no": f"20250515{idx:04d}"})
     return pd.DataFrame(rows)
 
 
@@ -59,16 +63,21 @@ def _panel() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def test_factor_selection_uses_bm_and_revision_aware_revenue_yoy():
+def test_factor_selection_uses_bm_and_revision_aware_asset_growth():
     m = load_module()
     snapshot = m.pit_factor_snapshot(_fundamentals(), "2025-05-30", universe_panel=_panel())
     closes = {code: 100.0 for code in ["000001", "000002", "000003", "000004"]}
 
     hml = m.select_factor_codes(snapshot, closes, strategy="hml_only", min_candidates=4, max_names=4)
     cma = m.select_factor_codes(snapshot, closes, strategy="cma_only", min_candidates=4, max_names=4)
+    profitability = m.select_factor_codes(snapshot, closes, strategy="profitability_proxy", min_candidates=4, max_names=4)
+    composite = m.select_factor_codes(snapshot, closes, strategy="hml_cma_profitability_composite", min_candidates=4, max_names=4)
 
     assert hml == ["000004"]
     assert cma == ["000004"]
+    assert profitability == ["000004"]
+    assert composite == ["000004"]
+    assert round(float(snapshot.set_index("code").loc["000004", "asset_growth"]), 6) == -0.2
 
 
 def test_backtest_executes_month_end_signal_at_next_trading_day_open():
