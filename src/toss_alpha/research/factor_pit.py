@@ -85,9 +85,20 @@ def validate_pit_contract(
     except ValueError as exc:
         return PitContractResult("BLOCKED_PIT_CONTRACT", False, (str(exc),), {"rows": len(fundamentals)})
 
-    missing_values = sorted(set(required_value_columns).difference(fund.columns))
+    required_values = tuple(required_value_columns)
+    missing_values = sorted(set(required_values).difference(fund.columns))
     if missing_values:
         reasons.append(f"missing_factor_values:{','.join(missing_values)}")
+
+    missing_factor_rows: dict[str, int] = {}
+    for column in required_values:
+        if column not in fund.columns:
+            continue
+        numeric = pd.to_numeric(fund[column], errors="coerce")
+        missing_factor_rows[column] = int(numeric.isna().sum())
+    if any(missing_factor_rows.values()):
+        detail = ",".join(f"{column}={count}" for column, count in sorted(missing_factor_rows.items()) if count)
+        reasons.append(f"missing_factor_value_rows:{detail}")
 
     missing_period = int(fund["period_end"].isna().sum())
     missing_available = int(fund["available_at"].isna().sum())
@@ -108,6 +119,7 @@ def validate_pit_contract(
             "revision_unsafe_rows": unsafe_rows,
             "missing_source_rows": source_missing,
             "availability_before_period_end_rows": impossible_availability,
+            "missing_factor_value_rows": missing_factor_rows,
         }
     )
 
@@ -180,6 +192,78 @@ def pit_snapshot(fundamentals: pd.DataFrame, as_of: Any, *, require_revision_saf
     eligible = eligible.sort_values(["code", "period_end", "available_at"])
     per_period = eligible.groupby(["code", "period_end"], as_index=False).tail(1)
     return per_period.sort_values(["code", "period_end", "available_at"]).groupby("code", as_index=False).tail(1).reset_index(drop=True)
+
+
+def pit_factor_snapshot(
+    fundamentals: pd.DataFrame,
+    as_of: Any,
+    *,
+    universe_panel: pd.DataFrame | None = None,
+    require_revision_safe: bool = True,
+) -> pd.DataFrame:
+    """Return an as-of factor snapshot with revision-aware same-period revenue YoY.
+
+    The current reporting period and its prior-year comparable are both chosen
+    using only filings available by ``as_of``.  A later amendment to the prior
+    year therefore changes YoY only after that amendment becomes public; it is
+    never backfilled into an earlier snapshot.
+    """
+    fund = normalize_fundamentals(fundamentals)
+    cutoff = pd.Timestamp(as_of)
+    eligible = fund[
+        fund["available_at"].notna()
+        & fund["period_end"].notna()
+        & (fund["available_at"] <= cutoff)
+        & (~fund["is_estimate"])
+    ].copy()
+    if require_revision_safe:
+        eligible = eligible[eligible["revision_safe"]]
+    if eligible.empty:
+        return eligible
+
+    eligible = eligible.sort_values(["code", "period_end", "available_at"])
+    latest_per_period = eligible.groupby(["code", "period_end"], as_index=False).tail(1)
+    current = (
+        latest_per_period.sort_values(["code", "period_end", "available_at"])
+        .groupby("code", as_index=False)
+        .tail(1)
+        .copy()
+    )
+
+    current["revenue_yoy"] = float("nan")
+    current["revenue_prior_year"] = float("nan")
+    current["revenue_prior_available_at"] = pd.NaT
+    current["revenue_prior_rcept_no"] = None
+
+    for idx, row in current.iterrows():
+        prior_end = pd.Timestamp(row["period_end"]) - pd.DateOffset(years=1)
+        prior = latest_per_period[
+            (latest_per_period["code"] == row["code"])
+            & (latest_per_period["period_end"] == prior_end)
+        ].copy()
+        if "reprt_code" in eligible.columns and pd.notna(row.get("reprt_code")):
+            prior = prior[prior["reprt_code"].astype(str) == str(row.get("reprt_code"))]
+        if "revenue_basis" in eligible.columns and pd.notna(row.get("revenue_basis")):
+            basis_match = prior["revenue_basis"].astype(str) == str(row.get("revenue_basis"))
+            if basis_match.any():
+                prior = prior[basis_match]
+        if prior.empty:
+            continue
+        prior_row = prior.sort_values("available_at").iloc[-1]
+        current_revenue = pd.to_numeric(pd.Series([row.get("revenue")]), errors="coerce").iloc[0]
+        prior_revenue = pd.to_numeric(pd.Series([prior_row.get("revenue")]), errors="coerce").iloc[0]
+        if pd.isna(current_revenue) or pd.isna(prior_revenue) or float(prior_revenue) == 0:
+            continue
+        current.at[idx, "revenue_prior_year"] = float(prior_revenue)
+        current.at[idx, "revenue_yoy"] = float(current_revenue) / float(prior_revenue) - 1.0
+        current.at[idx, "revenue_prior_available_at"] = prior_row.get("available_at")
+        if "rcept_no" in prior_row.index:
+            current.at[idx, "revenue_prior_rcept_no"] = prior_row.get("rcept_no")
+
+    current = current.reset_index(drop=True)
+    if universe_panel is not None:
+        current = intersect_snapshot_with_universe(current, universe_panel, as_of)
+    return current
 
 
 def tradable_codes_on(universe_panel: pd.DataFrame, as_of: Any) -> set[str]:

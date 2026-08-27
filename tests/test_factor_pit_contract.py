@@ -5,6 +5,7 @@ import pandas as pd
 from toss_alpha.research.factor_pit import (
     intersect_snapshot_with_universe,
     naver_current_view_candidate,
+    pit_factor_snapshot,
     pit_snapshot,
     tradable_codes_on,
     validate_pit_contract,
@@ -43,6 +44,16 @@ def test_true_pit_contract_requires_availability_revision_safety_and_delisted_un
     assert result.status == "TRUE_PIT_ELIGIBLE"
     assert result.reasons == ()
     assert result.stats["delisted_codes"] == 1
+
+
+def test_true_pit_contract_blocks_rows_with_missing_required_factor_values():
+    fund = _true_pit_fundamentals()
+    fund.loc[0, "bps"] = None
+    result = validate_pit_contract(fund, _historical_panel())
+
+    assert result.eligible is False
+    assert "missing_factor_value_rows:bps=1" in result.reasons
+    assert result.stats["missing_factor_value_rows"]["bps"] == 1
 
 
 def test_naver_current_view_fails_true_pit_contract_even_with_good_backtest_fields():
@@ -87,6 +98,47 @@ def test_pit_snapshot_uses_only_values_available_by_cutoff_and_latest_revision()
     assert before_amendment.iloc[0]["bps"] == 100
     assert after_amendment.iloc[0]["bps"] == 110
     assert after_q1.iloc[0]["bps"] == 120
+
+
+def test_factor_snapshot_recomputes_yoy_only_after_prior_year_amendment_is_available():
+    fund = pd.DataFrame(
+        {
+            "code": ["005930", "005930", "005930"],
+            "period_end": ["2024-03-31", "2024-03-31", "2025-03-31"],
+            "available_at": ["2024-05-15", "2025-05-18", "2025-05-15"],
+            "source": ["original", "amendment", "original"],
+            "is_estimate": [False, False, False],
+            "revision_safe": [True, True, True],
+            "reprt_code": ["11013", "11013", "11013"],
+            "revenue_basis": ["quarter", "quarter", "quarter"],
+            "rcept_no": ["202405150001", "202505180001", "202505150001"],
+            "bps": [100, 110, 120],
+            "revenue": [100, 110, 150],
+        }
+    )
+
+    before_prior_amendment = pit_factor_snapshot(fund, "2025-05-16")
+    after_prior_amendment = pit_factor_snapshot(fund, "2025-05-19")
+
+    assert before_prior_amendment.iloc[0]["revenue_yoy"] == 0.5
+    assert round(float(after_prior_amendment.iloc[0]["revenue_yoy"]), 6) == round(150 / 110 - 1, 6)
+    assert before_prior_amendment.iloc[0]["revenue_prior_rcept_no"] == "202405150001"
+    assert after_prior_amendment.iloc[0]["revenue_prior_rcept_no"] == "202505180001"
+
+
+def test_factor_snapshot_can_intersect_with_historical_tradeable_universe():
+    fund = _true_pit_fundamentals().copy()
+    fund["reprt_code"] = "11013"
+    fund["revenue_basis"] = "quarter"
+    older = fund.copy()
+    older["period_end"] = "2024-03-31"
+    older["available_at"] = "2024-05-15"
+    older["revenue"] = [80, 10]
+    combined = pd.concat([older, fund], ignore_index=True)
+
+    snap = pit_factor_snapshot(combined, "2025-05-16", universe_panel=_historical_panel())
+    assert set(snap["code"]) == {"005930", "111111"}
+    assert snap["revenue_yoy"].notna().all()
 
 
 def test_strict_snapshot_excludes_revision_unsafe_rows():
