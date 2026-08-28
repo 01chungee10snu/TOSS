@@ -116,6 +116,75 @@ def test_builder_missing_archive_is_retained_and_fails_factor_completeness(tmp_p
     assert any(reason.startswith("missing_factor_value_rows:") for reason in audit["pit_contract"]["reasons"])
 
 
+def test_receipt_matched_stock_total_can_fill_missing_xbrl_shares_without_rewriting_other_facts(tmp_path):
+    m = load_module()
+    raw = tmp_path / "raw"
+    payload = _xbrl(equity=900_000, revenue=300_000).replace(
+        b'<dart:NumberOfSharesOutstanding contextRef="i" unitRef="shares">100000</dart:NumberOfSharesOutstanding>',
+        b'',
+    )
+    _archive(raw / "005930/20250515000123_11013.zip", payload)
+    supplement = pd.DataFrame(
+        [
+            {
+                "code": "005930",
+                "period_end": "2025-03-31",
+                "available_at": "2025-05-15",
+                "rcept_no": "20250515000123",
+                "reprt_code": "11013",
+                "source": "opendart_stock_total_receipt_matched",
+                "revision_safe": True,
+                "issued_common_shares": 100_000,
+                "treasury_common_shares": 10_000,
+                "distributed_common_shares": 90_000,
+                "security_type": "보통주",
+            }
+        ]
+    )
+
+    frame = m.build_rows(_manifest().iloc[:1].copy(), raw_dir=raw, stock_totals=supplement)
+    row = frame.iloc[0]
+    assert row["shares_outstanding"] == 90_000
+    assert row["shares_status"] == "SUPPLEMENTED"
+    assert row["shares_outstanding_source"] == "opendart_stock_total_receipt_matched"
+    assert row["stock_total_receipt_matched"]
+    assert round(float(row["bps"]), 8) == round(900_000 / 90_000, 8)
+    assert row["parse_status"] == "READY"
+    assert "shares_outstanding:MISSING" not in str(row["parse_reason"])
+
+
+def test_receipt_matched_stock_total_conflict_fails_closed(tmp_path):
+    m = load_module()
+    raw = tmp_path / "raw"
+    _archive(raw / "005930/20250515000123_11013.zip", _xbrl(equity=900_000, revenue=300_000, shares=100_000))
+    supplement = pd.DataFrame(
+        [
+            {
+                "code": "005930",
+                "period_end": "2025-03-31",
+                "available_at": "2025-05-15",
+                "rcept_no": "20250515000123",
+                "reprt_code": "11013",
+                "source": "opendart_stock_total_receipt_matched",
+                "revision_safe": True,
+                "issued_common_shares": 100_000,
+                "treasury_common_shares": 10_000,
+                "distributed_common_shares": 90_000,
+                "security_type": "보통주",
+            }
+        ]
+    )
+
+    frame = m.build_rows(_manifest().iloc[:1].copy(), raw_dir=raw, stock_totals=supplement)
+    row = frame.iloc[0]
+    assert row["shares_status"] == "CONFLICT"
+    assert bool(row["stock_total_conflict"])
+    assert pd.isna(row["shares_outstanding"])
+    assert pd.isna(row["bps"])
+    assert row["parse_status"] == "INCOMPLETE"
+    assert "xbrl_vs_receipt_matched_stock_total" in str(row["parse_reason"])
+
+
 def test_builder_complete_revision_safe_rows_can_satisfy_pit_input_contract(tmp_path):
     m = load_module()
     raw = tmp_path / "raw"

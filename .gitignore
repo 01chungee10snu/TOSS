@@ -63,10 +63,14 @@ reports/harness/adaptive_regime_shadow_latest.json
 reports/harness/adaptive_regime_shadow_latest.md
 reports/backtests/fundamental/opendart_xbrl_raw/
 reports/backtests/fundamental/opendart_xbrl_manifest.csv
+reports/backtests/fundamental/opendart_xbrl_collection_issues.csv
+reports/backtests/fundamental/opendart_stock_totals_receipt_matched.csv
+reports/backtests/fundamental/opendart_stock_totals_issues.csv
 reports/backtests/fundamental/opendart_pit_fundamentals.csv
 reports/validation/opendart_pit_fundamentals_build_latest.json
 reports/validation/hml_cma_true_pit_latest.json
 reports/validation/hml_cma_true_pit_latest.csv
+reports/validation/hml_cma_true_pit_*_75bp_curve.csv
 reports/harness/inverse_sleeve_overlay_*
 reports/harness/strict_live_quality_gate_*
 reports/harness/entry_gap_veto_*

@@ -1,10 +1,12 @@
 """Fail-closed parser for receipt-versioned OpenDART XBRL fundamentals.
 
 The parser intentionally extracts only a small set of factor inputs and keeps
-selection provenance for every chosen fact.  It never substitutes an issued-
-share count for shares outstanding and never guesses across conflicting XBRL
-contexts.  Ambiguous or missing values remain ``None`` so the PIT contract can
-block promotion instead of manufacturing a backtest input.
+selection provenance for every chosen fact.  It never uses issued shares alone
+as a substitute for shares outstanding.  A fallback is allowed only when both
+ordinary issued shares and same-date treasury shares are unambiguous, in which
+case outstanding shares are derived as issued minus treasury.  Ambiguous or
+missing values remain ``None`` so the PIT contract can block promotion instead
+of manufacturing a backtest input.
 """
 from __future__ import annotations
 
@@ -19,7 +21,8 @@ from xml.etree import ElementTree as ET
 
 
 MONETARY_METRICS = {"assets", "book_equity", "revenue", "operating_income", "net_income"}
-INSTANT_METRICS = {"assets", "book_equity", "shares_outstanding"}
+SHARE_METRICS = {"shares_outstanding", "shares_issued", "treasury_shares"}
+INSTANT_METRICS = {"assets", "book_equity", *SHARE_METRICS}
 
 # Priority is significant.  Parent-owner equity is preferred for consolidated
 # statements because non-controlling interest is not attributable to common
@@ -55,6 +58,14 @@ CONCEPT_ALIASES: dict[str, tuple[str, ...]] = {
         "CommonStockSharesOutstanding",
         "EntityCommonStockSharesOutstanding",
         "OrdinarySharesOutstanding",
+    ),
+    "shares_issued": (
+        "NumberOfSharesIssued",
+        "CommonStockSharesIssued",
+    ),
+    "treasury_shares": (
+        "SharesInEntityHeldByEntityOrByItsSubsidiariesOrAssociates",
+        "NumberOfTreasuryShares",
     ),
 }
 
@@ -139,6 +150,8 @@ class ParsedFundamentals:
     operating_income: SelectedFact
     net_income: SelectedFact
     shares_outstanding: SelectedFact
+    shares_issued: SelectedFact
+    treasury_shares: SelectedFact
     instance_count: int
     raw_fact_count: int
 
@@ -198,7 +211,7 @@ class ParsedFundamentals:
         return (
             self.assets.status == "SELECTED"
             and self.book_equity.status == "SELECTED"
-            and self.shares_outstanding.status == "SELECTED"
+            and self.shares_outstanding.status in {"SELECTED", "DERIVED"}
             and self.bps is not None
             and self.assets.value is not None
         )
@@ -221,6 +234,8 @@ class ParsedFundamentals:
             "operating_income": self.operating_income.to_dict(),
             "net_income": self.net_income.to_dict(),
             "shares_outstanding": self.shares_outstanding.to_dict(),
+            "shares_issued": self.shares_issued.to_dict(),
+            "treasury_shares": self.treasury_shares.to_dict(),
             "bps": self.bps,
             "revenue_basis": self.revenue_basis,
             "profitability_basis": self.profitability_basis,
@@ -246,6 +261,15 @@ def parse_xbrl_archive(
         metric: select_metric_fact(facts, metric=metric, period_end=target_period, reprt_code=str(reprt_code))
         for metric in CONCEPT_ALIASES
     }
+    shares_outstanding = selected["shares_outstanding"]
+    if shares_outstanding.status != "SELECTED":
+        derived = _derive_shares_outstanding(
+            issued=selected["shares_issued"],
+            treasury=selected["treasury_shares"],
+            period_end=target_period,
+        )
+        if derived is not None:
+            shares_outstanding = derived
     return ParsedFundamentals(
         period_end=target_period,
         reprt_code=str(reprt_code),
@@ -254,7 +278,9 @@ def parse_xbrl_archive(
         revenue=selected["revenue"],
         operating_income=selected["operating_income"],
         net_income=selected["net_income"],
-        shares_outstanding=selected["shares_outstanding"],
+        shares_outstanding=shares_outstanding,
+        shares_issued=selected["shares_issued"],
+        treasury_shares=selected["treasury_shares"],
         instance_count=instance_count,
         raw_fact_count=len(facts),
     )
@@ -309,7 +335,7 @@ def select_metric_fact(
             continue
         if metric in MONETARY_METRICS and not _is_krw_unit(fact.unit):
             continue
-        if metric == "shares_outstanding" and not _is_share_unit(fact.unit):
+        if metric in SHARE_METRICS and not _is_share_unit(fact.unit):
             continue
 
         period_score = _period_score(fact, metric=metric, target_period=target_period, reprt_code=reprt_code)
@@ -318,6 +344,8 @@ def select_metric_fact(
         score = (
             alias_rank[concept_key],
             period_score,
+            _consolidation_score(fact.dimensions),
+            _share_class_score(fact.dimensions) if metric in SHARE_METRICS else 0,
             len(fact.dimensions),
             _statement_path_score(fact.instance_path),
         )
@@ -349,6 +377,45 @@ def select_metric_fact(
         instance_path=chosen.instance_path,
         candidate_count=len(candidates),
         reason=None,
+    )
+
+
+def _derive_shares_outstanding(
+    *,
+    issued: SelectedFact,
+    treasury: SelectedFact,
+    period_end: str,
+) -> SelectedFact | None:
+    if issued.status != "SELECTED" or treasury.status != "SELECTED":
+        return None
+    if issued.value is None or treasury.value is None:
+        return None
+    if issued.instant != period_end or treasury.instant != period_end:
+        return None
+    if not _dimensions_have_ordinary_share_class(issued.dimensions):
+        return None
+    treasury_is_ordinary = _dimensions_have_ordinary_share_class(treasury.dimensions)
+    if not treasury_is_ordinary and float(treasury.value) != 0.0:
+        return None
+    value = float(issued.value) - float(treasury.value)
+    if not math.isfinite(value) or value <= 0:
+        return None
+    dimensions = tuple(sorted(set(issued.dimensions) | set(treasury.dimensions)))
+    return SelectedFact(
+        metric="shares_outstanding",
+        status="DERIVED",
+        value=value,
+        concept=f"{issued.concept}-{treasury.concept}",
+        context_id=f"{issued.context_id}|{treasury.context_id}",
+        unit=issued.unit or treasury.unit,
+        instant=period_end,
+        start_date=None,
+        end_date=None,
+        duration_days=None,
+        dimensions=dimensions,
+        instance_path=issued.instance_path if issued.instance_path == treasury.instance_path else None,
+        candidate_count=int(issued.candidate_count) + int(treasury.candidate_count),
+        reason="derived_from_ordinary_issued_minus_treasury_shares",
     )
 
 
@@ -447,6 +514,32 @@ def _period_score(fact: XbrlFact, *, metric: str, target_period: str, reprt_code
             return None
         return abs(days - 91)
     return None
+
+
+def _consolidation_score(dimensions: Iterable[str]) -> int:
+    text = " ".join(str(item) for item in dimensions)
+    if "ConsolidatedAndSeparateFinancialStatementsAxis=ifrs-full:ConsolidatedMember" in text:
+        return 0
+    if "ConsolidatedAndSeparateFinancialStatementsAxis=ifrs-full:SeparateMember" in text:
+        return 2
+    return 1
+
+
+def _dimensions_have_ordinary_share_class(dimensions: Iterable[str]) -> bool:
+    text = " ".join(str(item) for item in dimensions)
+    return (
+        "ClassesOfShareCapitalAxis=ifrs-full:OrdinarySharesMember" in text
+        or "ClassesOfOrdinarySharesAxis=" in text
+    )
+
+
+def _share_class_score(dimensions: Iterable[str]) -> int:
+    text = " ".join(str(item) for item in dimensions)
+    if "ClassesOfShareCapitalAxis=ifrs-full:OrdinarySharesMember" in text:
+        return 0
+    if "ClassesOfShareCapitalAxis=ifrs-full:PreferenceSharesMember" in text:
+        return 2
+    return 1
 
 
 def _statement_path_score(path: str) -> int:

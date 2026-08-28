@@ -28,7 +28,21 @@ from toss_alpha.connectors.dart_xbrl_archive import (
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RAW_DIR = ROOT / "reports" / "backtests" / "fundamental" / "opendart_xbrl_raw"
 DEFAULT_MANIFEST = ROOT / "reports" / "backtests" / "fundamental" / "opendart_xbrl_manifest.csv"
+DEFAULT_ISSUES = ROOT / "reports" / "backtests" / "fundamental" / "opendart_xbrl_collection_issues.csv"
 AMENDMENT_MARKERS = ("정정", "첨부정정", "기재정정")
+
+
+@dataclass(frozen=True)
+class CollectionIssue:
+    code: str
+    corp_code: str
+    corp_name: str
+    report_nm: str
+    rcept_no: str
+    rcept_dt: str
+    reprt_code: str
+    issue_type: str
+    message: str
 
 
 @dataclass(frozen=True)
@@ -59,6 +73,7 @@ def collect_archive(
     begin_date: str,
     end_date: str,
     raw_dir: Path,
+    issues: list[CollectionIssue] | None = None,
 ) -> list[ArchiveRow]:
     target_codes = normalize_codes(codes)
     if not target_codes:
@@ -88,7 +103,27 @@ def collect_archive(
             relative = Path(code) / f"{rcept_no}_{reprt_code}.zip"
             target = raw_dir / relative
             if not target.exists():
-                client.save_xbrl(rcept_no=rcept_no, reprt_code=reprt_code, path=target)
+                try:
+                    client.save_xbrl(rcept_no=rcept_no, reprt_code=reprt_code, path=target)
+                except RuntimeError as exc:
+                    message = str(exc)
+                    if "014" not in message:
+                        raise
+                    if issues is not None:
+                        issues.append(
+                            CollectionIssue(
+                                code=code,
+                                corp_code=corp_code,
+                                corp_name=str(corp.get("corp_name") or ""),
+                                report_nm=report_nm,
+                                rcept_no=rcept_no,
+                                rcept_dt=rcept_dt,
+                                reprt_code=reprt_code,
+                                issue_type="MISSING_XBRL_ARCHIVE",
+                                message=message[:300],
+                            )
+                        )
+                    continue
 
             result.append(
                 ArchiveRow(
@@ -120,6 +155,16 @@ def write_manifest(rows: list[ArchiveRow], path: Path) -> None:
             writer.writerow(asdict(row))
 
 
+def write_issues(rows: list[CollectionIssue], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fields = list(CollectionIssue.__dataclass_fields__.keys())
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(asdict(row))
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--codes", required=True, help="comma-separated KRX stock codes")
@@ -127,6 +172,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--end", default="2026-08-27")
     parser.add_argument("--raw-dir", type=Path, default=DEFAULT_RAW_DIR)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    parser.add_argument("--issues", type=Path, default=DEFAULT_ISSUES)
     return parser.parse_args()
 
 
@@ -138,16 +184,21 @@ def main() -> int:
         return 2
 
     client = DartXbrlArchiveClient(api_key=api_key)
+    issues: list[CollectionIssue] = []
     rows = collect_archive(
         client,
         codes=args.codes.split(","),
         begin_date=args.begin,
         end_date=args.end,
         raw_dir=args.raw_dir,
+        issues=issues,
     )
     write_manifest(rows, args.manifest)
+    write_issues(issues, args.issues)
     print(f"archived_filings={len(rows)}")
+    print(f"missing_xbrl_filings={len(issues)}")
     print(f"manifest={args.manifest}")
+    print(f"issues={args.issues}")
     print(f"raw_dir={args.raw_dir}")
     return 0
 

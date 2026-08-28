@@ -89,6 +89,40 @@ def test_list_filings_paginates_and_preserves_receipt_metadata(monkeypatch):
     assert rows[0]["rcept_no"] == "20250101000001"
 
 
+def test_stock_total_status_preserves_receipt_number_and_handles_no_data(monkeypatch):
+    calls = []
+
+    def fake_get(url, params=None, timeout=None):
+        calls.append({"url": url, "params": dict(params or {})})
+        return FakeResponse(
+            payload={
+                "status": "000",
+                "message": "정상",
+                "list": [
+                    {
+                        "rcept_no": "20220308000798",
+                        "se": "보통주",
+                        "istc_totqy": "5,969,782,550",
+                        "distb_stock_co": "5,969,782,550",
+                    }
+                ],
+            }
+        )
+
+    monkeypatch.setattr("requests.get", fake_get)
+    client = DartXbrlArchiveClient(api_key="key")
+    rows = client.stock_total_status(corp_code="00126380", business_year=2021, reprt_code="11011")
+    assert rows[0]["rcept_no"] == "20220308000798"
+    assert calls[0]["url"].endswith("/stockTotqySttus.json")
+    assert calls[0]["params"]["bsns_year"] == "2021"
+
+    monkeypatch.setattr(
+        "requests.get",
+        lambda *args, **kwargs: FakeResponse(payload={"status": "013", "message": "조회된 데이타가 없습니다."}),
+    )
+    assert client.stock_total_status(corp_code="00126380", business_year=2020, reprt_code="11011") == []
+
+
 def test_download_xbrl_requires_receipt_versioned_zip(monkeypatch):
     archive = _zip_bytes("sample.xbrl", b"<xbrl/>")
     calls = []

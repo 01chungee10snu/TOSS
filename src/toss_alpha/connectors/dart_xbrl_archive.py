@@ -95,6 +95,35 @@ class DartXbrlArchiveClient:
                 return rows
             params["page_no"] = int(params["page_no"]) + 1
 
+    def stock_total_status(
+        self,
+        *,
+        corp_code: str,
+        business_year: int | str,
+        reprt_code: str,
+    ) -> list[dict[str, Any]]:
+        """Return periodic-report stock-total rows, including the source receipt number."""
+        self._require_key()
+        response = requests.get(
+            f"{self.base_url}/stockTotqySttus.json",
+            params={
+                "crtfc_key": self.api_key,
+                "corp_code": str(corp_code).strip(),
+                "bsns_year": str(business_year).strip(),
+                "reprt_code": str(reprt_code).strip(),
+            },
+            timeout=self.timeout,
+        )
+        if not response.ok:
+            raise RuntimeError(f"OpenDART stock-total HTTP error: {response.status_code}")
+        payload = response.json()
+        status = str(payload.get("status") or "")
+        if status in {"013", "014"}:
+            return []
+        if status != "000":
+            raise RuntimeError(f"OpenDART stock-total error: {status} {payload.get('message')}")
+        return [item for item in payload.get("list", []) if isinstance(item, dict)]
+
     def download_xbrl(self, *, rcept_no: str, reprt_code: str) -> bytes:
         """Download the XBRL zip tied to one disclosure receipt number."""
         self._require_key()

@@ -115,6 +115,34 @@ def test_profitability_facts_fail_closed_when_missing(tmp_path):
     assert parsed.ready_for_hml_cma is True
 
 
+def test_same_instance_prefers_consolidated_company_total_and_ordinary_shares(tmp_path):
+    payload = f'''<?xml version="1.0" encoding="UTF-8"?>
+<xbrli:xbrl {NS}>
+  <xbrli:unit id="krw"><xbrli:measure>iso4217:KRW</xbrli:measure></xbrli:unit>
+  <xbrli:unit id="shares"><xbrli:measure>xbrli:shares</xbrli:measure></xbrli:unit>
+  <xbrli:context id="ci"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>2025-09-30</xbrli:instant></xbrli:period></xbrli:context>
+  <xbrli:context id="si"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:SeparateMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>2025-09-30</xbrli:instant></xbrli:period></xbrli:context>
+  <xbrli:context id="cq"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:startDate>2025-07-01</xbrli:startDate><xbrli:endDate>2025-09-30</xbrli:endDate></xbrli:period></xbrli:context>
+  <xbrli:context id="sq"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:SeparateMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:startDate>2025-07-01</xbrli:startDate><xbrli:endDate>2025-09-30</xbrli:endDate></xbrli:period></xbrli:context>
+  <xbrli:context id="co"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember><xbrldi:explicitMember dimension="ifrs-full:ClassesOfShareCapitalAxis">ifrs-full:OrdinarySharesMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>2025-09-30</xbrli:instant></xbrli:period></xbrli:context>
+  <xbrli:context id="cp"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember><xbrldi:explicitMember dimension="ifrs-full:ClassesOfShareCapitalAxis">ifrs-full:PreferenceSharesMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>2025-09-30</xbrli:instant></xbrli:period></xbrli:context>
+  <ifrs-full:Assets contextRef="ci" unitRef="krw">2000000</ifrs-full:Assets>
+  <ifrs-full:Assets contextRef="si" unitRef="krw">1500000</ifrs-full:Assets>
+  <ifrs-full:EquityAttributableToOwnersOfParent contextRef="ci" unitRef="krw">900000</ifrs-full:EquityAttributableToOwnersOfParent>
+  <ifrs-full:Revenue contextRef="cq" unitRef="krw">300000</ifrs-full:Revenue>
+  <ifrs-full:Revenue contextRef="sq" unitRef="krw">250000</ifrs-full:Revenue>
+  <dart:NumberOfSharesOutstanding contextRef="co" unitRef="shares">100000</dart:NumberOfSharesOutstanding>
+  <dart:NumberOfSharesOutstanding contextRef="cp" unitRef="shares">5000</dart:NumberOfSharesOutstanding>
+</xbrli:xbrl>'''.encode()
+    archive = _zip(tmp_path / "x.zip", {"entity.xbrl": payload})
+    parsed = parse_xbrl_archive(archive, period_end="2025-09-30", reprt_code="11014")
+
+    assert parsed.assets.value == 2_000_000
+    assert parsed.revenue.value == 300_000
+    assert parsed.shares_outstanding.value == 100_000
+    assert parsed.bps == 9.0
+
+
 def test_forecast_dimension_is_excluded(tmp_path):
     archive = _zip(
         tmp_path / "x.zip",
@@ -137,7 +165,54 @@ def test_conflicting_equal_priority_facts_fail_closed_as_ambiguous(tmp_path):
     assert parsed.ready_for_hml_cma is False
 
 
-def test_issued_shares_are_not_used_as_outstanding_share_fallback(tmp_path):
+def test_issued_minus_treasury_can_derive_ordinary_shares_outstanding(tmp_path):
+    payload = f'''<?xml version="1.0" encoding="UTF-8"?>
+<xbrli:xbrl {NS}>
+  <xbrli:unit id="krw"><xbrli:measure>iso4217:KRW</xbrli:measure></xbrli:unit>
+  <xbrli:unit id="shares"><xbrli:measure>xbrli:shares</xbrli:measure></xbrli:unit>
+  <xbrli:context id="ci"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>2025-09-30</xbrli:instant></xbrli:period></xbrli:context>
+  <xbrli:context id="co"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember><xbrldi:explicitMember dimension="ifrs-full:ClassesOfShareCapitalAxis">ifrs-full:OrdinarySharesMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>2025-09-30</xbrli:instant></xbrli:period></xbrli:context>
+  <xbrli:context id="cq"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:startDate>2025-07-01</xbrli:startDate><xbrli:endDate>2025-09-30</xbrli:endDate></xbrli:period></xbrli:context>
+  <ifrs-full:Assets contextRef="ci" unitRef="krw">2000000</ifrs-full:Assets>
+  <ifrs-full:EquityAttributableToOwnersOfParent contextRef="ci" unitRef="krw">900000</ifrs-full:EquityAttributableToOwnersOfParent>
+  <ifrs-full:Revenue contextRef="cq" unitRef="krw">300000</ifrs-full:Revenue>
+  <dart:NumberOfSharesIssued contextRef="co" unitRef="shares">100000</dart:NumberOfSharesIssued>
+  <ifrs-full:SharesInEntityHeldByEntityOrByItsSubsidiariesOrAssociates contextRef="co" unitRef="shares">5000</ifrs-full:SharesInEntityHeldByEntityOrByItsSubsidiariesOrAssociates>
+</xbrli:xbrl>'''.encode()
+    archive = _zip(tmp_path / "x.zip", {"entity.xbrl": payload})
+    parsed = parse_xbrl_archive(archive, period_end="2025-09-30", reprt_code="11014")
+
+    assert parsed.shares_issued.value == 100_000
+    assert parsed.treasury_shares.value == 5_000
+    assert parsed.shares_outstanding.status == "DERIVED"
+    assert parsed.shares_outstanding.value == 95_000
+    assert parsed.shares_outstanding.reason == "derived_from_ordinary_issued_minus_treasury_shares"
+    assert round(float(parsed.bps), 6) == round(900_000 / 95_000, 6)
+    assert parsed.ready_for_hml_cma is True
+
+
+def test_issued_shares_alone_are_not_used_as_outstanding_share_fallback(tmp_path):
+    payload = f'''<?xml version="1.0" encoding="UTF-8"?>
+<xbrli:xbrl {NS}>
+  <xbrli:unit id="krw"><xbrli:measure>iso4217:KRW</xbrli:measure></xbrli:unit>
+  <xbrli:unit id="shares"><xbrli:measure>xbrli:shares</xbrli:measure></xbrli:unit>
+  <xbrli:context id="ci"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>2025-09-30</xbrli:instant></xbrli:period></xbrli:context>
+  <xbrli:context id="co"><xbrli:entity><xbrli:identifier scheme="dart">001</xbrli:identifier><xbrli:segment><xbrldi:explicitMember dimension="ifrs-full:ConsolidatedAndSeparateFinancialStatementsAxis">ifrs-full:ConsolidatedMember</xbrldi:explicitMember><xbrldi:explicitMember dimension="ifrs-full:ClassesOfShareCapitalAxis">ifrs-full:OrdinarySharesMember</xbrldi:explicitMember></xbrli:segment></xbrli:entity><xbrli:period><xbrli:instant>2025-09-30</xbrli:instant></xbrli:period></xbrli:context>
+  <ifrs-full:Assets contextRef="ci" unitRef="krw">2000000</ifrs-full:Assets>
+  <ifrs-full:EquityAttributableToOwnersOfParent contextRef="ci" unitRef="krw">900000</ifrs-full:EquityAttributableToOwnersOfParent>
+  <dart:NumberOfSharesIssued contextRef="co" unitRef="shares">100000</dart:NumberOfSharesIssued>
+</xbrli:xbrl>'''.encode()
+    archive = _zip(tmp_path / "x.zip", {"entity.xbrl": payload})
+    parsed = parse_xbrl_archive(archive, period_end="2025-09-30", reprt_code="11014")
+
+    assert parsed.shares_issued.value == 100_000
+    assert parsed.treasury_shares.status == "MISSING"
+    assert parsed.shares_outstanding.status == "MISSING"
+    assert parsed.bps is None
+    assert parsed.ready_for_hml_cma is False
+
+
+def test_legacy_number_of_issued_shares_is_not_treated_as_safe_fallback(tmp_path):
     archive = _zip(tmp_path / "x.zip", {"consolidated.xbrl": _instance(issued_only=True)})
     parsed = parse_xbrl_archive(archive, period_end="2025-09-30", reprt_code="11014")
     assert parsed.shares_outstanding.status == "MISSING"

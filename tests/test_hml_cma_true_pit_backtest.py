@@ -113,3 +113,93 @@ def test_insufficient_cross_section_stays_in_cash():
     result = m.run_backtest(_fundamentals(), _panel(), strategy="hml_only", cost_bps=31, min_candidates=10, max_names=4)
     assert all(row["name_count"] == 0 for row in result.rebalances)
     assert result.summary()["final_equity_krw"] == 100_000_000
+
+
+def test_profitability_variant_selector_separates_high_low_and_all():
+    m = load_module()
+    snapshot = m.pit_factor_snapshot(_fundamentals(), "2025-05-30", universe_panel=_panel())
+    closes = {code: 100.0 for code in ["000001", "000002", "000003", "000004"]}
+
+    high = m.select_profitability_variant_codes(
+        snapshot, closes, strategy="profitability_proxy", min_candidates=4, max_names=4, variant="high"
+    )
+    low = m.select_profitability_variant_codes(
+        snapshot, closes, strategy="profitability_proxy", min_candidates=4, max_names=4, variant="low"
+    )
+    all_names = m.select_profitability_variant_codes(
+        snapshot, closes, strategy="profitability_proxy", min_candidates=4, max_names=4, variant="all"
+    )
+
+    assert high == ["000004"]
+    assert low == ["000001"]
+    assert set(all_names) == {"000001", "000002", "000003", "000004"}
+
+
+def test_profitability_diagnostic_compares_high_against_low_and_universe():
+    m = load_module()
+    high = m.run_backtest(
+        _fundamentals(),
+        _panel(),
+        strategy="profitability_proxy",
+        cost_bps=75,
+        min_candidates=4,
+        max_names=4,
+        start_date=pd.Timestamp("2025-05-01"),
+    )
+    diagnostic = m.build_profitability_diagnostic(
+        _fundamentals(),
+        _panel(),
+        high_result=high,
+        cost_bps=75,
+        min_candidates=4,
+        max_names=4,
+    )
+
+    assert diagnostic["diagnostic_only"] is True
+    assert diagnostic["theoretical_high_minus_low_is_not_executable_shorting_evidence"] is True
+    assert diagnostic["high_profitability"]["total_return_pct"] > diagnostic["low_profitability"]["total_return_pct"]
+    assert diagnostic["high_minus_low"]["relative_sharpe"] > 0
+
+
+def test_backtest_start_date_prevents_pre_gate_rebalances():
+    m = load_module()
+    result = m.run_backtest(
+        _fundamentals(),
+        _panel(),
+        strategy="hml_only",
+        cost_bps=31,
+        min_candidates=4,
+        max_names=4,
+        start_date=pd.Timestamp("2025-06-01"),
+    )
+    invested = [row for row in result.rebalances if row["name_count"] > 0]
+    assert invested
+    assert invested[0]["signal_date"] == "2025-06-30"
+    assert invested[0]["execution_date"] == "2025-07-01"
+    assert result.equity["date"].min() >= pd.Timestamp("2025-06-02")
+
+
+def test_strategy_asof_coverage_is_scoped_to_selected_factor():
+    m = load_module()
+    fund = _fundamentals().copy()
+    fund["bps"] = None
+
+    profitability = m.assess_strategy_asof_coverage(
+        fund,
+        _panel(),
+        strategies=("profitability_proxy",),
+        required_rebalance_start=pd.Timestamp("2025-05-01"),
+        min_factor_ready_codes=4,
+    )
+    hml = m.assess_strategy_asof_coverage(
+        fund,
+        _panel(),
+        strategies=("hml_only",),
+        required_rebalance_start=pd.Timestamp("2025-05-01"),
+        min_factor_ready_codes=4,
+    )
+
+    assert profitability["passed"] is True
+    assert profitability["minimum_ready_codes"]["profitability_proxy"] == 4
+    assert hml["passed"] is False
+    assert hml["minimum_ready_codes"]["hml_only"] == 0

@@ -26,13 +26,17 @@ if str(SRC) not in sys.path:
 from toss_alpha.research.meta_allocator import allocate_candidates, correlation_matrix, risk_metrics
 
 VALIDATOR_PATH = ROOT / "scripts" / "validate_executable_etf_portfolio.py"
-TOURNAMENT_PATH = ROOT / "reports" / "validation" / "strategy_tournament_latest.json"
+VALIDATION = ROOT / "reports" / "validation"
+TOURNAMENT_PATH = VALIDATION / "strategy_tournament_latest.json"
 ETF_PANEL_PATH = ROOT / "reports" / "backtests" / "executable_etf" / "verified_etf_unadjusted_panel_2015_2026.csv"
 FORWARD_PAPER_PATH = ROOT / "reports" / "harness" / "executable_etf_paper_latest.json"
 OUT_JSON = ROOT / "reports" / "validation" / "strategy_meta_allocator_latest.json"
 OUT_CSV = ROOT / "reports" / "validation" / "strategy_meta_allocator_latest.csv"
 OUT_MD = ROOT / "reports" / "validation" / "strategy_meta_allocator_latest.md"
 COST_BPS = 75
+STRICT_FACTOR_CURVE_PREFIX = "hml_cma_true_pit_"
+STRICT_FACTOR_CURVE_SUFFIX = "_75bp_curve.csv"
+INDEPENDENT_FACTOR_CORRELATION_THRESHOLD = 0.80
 
 
 def _display_path(path: Path) -> str:
@@ -97,6 +101,87 @@ def build_etf_return_series(panel: pd.DataFrame, tournament: dict[str, Any]) -> 
     return series, coverage
 
 
+def build_strict_factor_return_series(
+    tournament: dict[str, Any],
+    *,
+    validation_dir: Path = VALIDATION,
+) -> tuple[dict[str, pd.Series], dict[str, Any]]:
+    """Load comparable 75bp daily curves only for strict PIT factor rows in the tournament."""
+    series: dict[str, pd.Series] = {}
+    coverage: dict[str, Any] = {}
+    for row in tournament.get("leaderboard", []):
+        strategy_id = str(row.get("strategy_id") or "").strip()
+        if not strategy_id or str(row.get("family") or "") != "true_pit_domestic_factor":
+            continue
+        if str(row.get("source") or "") != "reports/validation/hml_cma_true_pit_latest.json":
+            continue
+        if not strategy_id.replace("_", "").isalnum():
+            continue
+        path = validation_dir / f"{STRICT_FACTOR_CURVE_PREFIX}{strategy_id}{STRICT_FACTOR_CURVE_SUFFIX}"
+        if not path.exists():
+            coverage[strategy_id] = {
+                "source": _display_path(path),
+                "data_class": "strict_true_pit_domestic_factor",
+                "status": "MISSING_CURVE",
+                "observations": 0,
+            }
+            continue
+        try:
+            frame = pd.read_csv(path)
+        except Exception:
+            coverage[strategy_id] = {
+                "source": _display_path(path),
+                "data_class": "strict_true_pit_domestic_factor",
+                "status": "INVALID_CURVE",
+                "observations": 0,
+            }
+            continue
+        if not {"date", "equity"}.issubset(frame.columns):
+            coverage[strategy_id] = {
+                "source": _display_path(path),
+                "data_class": "strict_true_pit_domestic_factor",
+                "status": "INVALID_CURVE",
+                "observations": 0,
+            }
+            continue
+        frame["date"] = pd.to_datetime(frame["date"], errors="coerce")
+        frame["equity"] = pd.to_numeric(frame["equity"], errors="coerce")
+        frame = frame.dropna(subset=["date", "equity"]).sort_values("date").drop_duplicates("date", keep="last")
+        frame = frame[frame["equity"] > 0]
+        ret = frame.set_index("date")["equity"].pct_change(fill_method=None).dropna()
+        if ret.empty:
+            coverage[strategy_id] = {
+                "source": _display_path(path),
+                "data_class": "strict_true_pit_domestic_factor",
+                "status": "EMPTY_RETURN_SERIES",
+                "observations": 0,
+            }
+            continue
+        series[strategy_id] = ret
+        coverage[strategy_id] = {
+            "source": _display_path(path),
+            "data_class": "strict_true_pit_domestic_factor",
+            "status": "AVAILABLE",
+            "execution_model": "strict receipt-versioned PIT factor; month-end signal -> next-open; 75bp stress; fractional research sizing",
+            "observations": int(len(ret)),
+            "start": ret.index.min().date().isoformat(),
+            "end": ret.index.max().date().isoformat(),
+        }
+    return series, coverage
+
+
+def build_comparable_return_series(
+    panel: pd.DataFrame,
+    tournament: dict[str, Any],
+) -> tuple[dict[str, pd.Series], dict[str, Any]]:
+    etf_series, etf_coverage = build_etf_return_series(panel, tournament)
+    factor_series, factor_coverage = build_strict_factor_return_series(tournament)
+    overlap = set(etf_series).intersection(factor_series)
+    if overlap:
+        raise RuntimeError(f"duplicate comparable return series: {','.join(sorted(overlap))}")
+    return etf_series | factor_series, etf_coverage | factor_coverage
+
+
 def _forward_target_ids(leaderboard: list[dict[str, Any]]) -> list[str]:
     selected: list[str] = []
     for row in leaderboard:
@@ -126,11 +211,51 @@ def _current_drawdown_evidence(protected: list[str]) -> tuple[dict[str, float], 
     }
 
 
+def _factor_independence_vs_forward(
+    leaderboard: list[dict[str, Any]],
+    correlations: dict[str, Any],
+    protected: list[str],
+    *,
+    threshold: float = INDEPENDENT_FACTOR_CORRELATION_THRESHOLD,
+) -> dict[str, Any]:
+    if len(protected) != 1:
+        return {}
+    forward = protected[0]
+    pair_map = correlations.get("pairs", {})
+    result: dict[str, Any] = {}
+    for row in leaderboard:
+        sid = str(row.get("strategy_id") or "")
+        if str(row.get("family") or "") != "true_pit_domestic_factor" or sid == forward:
+            continue
+        pair = pair_map.get("|".join(sorted((sid, forward))), {})
+        pearson = pair.get("pearson")
+        downside = pair.get("downside")
+        observations = int(pair.get("observations") or 0)
+        passed = bool(
+            observations >= 252
+            and pearson is not None
+            and downside is not None
+            and float(pearson) < float(threshold)
+            and float(downside) < float(threshold)
+        )
+        result[sid] = {
+            "forward_strategy_id": forward,
+            "observations": observations,
+            "pearson": pearson,
+            "downside": downside,
+            "threshold": float(threshold),
+            "passed_independence_check": passed,
+            "allocation_effect": "none_until_tournament_status_reaches_paper_candidate",
+        }
+    return result
+
+
 def build_report(tournament: dict[str, Any], returns: dict[str, pd.Series], coverage: dict[str, Any]) -> dict[str, Any]:
     leaderboard = list(tournament.get("leaderboard", []))
     metrics = {sid: risk_metrics(series) for sid, series in returns.items()}
     correlations = correlation_matrix(returns, min_obs=60, windows=(60, 120))
     protected = _forward_target_ids(leaderboard)
+    factor_independence = _factor_independence_vs_forward(leaderboard, correlations, protected)
     current_drawdowns, drawdown_evidence = _current_drawdown_evidence(protected)
 
     live = allocate_candidates(
@@ -171,6 +296,7 @@ def build_report(tournament: dict[str, Any], returns: dict[str, pd.Series], cove
         "series_coverage": coverage,
         "strategy_risk_metrics": {sid: value.to_dict() for sid, value in metrics.items()},
         "correlations": correlations,
+        "factor_independence_vs_forward": factor_independence,
         "live_allocation": live,
         "research_shadow_allocation": shadow,
         "governance": {
@@ -178,7 +304,8 @@ def build_report(tournament: dict[str, Any], returns: dict[str, pd.Series], cove
             "forward_paper_or_research_only_live_weight": 0.0,
             "performance_score_used_for_sizing": False,
             "current_forward_target_is_not_switched_by_meta_research": True,
-            "non_etf_strategy_weight_until_comparable_daily_series": 0.0,
+            "research_only_strategy_weight_until_paper_candidate": 0.0,
+            "strict_factor_daily_series_used_for_correlation_before_sizing": True,
             "live_execution_connected": False,
             "live_current_drawdown_evidence_required": True,
             "historical_backtest_end_drawdown_not_used_as_current_risk_state": True,
@@ -277,7 +404,7 @@ def main() -> int:
     except FileNotFoundError as exc:
         print(f"BLOCKED_MISSING_INPUT:{exc}")
         return 2
-    returns, coverage = build_etf_return_series(panel, tournament)
+    returns, coverage = build_comparable_return_series(panel, tournament)
     if not returns:
         print("BLOCKED_NO_COMPARABLE_DAILY_RETURN_SERIES")
         return 2

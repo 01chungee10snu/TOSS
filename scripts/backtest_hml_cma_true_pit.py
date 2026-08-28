@@ -42,6 +42,16 @@ STRATEGIES = (
     "hml_cma_composite",
     "hml_cma_profitability_composite",
 )
+STRATEGY_FACTOR_COLUMNS = {
+    "hml_only": ("bps",),
+    "cma_only": ("asset_growth",),
+    "profitability_proxy": ("operating_profitability_proxy",),
+    "hml_cma_intersection": ("bps", "asset_growth"),
+    "hml_cma_composite": ("bps", "asset_growth"),
+    "hml_cma_profitability_composite": ("bps", "asset_growth", "operating_profitability_proxy"),
+}
+REQUIRED_REBALANCE_START = pd.Timestamp("2022-06-30")
+MIN_FACTOR_READY_CODES_PER_REBALANCE = 100
 
 
 @dataclass
@@ -186,6 +196,38 @@ def select_factor_codes(
     return selected["code"].astype(str).tolist()[: int(max_names)]
 
 
+def select_profitability_variant_codes(
+    snapshot: pd.DataFrame,
+    close_prices: Mapping[str, float],
+    *,
+    strategy: str,
+    min_candidates: int = MIN_CANDIDATES,
+    max_names: int = MAX_NAMES,
+    variant: str,
+) -> list[str]:
+    del close_prices, strategy
+    snap = snapshot.copy()
+    if snap.empty or "operating_profitability_proxy" not in snap.columns:
+        return []
+    snap["code"] = snap["code"].astype(str).str.zfill(6)
+    snap["operating_profitability_proxy"] = pd.to_numeric(
+        snap["operating_profitability_proxy"], errors="coerce"
+    )
+    snap = snap.dropna(subset=["operating_profitability_proxy"])
+    if len(snap) < int(min_candidates):
+        return []
+    if variant == "all":
+        return snap["code"].astype(str).tolist()
+    n_select = max(1, min(int(max_names), int(np.ceil(len(snap) * TOP_QUANTILE))))
+    if variant == "high":
+        selected = snap.nlargest(n_select, "operating_profitability_proxy")
+    elif variant == "low":
+        selected = snap.nsmallest(n_select, "operating_profitability_proxy")
+    else:
+        raise ValueError(f"unknown profitability variant: {variant}")
+    return selected["code"].astype(str).tolist()[: int(max_names)]
+
+
 def run_backtest(
     fundamentals: pd.DataFrame,
     panel: pd.DataFrame,
@@ -194,13 +236,19 @@ def run_backtest(
     cost_bps: int,
     min_candidates: int = MIN_CANDIDATES,
     max_names: int = MAX_NAMES,
+    start_date: pd.Timestamp | None = None,
+    selector: Any | None = None,
 ) -> BacktestResult:
     prices = normalize_price_panel(panel)
     opens = prices.pivot_table(index="Date", columns="code", values="Open", aggfunc="last").sort_index()
     closes = prices.pivot_table(index="Date", columns="code", values="Close", aggfunc="last").sort_index()
     dates = list(opens.index.intersection(closes.index))
+    if start_date is not None:
+        cutoff = pd.Timestamp(start_date).normalize()
+        dates = [day for day in dates if pd.Timestamp(day).normalize() >= cutoff]
     signals = month_end_signal_dates(dates)
     side_rate = (float(cost_bps) / 2.0) / 10_000.0
+    selection_fn = selector or select_factor_codes
 
     quantities: dict[str, float] = {}
     cash = INITIAL_CAPITAL
@@ -248,7 +296,7 @@ def run_backtest(
         if day in signals and i + 1 < len(dates):
             snapshot = pit_factor_snapshot(fundamentals, day, universe_panel=prices, require_revision_safe=True)
             close_prices = {str(code): float(value) for code, value in close_row.items() if pd.notna(value) and float(value) > 0}
-            codes = select_factor_codes(
+            codes = selection_fn(
                 snapshot,
                 close_prices,
                 strategy=strategy,
@@ -260,11 +308,159 @@ def run_backtest(
     return BacktestResult(strategy=strategy, cost_bps=int(cost_bps), equity=pd.DataFrame(curve), rebalances=rebalances)
 
 
+def _relative_curve_metrics(left: pd.DataFrame, right: pd.DataFrame) -> dict[str, float]:
+    merged = left[["date", "equity"]].merge(
+        right[["date", "equity"]], on="date", suffixes=("_left", "_right")
+    )
+    if len(merged) < 3:
+        return {"cumulative_relative_return_pct": 0.0, "relative_sharpe": 0.0, "mean_daily_bp": 0.0}
+    left_return = merged["equity_left"].astype(float).pct_change(fill_method=None)
+    right_return = merged["equity_right"].astype(float).pct_change(fill_method=None)
+    relative = (left_return - right_return).dropna()
+    if relative.empty:
+        return {"cumulative_relative_return_pct": 0.0, "relative_sharpe": 0.0, "mean_daily_bp": 0.0}
+    cumulative = float((1.0 + relative).prod() - 1.0)
+    sharpe = 0.0
+    if len(relative) > 1 and relative.std(ddof=1) > 0:
+        sharpe = float(relative.mean() / relative.std(ddof=1) * np.sqrt(252))
+    return {
+        "cumulative_relative_return_pct": round(cumulative * 100.0, 2),
+        "relative_sharpe": round(sharpe, 4),
+        "mean_daily_bp": round(float(relative.mean()) * 10_000.0, 3),
+    }
+
+
+def build_profitability_diagnostic(
+    fundamentals: pd.DataFrame,
+    panel: pd.DataFrame,
+    *,
+    high_result: BacktestResult,
+    cost_bps: int = 75,
+    min_candidates: int = MIN_CANDIDATES,
+    max_names: int = MAX_NAMES,
+) -> dict[str, Any]:
+    def selector_for(variant: str):
+        def _selector(snapshot, close_prices, *, strategy, min_candidates=MIN_CANDIDATES, max_names=MAX_NAMES):
+            return select_profitability_variant_codes(
+                snapshot,
+                close_prices,
+                strategy=strategy,
+                min_candidates=min_candidates,
+                max_names=max_names,
+                variant=variant,
+            )
+        return _selector
+
+    low = run_backtest(
+        fundamentals,
+        panel,
+        strategy="profitability_proxy",
+        cost_bps=cost_bps,
+        min_candidates=min_candidates,
+        max_names=max_names,
+        start_date=REQUIRED_REBALANCE_START,
+        selector=selector_for("low"),
+    )
+    all_names = run_backtest(
+        fundamentals,
+        panel,
+        strategy="profitability_proxy",
+        cost_bps=cost_bps,
+        min_candidates=min_candidates,
+        start_date=REQUIRED_REBALANCE_START,
+        max_names=10_000,
+        selector=selector_for("all"),
+    )
+    high_summary = high_result.summary()
+    low_summary = low.summary()
+    all_summary = all_names.summary()
+    high_minus_low = _relative_curve_metrics(high_result.equity, low.equity)
+    high_minus_all = _relative_curve_metrics(high_result.equity, all_names.equity)
+    passed = bool(
+        float(high_summary.get("total_return_pct", 0.0)) > float(all_summary.get("total_return_pct", 0.0))
+        and float(high_minus_low.get("relative_sharpe", 0.0)) > 0.0
+        and float(high_minus_all.get("relative_sharpe", 0.0)) > 0.0
+    )
+    return {
+        "cost_bps": int(cost_bps),
+        "diagnostic_only": True,
+        "theoretical_high_minus_low_is_not_executable_shorting_evidence": True,
+        "passed_directional_factor_check": passed,
+        "high_profitability": high_summary,
+        "low_profitability": low_summary,
+        "equal_weight_eligible_universe": all_summary,
+        "high_minus_low": high_minus_low,
+        "high_minus_all": high_minus_all,
+    }
+
+
+def assess_strategy_asof_coverage(
+    fundamentals: pd.DataFrame,
+    panel: pd.DataFrame,
+    *,
+    strategies: tuple[str, ...],
+    required_rebalance_start: pd.Timestamp = REQUIRED_REBALANCE_START,
+    min_factor_ready_codes: int = MIN_FACTOR_READY_CODES_PER_REBALANCE,
+) -> dict[str, Any]:
+    prices = normalize_price_panel(panel)
+    dates = sorted(set(prices["Date"]))
+    signals = sorted(day for day in month_end_signal_dates(dates) if day >= pd.Timestamp(required_rebalance_start))
+    checkpoints: list[dict[str, Any]] = []
+    failures: dict[str, int] = {strategy: 0 for strategy in strategies}
+    minimums: dict[str, int] = {strategy: 10**9 for strategy in strategies}
+    for day in signals:
+        snapshot = pit_factor_snapshot(fundamentals, day, universe_panel=prices, require_revision_safe=True)
+        row: dict[str, Any] = {"date": pd.Timestamp(day).date().isoformat()}
+        for strategy in strategies:
+            required = STRATEGY_FACTOR_COLUMNS[strategy]
+            if snapshot.empty or any(column not in snapshot.columns for column in required):
+                count = 0
+            else:
+                mask = pd.Series(True, index=snapshot.index, dtype=bool)
+                for column in required:
+                    numeric = pd.to_numeric(snapshot[column], errors="coerce")
+                    mask &= numeric.notna()
+                    if column == "bps":
+                        mask &= numeric > 0
+                count = int(mask.sum())
+            passed = count >= int(min_factor_ready_codes)
+            failures[strategy] += int(not passed)
+            minimums[strategy] = min(minimums[strategy], count)
+            row[f"{strategy}_ready_codes"] = count
+            row[f"{strategy}_passed"] = passed
+        checkpoints.append(row)
+    if not checkpoints:
+        return {
+            "passed": False,
+            "reasons": ["no_historical_rebalance_checkpoints"],
+            "minimum_ready_codes": {strategy: 0 for strategy in strategies},
+            "checkpoint_count": 0,
+            "checkpoints": [],
+        }
+    reasons = [
+        f"{strategy}_rebalance_checkpoints_below_minimum:{failures[strategy]}/{len(checkpoints)}"
+        for strategy in strategies
+        if failures[strategy]
+    ]
+    return {
+        "passed": not reasons,
+        "reasons": reasons,
+        "thresholds": {
+            "required_rebalance_start_on_or_after": pd.Timestamp(required_rebalance_start).date().isoformat(),
+            "min_factor_ready_codes_per_rebalance": int(min_factor_ready_codes),
+        },
+        "minimum_ready_codes": {strategy: int(minimums[strategy]) for strategy in strategies},
+        "checkpoint_count": len(checkpoints),
+        "checkpoints": checkpoints,
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fundamentals", type=Path, default=FUND_CSV)
     parser.add_argument("--panel", type=Path, default=PANEL_CSV)
     parser.add_argument("--out-dir", type=Path, default=OUT_DIR)
+    parser.add_argument("--strategies", nargs="+", choices=STRATEGIES, default=list(STRATEGIES))
     return parser.parse_args()
 
 
@@ -279,23 +475,45 @@ def main() -> int:
 
     fundamentals = pd.read_csv(args.fundamentals, dtype={"code": str, "rcept_no": str, "reprt_code": str})
     panel = pd.read_csv(args.panel, dtype={"code": str})
-    contract = validate_pit_contract(
-        fundamentals,
-        panel,
-        required_value_columns=("bps", "assets", "operating_profitability_proxy"),
-    )
+    selected_strategies = tuple(dict.fromkeys(args.strategies))
+    contract = validate_pit_contract(fundamentals, panel, required_value_columns=())
     if not contract.eligible:
         print(f"BLOCKED_PIT_CONTRACT:{','.join(contract.reasons)}")
         return 3
+    asof_coverage = assess_strategy_asof_coverage(
+        fundamentals,
+        panel,
+        strategies=selected_strategies,
+    )
+    if not asof_coverage["passed"]:
+        print(f"BLOCKED_ASOF_FACTOR_COVERAGE:{','.join(asof_coverage['reasons'])}")
+        return 4
 
     rows: list[dict[str, Any]] = []
     details: dict[str, Any] = {}
-    for strategy in STRATEGIES:
+    result_objects: dict[tuple[str, int], BacktestResult] = {}
+    for strategy in selected_strategies:
         for cost_bps in COST_LEVELS_BPS:
-            result = run_backtest(fundamentals, panel, strategy=strategy, cost_bps=cost_bps)
+            result = run_backtest(
+                fundamentals,
+                panel,
+                strategy=strategy,
+                cost_bps=cost_bps,
+                start_date=REQUIRED_REBALANCE_START,
+            )
             summary = result.summary()
             rows.append(summary)
+            result_objects[(strategy, int(cost_bps))] = result
             details[f"{strategy}_{cost_bps}bp"] = {"summary": summary, "rebalances": result.rebalances}
+
+    profitability_diagnostic = None
+    if "profitability_proxy" in selected_strategies and ("profitability_proxy", 75) in result_objects:
+        profitability_diagnostic = build_profitability_diagnostic(
+            fundamentals,
+            panel,
+            high_result=result_objects[("profitability_proxy", 75)],
+            cost_bps=75,
+        )
 
     payload = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -303,16 +521,36 @@ def main() -> int:
         "live_promotion_allowed": False,
         "validation_state": "RESEARCH_ONLY_REQUIRES_INDEPENDENT_OOS",
         "pit_contract": contract.to_dict(),
+        "strategy_asof_coverage": asof_coverage,
+        "selected_strategies": list(selected_strategies),
         "execution": "month-end close signal -> next trading-day open; fractional research sizing",
         "round_trip_cost_stress_bps": list(COST_LEVELS_BPS),
         "results": rows,
+        "profitability_diagnostic_75bp": profitability_diagnostic,
         "details": details,
     }
     args.out_dir.mkdir(parents=True, exist_ok=True)
     out = args.out_dir / "hml_cma_true_pit_latest.json"
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     pd.DataFrame(rows).to_csv(args.out_dir / "hml_cma_true_pit_latest.csv", index=False)
+    curve_paths: dict[str, str] = {}
+    for strategy in selected_strategies:
+        result = result_objects.get((strategy, 75))
+        if result is None or result.equity.empty:
+            continue
+        curve = result.equity[["date", "equity"]].copy().sort_values("date")
+        curve["date"] = pd.to_datetime(curve["date"]).dt.date.astype(str)
+        curve["daily_return"] = pd.to_numeric(curve["equity"], errors="coerce").pct_change(fill_method=None)
+        curve_path = args.out_dir / f"hml_cma_true_pit_{strategy}_75bp_curve.csv"
+        curve.to_csv(curve_path, index=False)
+        curve_paths[strategy] = str(curve_path)
+    payload["daily_curve_files_75bp"] = curve_paths
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     print(pd.DataFrame(rows).to_string(index=False))
+    if profitability_diagnostic is not None:
+        print("profitability_directional_factor_check=", profitability_diagnostic["passed_directional_factor_check"])
+        print("profitability_high_minus_all=", profitability_diagnostic["high_minus_all"])
+        print("profitability_high_minus_low=", profitability_diagnostic["high_minus_low"])
     print(f"report={out}")
     return 0
 

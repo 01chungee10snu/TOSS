@@ -41,6 +41,7 @@ def _opendart() -> pd.DataFrame:
             "assets": [1_000_000.0],
             "book_equity": [500_000.0],
             "operating_income": [50_000.0],
+            "operating_profitability_proxy": [0.10],
             "revenue": [100.0],
             "rcept_no": ["20250515000123"],
             "reprt_code": ["11013"],
@@ -56,7 +57,18 @@ def test_loader_prefers_opendart_receipt_versioned_file(tmp_path):
     pd.DataFrame({"code": ["005930"], "year": [2025], "month": [3], "revenue": [1], "bps": [1]}).to_csv(naver, index=False)
 
     candidate, source = m.load_preferred_candidate(opendart_path=dart, naver_path=naver)
-    report = m.build_readiness_report(candidate, _pit_panel(), source=source, opendart_key_present=False)
+    report = m.build_readiness_report(
+        candidate,
+        _pit_panel(),
+        source=source,
+        opendart_key_present=False,
+        min_universe_codes=1,
+        min_hml_cma_ready_row_share=1.0,
+        min_profitability_ready_row_share=1.0,
+        required_history_start=pd.Timestamp("2025-03-31"),
+        required_available_start=pd.Timestamp("2025-05-15"),
+        min_factor_ready_codes_per_rebalance=0,
+    )
 
     assert source == "opendart_receipt_xbrl"
     assert report["promotion"]["factor_backtest_allowed"] is True
@@ -100,8 +112,97 @@ def test_incomplete_opendart_is_not_silently_replaced_by_naver(tmp_path):
     _opendart().to_csv(naver, index=False)
 
     candidate, source = m.load_preferred_candidate(opendart_path=dart, naver_path=naver)
-    report = m.build_readiness_report(candidate, _pit_panel(), source=source, opendart_key_present=True)
+    report = m.build_readiness_report(
+        candidate,
+        _pit_panel(),
+        source=source,
+        opendart_key_present=True,
+        min_universe_codes=1,
+        min_hml_cma_ready_row_share=1.0,
+        min_profitability_ready_row_share=1.0,
+        required_history_start=pd.Timestamp("2025-03-31"),
+        required_available_start=pd.Timestamp("2025-05-15"),
+        min_factor_ready_codes_per_rebalance=0,
+    )
 
     assert source == "opendart_receipt_xbrl"
     assert report["promotion"]["factor_backtest_allowed"] is False
     assert any(reason.startswith("missing_factor_value_rows:") for reason in report["contract"]["reasons"])
+
+
+def test_default_universe_coverage_blocks_small_recent_pilot_even_when_rows_are_clean():
+    m = load_module()
+    candidate = _opendart()
+    report = m.build_readiness_report(
+        candidate,
+        _pit_panel(),
+        source="opendart_receipt_xbrl",
+        opendart_key_present=True,
+    )
+
+    coverage = report["universe_coverage"]
+    assert coverage["combined"]["passed"] is False
+    assert coverage["observed"]["codes"] == 1
+    assert coverage["observed"]["hml_cma_ready_row_share"] == 1.0
+    assert any(reason.startswith("universe_codes_below_minimum:") for reason in coverage["combined"]["reasons"])
+    assert any(reason.startswith("fundamental_period_history_starts_too_late:") for reason in coverage["combined"]["reasons"])
+    assert any(reason.startswith("filing_availability_history_starts_too_late:") for reason in coverage["combined"]["reasons"])
+    assert report["contracts"]["provenance"]["eligible"] is True
+    assert report["asof_rebalance_coverage"]["passed"] is False
+    assert report["promotion"]["factor_backtest_allowed"] is False
+
+
+def test_asof_rebalance_coverage_rejects_current_survivor_basket_with_no_early_factor_history():
+    m = load_module()
+    candidate = _opendart()
+    panel = pd.DataFrame(
+        {
+            "date": ["2024-06-28", "2024-06-28", "2025-05-16", "2025-05-16"],
+            "code": ["005930", "111111", "005930", "111111"],
+            "delisted": [None, "2024-12-31", None, "2024-12-31"],
+        }
+    )
+
+    coverage = m.assess_asof_rebalance_coverage(
+        candidate,
+        panel,
+        required_rebalance_start=pd.Timestamp("2024-06-01"),
+        min_factor_ready_codes=1,
+    )
+
+    assert coverage["passed"] is False
+    assert coverage["hml_cma"]["passed"] is False
+    assert coverage["profitability"]["passed"] is False
+    assert coverage["checkpoint_count"] == 2
+    assert coverage["checkpoints"][0]["hml_cma_ready_codes"] == 0
+    assert coverage["checkpoints"][0]["profitability_ready_codes"] == 0
+    assert any(reason.startswith("hml_cma_rebalance_checkpoints_below_minimum:") for reason in coverage["reasons"])
+
+
+def test_profitability_asof_gate_can_pass_while_hml_cma_remains_blocked():
+    m = load_module()
+    candidate = pd.concat(
+        [
+            _opendart().assign(bps=None, period_end="2024-03-31", available_at="2024-05-15", rcept_no="20240515000123"),
+            _opendart().assign(bps=None),
+        ],
+        ignore_index=True,
+    )
+    panel = pd.DataFrame(
+        {
+            "date": ["2024-06-28", "2025-05-16"],
+            "code": ["005930", "005930"],
+            "delisted": [None, None],
+        }
+    )
+
+    coverage = m.assess_asof_rebalance_coverage(
+        candidate,
+        panel,
+        required_rebalance_start=pd.Timestamp("2024-06-01"),
+        min_factor_ready_codes=1,
+    )
+
+    assert coverage["hml_cma"]["passed"] is False
+    assert coverage["profitability"]["passed"] is True
+    assert coverage["minimum_observed_profitability_ready_codes"] == 1

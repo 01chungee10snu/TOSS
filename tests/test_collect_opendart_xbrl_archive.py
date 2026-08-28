@@ -84,6 +84,59 @@ def test_collect_archive_does_not_redownload_existing_receipt(tmp_path):
     assert "20250520000456" in saved_receipts
 
 
+def test_missing_xbrl_014_is_recorded_and_batch_continues(tmp_path):
+    m = load_module()
+
+    class MissingOneClient(FakeClient):
+        def save_xbrl(self, *, rcept_no, reprt_code, path):
+            if rcept_no == "20250515000123":
+                raise RuntimeError("OpenDART XBRL response is not a zip archive: 014 파일이 존재하지 않습니다.")
+            return super().save_xbrl(rcept_no=rcept_no, reprt_code=reprt_code, path=path)
+
+    issues = []
+    rows = m.collect_archive(
+        MissingOneClient(),
+        codes=["005930"],
+        begin_date="2025-01-01",
+        end_date="2025-12-31",
+        raw_dir=tmp_path / "raw",
+        issues=issues,
+    )
+
+    assert [row.rcept_no for row in rows] == ["20250520000456"]
+    assert len(issues) == 1
+    assert issues[0].rcept_no == "20250515000123"
+    assert issues[0].issue_type == "MISSING_XBRL_ARCHIVE"
+
+    issue_path = tmp_path / "issues.csv"
+    m.write_issues(issues, issue_path)
+    text = issue_path.read_text(encoding="utf-8")
+    assert "MISSING_XBRL_ARCHIVE" in text
+    assert "20250515000123" in text
+
+
+def test_non_014_archive_failure_remains_fail_closed(tmp_path):
+    m = load_module()
+
+    class BrokenClient(FakeClient):
+        def save_xbrl(self, *, rcept_no, reprt_code, path):
+            raise RuntimeError("network failure")
+
+    try:
+        m.collect_archive(
+            BrokenClient(),
+            codes=["005930"],
+            begin_date="2025-01-01",
+            end_date="2025-12-31",
+            raw_dir=tmp_path / "raw",
+            issues=[],
+        )
+    except RuntimeError as exc:
+        assert "network failure" in str(exc)
+    else:
+        raise AssertionError("non-014 failure must abort collection")
+
+
 def test_write_manifest_is_stable_and_contains_pit_provenance(tmp_path):
     m = load_module()
     rows = m.collect_archive(

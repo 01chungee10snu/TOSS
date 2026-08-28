@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "reports" / "backtests" / "fundamental" / "opendart_xbrl_manifest.csv"
 DEFAULT_RAW_DIR = ROOT / "reports" / "backtests" / "fundamental" / "opendart_xbrl_raw"
 DEFAULT_OUT = ROOT / "reports" / "backtests" / "fundamental" / "opendart_pit_fundamentals.csv"
+DEFAULT_STOCK_TOTALS = ROOT / "reports" / "backtests" / "fundamental" / "opendart_stock_totals_receipt_matched.csv"
 DEFAULT_AUDIT = ROOT / "reports" / "validation" / "opendart_pit_fundamentals_build_latest.json"
 DEFAULT_PANEL = ROOT / "reports" / "backtests" / "pit_full_universe_2022-01-01_2026_ohlcv_panel.csv"
 
@@ -32,7 +33,115 @@ def _bool_value(value: Any) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
-def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
+def _numeric(value: Any) -> float | None:
+    number = pd.to_numeric(pd.Series([value]), errors="coerce").iloc[0]
+    if pd.isna(number):
+        return None
+    return float(number)
+
+
+def _same_share_count(a: float, b: float) -> bool:
+    return abs(float(a) - float(b)) <= max(1.0, abs(float(a)) * 1e-10)
+
+
+def _remove_share_reason(value: Any) -> str:
+    parts = [item for item in str(value or "").split(";") if item and not item.startswith("shares_outstanding:")]
+    return ";".join(parts)
+
+
+def apply_receipt_matched_stock_totals(frame: pd.DataFrame, stock_totals: pd.DataFrame | None) -> pd.DataFrame:
+    """Fill stock counts only from exact receipt-matched, revision-safe OpenDART rows."""
+    if frame.empty or stock_totals is None or stock_totals.empty:
+        return frame
+    required = {
+        "code", "period_end", "rcept_no", "reprt_code", "source", "revision_safe",
+        "issued_common_shares", "distributed_common_shares",
+    }
+    missing = sorted(required.difference(stock_totals.columns))
+    if missing:
+        raise ValueError(f"stock totals missing columns: {','.join(missing)}")
+
+    supplement = stock_totals.copy()
+    supplement["code"] = supplement["code"].astype(str).str.zfill(6)
+    supplement["rcept_no"] = supplement["rcept_no"].astype(str).str.strip()
+    supplement["reprt_code"] = supplement["reprt_code"].astype(str).str.strip()
+    supplement["period_end"] = supplement["period_end"].astype(str).str[:10]
+    supplement = supplement[
+        supplement["source"].astype(str).eq("opendart_stock_total_receipt_matched")
+        & supplement["revision_safe"].map(_bool_value)
+    ].copy()
+    keys = ["code", "period_end", "rcept_no", "reprt_code"]
+    supplement = supplement.sort_values(keys).drop_duplicates(keys, keep=False)
+    lookup = {tuple(str(row[key]) for key in keys): row for _, row in supplement.iterrows()}
+
+    result = frame.copy()
+    if "stock_total_receipt_matched" not in result.columns:
+        result["stock_total_receipt_matched"] = False
+    if "shares_outstanding_source" not in result.columns:
+        result["shares_outstanding_source"] = result.get("shares_status", pd.Series(index=result.index, dtype=object)).map(
+            lambda value: "opendart_receipt_xbrl" if str(value) in {"SELECTED", "DERIVED"} else None
+        )
+    if "shares_issued_source" not in result.columns:
+        result["shares_issued_source"] = result.get("shares_issued", pd.Series(index=result.index, dtype=float)).map(
+            lambda value: "opendart_receipt_xbrl" if _numeric(value) is not None else None
+        )
+    result["stock_total_conflict"] = False
+
+    for idx, row in result.iterrows():
+        key = (
+            str(row.get("code") or "").zfill(6),
+            str(row.get("period_end") or "")[:10],
+            str(row.get("rcept_no") or "").strip(),
+            str(row.get("reprt_code") or "").strip(),
+        )
+        stock = lookup.get(key)
+        if stock is None:
+            continue
+        result.at[idx, "stock_total_receipt_matched"] = True
+        distributed = _numeric(stock.get("distributed_common_shares"))
+        issued = _numeric(stock.get("issued_common_shares"))
+        existing_outstanding = _numeric(row.get("shares_outstanding"))
+        existing_issued = _numeric(row.get("shares_issued"))
+
+        if existing_outstanding is not None and distributed is not None and not _same_share_count(existing_outstanding, distributed):
+            result.at[idx, "shares_outstanding"] = None
+            result.at[idx, "bps"] = None
+            result.at[idx, "shares_status"] = "CONFLICT"
+            result.at[idx, "shares_outstanding_source"] = None
+            result.at[idx, "stock_total_conflict"] = True
+            base_reason = _remove_share_reason(row.get("parse_reason"))
+            conflict_reason = "shares_outstanding:CONFLICT:xbrl_vs_receipt_matched_stock_total"
+            result.at[idx, "parse_reason"] = ";".join(item for item in [base_reason, conflict_reason] if item)
+        elif existing_outstanding is None and distributed is not None and distributed > 0:
+            result.at[idx, "shares_outstanding"] = distributed
+            result.at[idx, "shares_status"] = "SUPPLEMENTED"
+            result.at[idx, "shares_derivation_reason"] = "exact_receipt_matched_stock_total_status"
+            result.at[idx, "shares_concept"] = "OpenDART:distb_stock_co"
+            result.at[idx, "shares_context_id"] = f"rcept_no:{key[2]}"
+            result.at[idx, "shares_outstanding_source"] = "opendart_stock_total_receipt_matched"
+            result.at[idx, "parse_reason"] = _remove_share_reason(row.get("parse_reason"))
+
+        if existing_issued is not None and issued is not None and not _same_share_count(existing_issued, issued):
+            result.at[idx, "stock_total_conflict"] = True
+        elif existing_issued is None and issued is not None and issued > 0:
+            result.at[idx, "shares_issued"] = issued
+            result.at[idx, "shares_issued_concept"] = "OpenDART:istc_totqy"
+            result.at[idx, "shares_issued_context_id"] = f"rcept_no:{key[2]}"
+            result.at[idx, "shares_issued_source"] = "opendart_stock_total_receipt_matched"
+
+        equity = _numeric(result.at[idx, "book_equity"] if "book_equity" in result.columns else None)
+        shares = _numeric(result.at[idx, "shares_outstanding"] if "shares_outstanding" in result.columns else None)
+        assets = _numeric(result.at[idx, "assets"] if "assets" in result.columns else None)
+        if not bool(result.at[idx, "stock_total_conflict"]) and equity is not None and shares is not None and equity > 0 and shares > 0:
+            result.at[idx, "bps"] = equity / shares
+        if assets is not None and equity is not None and _numeric(result.at[idx, "bps"]) is not None and not bool(result.at[idx, "stock_total_conflict"]):
+            result.at[idx, "parse_status"] = "READY"
+        elif str(result.at[idx, "parse_status"]) == "READY" and bool(result.at[idx, "stock_total_conflict"]):
+            result.at[idx, "parse_status"] = "INCOMPLETE"
+    return result
+
+
+def build_rows(manifest: pd.DataFrame, *, raw_dir: Path, stock_totals: pd.DataFrame | None = None) -> pd.DataFrame:
     required = {
         "code",
         "period_end",
@@ -78,6 +187,10 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
                     "operating_income": None,
                     "net_income": None,
                     "shares_outstanding": None,
+                    "shares_issued": None,
+                    "treasury_shares": None,
+                    "shares_status": "MISSING",
+                    "shares_derivation_reason": None,
                     "bps": None,
                     "revenue_basis": None,
                     "profitability_basis": None,
@@ -106,6 +219,10 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
                     "operating_income": None,
                     "net_income": None,
                     "shares_outstanding": None,
+                    "shares_issued": None,
+                    "treasury_shares": None,
+                    "shares_status": "MISSING",
+                    "shares_derivation_reason": None,
                     "bps": None,
                     "revenue_basis": None,
                     "profitability_basis": None,
@@ -124,11 +241,11 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
             "net_income": parsed.net_income,
             "shares_outstanding": parsed.shares_outstanding,
         }
-        reasons = [
-            f"{name}:{selection.status}:{selection.reason or ''}".rstrip(":")
-            for name, selection in selections.items()
-            if selection.status != "SELECTED"
-        ]
+        reasons = []
+        for name, selection in selections.items():
+            allowed = {"SELECTED", "DERIVED"} if name == "shares_outstanding" else {"SELECTED"}
+            if selection.status not in allowed:
+                reasons.append(f"{name}:{selection.status}:{selection.reason or ''}".rstrip(":"))
         rows.append(
             base
             | {
@@ -140,6 +257,10 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
                 "operating_income": parsed.operating_income.value,
                 "net_income": parsed.net_income.value,
                 "shares_outstanding": parsed.shares_outstanding.value,
+                "shares_issued": parsed.shares_issued.value,
+                "treasury_shares": parsed.treasury_shares.value,
+                "shares_status": parsed.shares_outstanding.status,
+                "shares_derivation_reason": parsed.shares_outstanding.reason,
                 "bps": parsed.bps,
                 "revenue_basis": parsed.revenue_basis,
                 "profitability_basis": parsed.profitability_basis,
@@ -152,12 +273,16 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
                 "operating_income_concept": parsed.operating_income.concept,
                 "net_income_concept": parsed.net_income.concept,
                 "shares_concept": parsed.shares_outstanding.concept,
+                "shares_issued_concept": parsed.shares_issued.concept,
+                "treasury_shares_concept": parsed.treasury_shares.concept,
                 "assets_context_id": parsed.assets.context_id,
                 "equity_context_id": parsed.book_equity.context_id,
                 "revenue_context_id": parsed.revenue.context_id,
                 "operating_income_context_id": parsed.operating_income.context_id,
                 "net_income_context_id": parsed.net_income.context_id,
                 "shares_context_id": parsed.shares_outstanding.context_id,
+                "shares_issued_context_id": parsed.shares_issued.context_id,
+                "treasury_shares_context_id": parsed.treasury_shares.context_id,
                 "revenue_duration_days": parsed.revenue.duration_days,
                 "operating_income_duration_days": parsed.operating_income.duration_days,
                 "net_income_duration_days": parsed.net_income.duration_days,
@@ -170,6 +295,7 @@ def build_rows(manifest: pd.DataFrame, *, raw_dir: Path) -> pd.DataFrame:
     if not frame.empty:
         frame["code"] = frame["code"].astype(str).str.zfill(6)
         frame = frame.sort_values(["code", "period_end", "available_at", "rcept_no"]).reset_index(drop=True)
+        frame = apply_receipt_matched_stock_totals(frame, stock_totals)
     return frame
 
 
@@ -206,6 +332,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--raw-dir", type=Path, default=DEFAULT_RAW_DIR)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--stock-totals", type=Path, default=DEFAULT_STOCK_TOTALS)
     parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT)
     parser.add_argument("--pit-panel", type=Path, default=DEFAULT_PANEL)
     return parser.parse_args()
@@ -217,7 +344,12 @@ def main() -> int:
         print(f"BLOCKED_MISSING_MANIFEST:{args.manifest}")
         return 2
     manifest = pd.read_csv(args.manifest, dtype={"code": str, "rcept_no": str, "reprt_code": str})
-    frame = build_rows(manifest, raw_dir=args.raw_dir)
+    stock_totals = (
+        pd.read_csv(args.stock_totals, dtype={"code": str, "rcept_no": str, "reprt_code": str})
+        if args.stock_totals.exists()
+        else None
+    )
+    frame = build_rows(manifest, raw_dir=args.raw_dir, stock_totals=stock_totals)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     frame.to_csv(args.out, index=False, encoding="utf-8-sig")
 

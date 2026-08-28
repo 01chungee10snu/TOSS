@@ -223,17 +223,21 @@ def add_pit_walkforward(candidates: list[dict[str, Any]]) -> dict[str, dict[str,
     return by_strategy
 
 
-def add_true_pit_domestic_factors(candidates: list[dict[str, Any]]) -> bool:
-    """Prefer strict receipt-versioned domestic factor evidence when available."""
+def add_true_pit_domestic_factors(candidates: list[dict[str, Any]]) -> set[str]:
+    """Add strict receipt-versioned factor evidence and return superseded strategy IDs."""
     path = VALIDATION / "hml_cma_true_pit_latest.json"
     if not path.exists():
-        return False
+        return set()
     data = load_json(path)
     contract = data.get("pit_contract", {})
+    asof_coverage = data.get("strategy_asof_coverage", {})
     if not bool(contract.get("eligible", False)):
-        return False
+        return set()
+    if not bool(asof_coverage.get("passed", False)):
+        return set()
 
-    added = False
+    added: set[str] = set()
+    profitability_diagnostic = data.get("profitability_diagnostic_75bp") or {}
     for row in data.get("results", []):
         if int(row.get("cost_bps", -1) or -1) != 75:
             continue
@@ -242,7 +246,25 @@ def add_true_pit_domestic_factors(candidates: list[dict[str, Any]]) -> bool:
             continue
         cagr = safe_float(row.get("cagr_pct"))
         sharpe = safe_float(row.get("sharpe_ratio"))
-        status = "RESEARCH_ONLY" if (cagr or 0) > 0 and (sharpe or 0) > 0 else "REJECTED"
+        directional_ok = True
+        if strategy_id == "profitability_proxy":
+            directional_ok = bool(profitability_diagnostic.get("passed_directional_factor_check", False))
+        status = "RESEARCH_ONLY" if (cagr or 0) > 0 and (sharpe or 0) > 0 and directional_ok else "REJECTED"
+        notes = [
+            "receipt-versioned OpenDART XBRL with historical PIT universe",
+            "canonical CMA uses total-asset growth; profitability leg uses operating-income/book-equity proxy",
+            "month-end close signal -> next trading-day open; 75bp stress; fractional research sizing",
+            "strict PIT correctness does not by itself satisfy independent OOS or live-promotion requirements",
+        ]
+        if strategy_id == "profitability_proxy":
+            notes.extend(
+                [
+                    f"directional_factor_check={directional_ok}",
+                    f"high_minus_all={profitability_diagnostic.get('high_minus_all')}",
+                    f"high_minus_low={profitability_diagnostic.get('high_minus_low')}",
+                    "high-minus-low is diagnostic only and is not executable shorting evidence",
+                ]
+            )
         candidates.append(candidate(
             strategy_id=strategy_id,
             family="true_pit_domestic_factor",
@@ -256,24 +278,22 @@ def add_true_pit_domestic_factors(candidates: list[dict[str, Any]]) -> bool:
             cost_bps=row.get("cost_bps"),
             positive_period_share=row.get("positive_year_share"),
             sample_size=row.get("rebalances"),
-            notes=[
-                "receipt-versioned OpenDART XBRL with historical PIT universe",
-                "canonical CMA uses total-asset growth; profitability leg uses operating-income/book-equity proxy",
-                "month-end close signal -> next trading-day open; 75bp stress; fractional research sizing",
-                "strict PIT correctness does not by itself satisfy independent OOS or live-promotion requirements",
-            ],
+            notes=notes,
         ))
-        added = True
+        added.add(strategy_id)
     return added
 
 
-def add_hml_cma(candidates: list[dict[str, Any]]) -> None:
+def add_hml_cma(candidates: list[dict[str, Any]], *, skip_strategy_ids: set[str] | None = None) -> None:
     path = latest("reports/validation/hml_cma_quarterly_v2_*.json")
     if path is None:
         return
     data = load_json(path)
     quality = data.get("data_quality", {})
+    skip = skip_strategy_ids or set()
     for strategy_id in ["hml_only", "cma_only", "hml_cma_intersection", "hml_cma_composite"]:
+        if strategy_id in skip:
+            continue
         row = data.get(strategy_id, {}).get("75bp", {})
         if not row:
             continue
@@ -595,8 +615,8 @@ def build_tournament() -> dict[str, Any]:
     candidates: list[dict[str, Any]] = []
     add_executable_etf(candidates)
     pit_map = add_pit_walkforward(candidates)
-    if not add_true_pit_domestic_factors(candidates):
-        add_hml_cma(candidates)
+    strict_factor_ids = add_true_pit_domestic_factors(candidates)
+    add_hml_cma(candidates, skip_strategy_ids=strict_factor_ids)
     add_low_vol(candidates)
     add_low_vol_value(candidates)
     add_etf_trend_diversifier(candidates)

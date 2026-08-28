@@ -277,6 +277,12 @@ def test_strict_true_pit_domestic_factors_supersede_legacy_naver_factor_report(t
         m.VALIDATION / "hml_cma_true_pit_latest.json",
         {
             "pit_contract": {"eligible": True, "status": "TRUE_PIT_ELIGIBLE"},
+            "strategy_asof_coverage": {"passed": True},
+            "profitability_diagnostic_75bp": {
+                "passed_directional_factor_check": True,
+                "high_minus_all": {"relative_sharpe": 0.5},
+                "high_minus_low": {"relative_sharpe": 1.0},
+            },
             "results": [
                 {
                     "strategy": "hml_only",
@@ -309,7 +315,8 @@ def test_strict_true_pit_domestic_factors_supersede_legacy_naver_factor_report(t
     assert by_id["hml_only"]["evidence_grade"] == "C"
     assert by_id["hml_only"]["source"] == "reports/validation/hml_cma_true_pit_latest.json"
     assert by_id["profitability_proxy"]["status"] == "RESEARCH_ONLY"
-    assert "cma_only" not in by_id  # legacy Naver report is suppressed once strict PIT evidence is present
+    assert by_id["hml_cma_composite"]["family"] == "hml_cma_factor"
+    assert by_id["hml_cma_composite"]["evidence_grade"] == "D"
 
 
 def test_current_forward_paper_target_is_identified_by_weights(tmp_path):
