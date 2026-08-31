@@ -39,14 +39,14 @@
       "momentum_col": "mom_5d",
       "vol_col": "vol_20d",
       "mode": "reversal",
-      "return_col": "daily_7d_close",
-      "top_n": 2,
+      "return_col": "daily_10d_close",
+      "top_n": 3,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
       "min_mom_5d": -0.3,
       "max_mom_5d": -0.02,
       "min_rsi": 0,
-      "max_rsi": 30,
+      "max_rsi": 40,
       "min_vol_ratio": 0.8,
       "max_vol_ratio": 5.0,
       "max_vol_20d": 0.15,
@@ -61,7 +61,8 @@
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
       "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
-      "require_bb_lower": true
+      "require_bb_lower": false,
+      "tuning_note": "2026-08-31 PIT-correct sweep: hold 7->10d, top_n->3, BB filter removed"
     },
     "flat_low_vol": {
       "situation": "flat_low_vol",
@@ -76,7 +77,7 @@
       "min_mom_5d": -0.3,
       "max_mom_5d": -0.02,
       "min_rsi": 0,
-      "max_rsi": 30,
+      "max_rsi": 40,
       "min_vol_ratio": 0.8,
       "max_vol_ratio": 5.0,
       "max_vol_20d": 0.15,
@@ -106,7 +107,7 @@
       "min_mom_5d": -0.3,
       "max_mom_5d": -0.02,
       "min_rsi": 0,
-      "max_rsi": 30,
+      "max_rsi": 40,
       "min_vol_ratio": 0.8,
       "max_vol_ratio": 5.0,
       "max_vol_20d": 0.15,
@@ -129,14 +130,14 @@
       "momentum_col": "mom_5d",
       "vol_col": "vol_20d",
       "mode": "reversal",
-      "return_col": "daily_7d_close",
-      "top_n": 2,
+      "return_col": "daily_10d_close",
+      "top_n": 3,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
       "min_mom_5d": -0.3,
       "max_mom_5d": -0.02,
       "min_rsi": 0,
-      "max_rsi": 30,
+      "max_rsi": 40,
       "min_vol_ratio": 0.8,
       "max_vol_ratio": 5.0,
       "max_vol_20d": 0.15,
@@ -151,7 +152,8 @@
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
       "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
-      "require_bb_lower": true
+      "require_bb_lower": true,
+      "tuning_note": "2026-08-31 PIT-correct sweep: hold 7->10d, top_n->3, BB kept"
     },
     "flat_high_vol": {
       "situation": "flat_high_vol",
@@ -159,14 +161,14 @@
       "momentum_col": "mom_5d",
       "vol_col": "vol_20d",
       "mode": "reversal",
-      "return_col": "daily_7d_close",
-      "top_n": 2,
+      "return_col": "daily_10d_close",
+      "top_n": 3,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
       "min_mom_5d": -0.3,
       "max_mom_5d": -0.02,
       "min_rsi": 0,
-      "max_rsi": 30,
+      "max_rsi": 40,
       "min_vol_ratio": 0.8,
       "max_vol_ratio": 5.0,
       "max_vol_20d": 0.15,
@@ -181,7 +183,8 @@
       "backtest_sharpe": 0.69,
       "backtest_mdd_pct": -31.9,
       "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
-      "require_bb_lower": true
+      "require_bb_lower": true,
+      "tuning_note": "2026-08-31 PIT-correct sweep: hold 7->10d, top_n->3, BB kept"
     }
   },
   "rejected_situations": {},
@@ -197,5 +200,12 @@
     "note": "v2 reversal strategy: oversold(bottom-5% mom_5d) + RSI<30 + below BB lower + market regime filter(down/high-vol). 7d hold, top-2 by dollar volume. Walk-forward validated."
   },
   "disclaimer": "Research-only candidate draft. Not investment advice. Do not submit real orders without separate approval and broker readiness checks.",
-  "policy_update_note": "2026-07-30: v2 reversal strategy deployed. Entry: oversold + RSI<30 + BB-lower break. Exit: 7-day hold, no TP/SL (time exit only). Replaced momentum strategy that was -362만원/4.5yr."
+  "policy_update_note": "2026-07-30: v2 reversal strategy deployed. Entry: oversold + RSI<30 + BB-lower break. Exit: 7-day hold, no TP/SL (time exit only). Replaced momentum strategy that was -362만원/4.5yr.",
+  "tuning_20260831": {
+    "basis": "scripts/_bb_filter_backtest.py, _bb_robustness.py, _bb_vs_hold_grid.py, _topn_test.py (PIT shift(1), 24.5bps)",
+    "blocked_live_situations": [
+      "down_high_vol",
+      "flat_low_vol"
+    ]
+  }
 }
