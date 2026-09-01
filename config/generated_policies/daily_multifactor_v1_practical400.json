@@ -6,7 +6,7 @@
   "universe_source": "/Users/01chungee10/Github/TOSS/reports/backtests/practical_universe_400_2022-01-01_2026-latest_ohlcv_panel.csv",
   "entry_exit_cycle": {
     "buy": "daily_open",
-    "sell": "hold_7d_close"
+    "sell": "hold_10d_close"
   },
   "selection": {
     "scoring_mode": "multi",
@@ -40,7 +40,7 @@
       "vol_col": "vol_20d",
       "mode": "reversal",
       "return_col": "daily_10d_close",
-      "top_n": 3,
+      "top_n": 2,
       "min_dollar_volume": 500000000,
       "min_abs_momentum": 0.0,
       "min_mom_5d": -0.3,
@@ -62,7 +62,7 @@
       "backtest_mdd_pct": -31.9,
       "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
       "require_bb_lower": false,
-      "tuning_note": "2026-08-31 PIT-correct sweep: hold 7->10d, top_n->3, BB filter removed"
+      "tuning_note": "2026-09-01 profit-oriented retune: top_n 3->2 (BB already removed 8/31). PIT-correct backtest h10: top2 +1.266%/trade avg vs top3 +0.954%; 2026 +8.14%/trade. Kept h10 + BB=False per 8/31 sweep."
     },
     "flat_low_vol": {
       "situation": "flat_low_vol",

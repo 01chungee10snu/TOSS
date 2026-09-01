@@ -57,20 +57,26 @@ REQUIRED_PATTERNS = {
         r"parse_pubdate",
         r"buy_gate",
     ],
+    # [2026-09-01] Legacy 20260708 scripts are permanently live-quarantined
+    # (commit d6a0935): their entrypoints never call broker APIs or submit
+    # orders, so the old run_live_submit_phase patterns were unreachable by
+    # design. The audit now verifies the quarantine contract itself — the
+    # entrypoint must print LEGACY_LIVE_QUARANTINED and return without any
+    # submission — which is the actual safety invariant that replaced
+    # per-script live-submit plumbing.
     "scripts/risk_off_inverse_entry_20260708.py": [
         r"ETF_CODE = \"252670\"",
-        r"inverse_sleeve_current_issue_20260708",
-        r"run_live_submit_phase",
+        r"LEGACY_LIVE_QUARANTINED",
+        r"permanently live-quarantined",
     ],
     "scripts/rebound_open_detector_20260708.py": [
-        r"current_issue_buy_violation",
+        r"LEGACY_LIVE_QUARANTINED",
         r"MIN_REBOUND_FROM_LOW",
-        r"run_live_submit_phase",
     ],
     "scripts/rebound_exit_watchdog_20260708.py": [
+        r"LEGACY_LIVE_QUARANTINED",
         r"STOP_LOSS_PCT",
         r"TAKE_PROFIT_PCT",
-        r"run_live_submit_phase",
     ],
 }
 
