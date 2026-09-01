@@ -138,7 +138,7 @@
       "max_mom_5d": -0.02,
       "min_rsi": 0,
       "max_rsi": 40,
-      "min_vol_ratio": 0.8,
+      "min_vol_ratio": 0.4,
       "max_vol_ratio": 5.0,
       "max_vol_20d": 0.15,
       "min_price": 2000,
@@ -153,7 +153,7 @@
       "backtest_mdd_pct": -31.9,
       "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
       "require_bb_lower": true,
-      "tuning_note": "2026-08-31 PIT-correct sweep: hold 7->10d, top_n->3, BB kept"
+      "tuning_note": "2026-09-01 bottleneck relief: min_vol_ratio 0.8->0.4 (BB hard kept). PIT h10 top3: +1.460%/trade vs base +1.371%, n 407->441, signal-day 78->83%. Diagnosis: vol_ratio floor killed 14/18 RSI-passers (median 0.43) in up_high_vol."
     },
     "flat_high_vol": {
       "situation": "flat_high_vol",
@@ -169,7 +169,7 @@
       "max_mom_5d": -0.02,
       "min_rsi": 0,
       "max_rsi": 40,
-      "min_vol_ratio": 0.8,
+      "min_vol_ratio": 0.7,
       "max_vol_ratio": 5.0,
       "max_vol_20d": 0.15,
       "min_price": 2000,
@@ -184,7 +184,7 @@
       "backtest_mdd_pct": -31.9,
       "disclaimer": "v2 reversal: oversold+BB_lower+RSI<30, 7d hold. Backtested 2022-02~2026-07: +186만원, Sharpe 1.60, WR 54.4%. Walk-forward OOS: +142만원, 10/15 positive windows.",
       "require_bb_lower": true,
-      "tuning_note": "2026-08-31 PIT-correct sweep: hold 7->10d, top_n->3, BB kept"
+      "tuning_note": "2026-09-01 bottleneck relief: min_vol_ratio 0.8->0.7 only (floor<=0.6 dilutes: +1.33%/+0.72%). PIT h10 top3: +2.054%/trade vs base +1.843%, n 281->294, coverage 83->85%."
     }
   },
   "rejected_situations": {},
